@@ -1,0 +1,19 @@
+---
+title: "Acknowledgements and Funding"
+output:
+  workflowr::wflow_html:
+    toc: false
+editor_options:
+  chunk_output_type: console
+---
+
+Abstract, acknowledgements and funding sources for the project here.
+
+# Abstract
+
+Diverse crops ranging from staples (e.g., cassava) to cash crops (e.g., cacao) are both outbred and clonally propagated. In these crops, exceptional genotypes can be immortalized and commercialized as clonal varieties. To take advantage of this, genomic prediction can incorporate both additive and non-additive effects in clonal crops to select candidates with high breeding value as parents for crossing and candidates with high total genetic merit as varieties for release to farmers. It is possible to predict not only the mean breeding value but also the additive genetic variance and trait covariance in a cross using genome-wide phased parental haplotypes, marker effects estimates, and a recombination map. Several recent studies in both animal and plant breeding have demonstrated improved short and long term genetic gain using optimized parent selection and mate allocation, enabled by predictions of cross variances. In this study, we extend cross (co)variance prediction to include non-additive (namely dominance) effects. We present an empirical study of cassava (Manihot esculenta), a staple root crop essential to food security throughout the tropics. We analyze 462 outbred cassava families (209 parents total) derived from a genomic selection program, part of the Next Generation Cassava Breeding Project (www.nextgencassava.org). We assess the practical potential to predict the multivariate genetic distribution (means, variances and trait covariances) in untested cassava crosses in terms of both general and specific combining ability using cross-validation. Ultimately, we hope to enable breeders of outbred clonal crops to consider the potential of crosses to produce future parents (progeny with excellent breeding values) as well as potential varieties (progeny with top performance) on a multi-trait selection index. 
+
+# Acknowledgements
+
+# Funding
+

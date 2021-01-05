@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Compute observed cross means and (co)variances</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">PredictOutbredCrossVar</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="PreprocessDataFiles.html">Preprocess Data</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Fit MtBRRs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="fitMtBRRs.html">Run mixed models</a>
+    </li>
+    <li>
+      <a href="getPMVarComps.html">Get VarComps</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Cross-validation study
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="predictCrossVars.html">Predict cross means and (co)variances</a>
+    </li>
+    <li>
+      <a href="observedCrossVars.html">Observed means and (co)variances</a>
+    </li>
+    <li>
+      <a href="predictionAccuracy.html">Prediction accuracy</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Exploratory analyses
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="predictUntestedCrosses.html">Predict untested crosses</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Manuscript
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Results.html">Results</a>
+    </li>
+    <li>
+      <a href="Figures.html">Figures</a>
+    </li>
+    <li>
+      <a href="SupplementaryTables.html">Supplementary Tables</a>
+    </li>
+    <li>
+      <a href="SupplementaryFigures.html">Supplementary Figures</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Other
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="about.html">About</a>
+    </li>
+    <li>
+      <a href="license.html">License</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/wolfemd/PredictOutbredCrossVar">
+    <span class="fas fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Compute observed cross means and (co)variances</h1>
+<h4 class="date">2020-June-16</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-01-03
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>PredictOutbredCrossVar/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20191123code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20191123)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20191123code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20191123)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreee7306d330fdafca30d4eaecb99825ee733aa4857targetblanke7306d3a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/e7306d330fdafca30d4eaecb99825ee733aa4857" target="_blank">e7306d3</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreee7306d330fdafca30d4eaecb99825ee733aa4857targetblanke7306d3a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/e7306d330fdafca30d4eaecb99825ee733aa4857" target="_blank">e7306d3</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    manuscript/.DS_Store
+    Ignored:    output/.DS_Store
+    Ignored:    output/crossPredictions/.DS_Store
+    Ignored:    output/crossPredictions/.gitignore
+    Ignored:    output/crossPredictions/Icon
+    Ignored:    output/crossPredictions/July2020/
+    Ignored:    output/crossPredictions/defunctDirectionalDomResults/
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/otherRetiredEarlyResults/
+    Ignored:    output/crossPredictions/predUntestedCrossBVs_ReDoSelfs_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/predUntestedCrossTGVs_ReDoSelfs_AD_predVarsAndCovars.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/retired_ReDoSelfs/
+    Ignored:    output/crossRealizations/.DS_Store
+    Ignored:    output/mtMarkerEffects/Icon
+
+Untracked files:
+    Untracked:  Abstract_EdingburghCompGenomicsTalk_2020June02.gdoc
+    Untracked:  Icon
+    Untracked:  ScratchSlidesAndNotes.gslides
+    Untracked:  analysis/ICQG6.Rmd
+    Untracked:  analysis/Icon
+    Untracked:  archive/
+    Untracked:  code/Icon
+    Untracked:  data/Icon
+    Untracked:  manuscript/Figures.gslides
+    Untracked:  manuscript/SupplementaryTable06.csv
+    Untracked:  manuscript/SupplementaryTable07.csv
+    Untracked:  manuscript/SupplementaryTable08.csv
+    Untracked:  manuscript/SupplementaryTable09.csv
+    Untracked:  manuscript/SupplementaryTable17.csv
+    Untracked:  manuscript/SupplementaryTable18.csv
+    Untracked:  output/Figures/
+    Untracked:  output/Icon
+    Untracked:  output/Tables/
+    Untracked:  output/crossRealizations/Icon
+    Untracked:  predCrossVar/
+    Untracked:  rsyncs.R
+    Untracked:  rsyncs2.R
+    Untracked:  setupOnServer.R
+
+Unstaged changes:
+    Modified:   analysis/NGCleadersCall.Rmd
+    Modified:   data/Madd_awc.rds
+    Modified:   data/Mdom_awc.rds
+    Modified:   data/blups_forawcdata.rds
+    Modified:   data/dosages_awc.rds
+    Modified:   data/genmap_awc_May2020.rds
+    Modified:   data/haps_awc.rds
+    Modified:   data/iita_blupsForCrossVal_72619.rds
+    Modified:   data/parentwise_crossVal_folds.rds
+    Modified:   data/ped_awc.rds
+    Modified:   data/recombFreqMat_1minus2c_awcmap_May2020.rds
+    Modified:   manuscript/SupplementaryTables.xlsx
+    Modified:   output/accuraciesMeans.rds
+    Modified:   output/accuraciesUC.rds
+    Modified:   output/accuraciesVars.rds
+    Modified:   output/crossPredictions/TableS7_predictedCrossVars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk5_A_predVarAndCovarBVs.rds
+    Deleted:    output/crossPredictions/predUntestedCrossBVs_chunk5_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrossTGVs_chunk5_DirDom_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predictedCrossMeans.rds
+    Modified:   output/crossPredictions/predictedCrossMeans_DirectionalDom_tidy_withSelIndices.rds
+    Deleted:    output/crossPredictions/predictedCrossMeans_GCA_SCA.rds
+    Modified:   output/crossPredictions/predictedCrossMeans_tidy_withSelIndices.rds
+    Modified:   output/crossPredictions/predictedCrossVars_DirectionalDom_tidy_withSelIndices.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_GCA_SCA.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk1.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk2.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk3.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk4.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk5.rds
+    Modified:   output/crossPredictions/predictedCrossVars_tidy_withSelIndices.rds
+    Modified:   output/crossPredictions/predictedDirectionalDomCrossMeans.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk1.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk2.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk3.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk4.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk5.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansBV.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansDirDom.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansTGV.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeans_SelIndices.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeans_tidy_traits.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossVars_SelIndices.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossVars_tidy_traits.rds
+    Modified:   output/crossRealizations/realizedCrossMeans.rds
+    Modified:   output/crossRealizations/realizedCrossMeans_BLUPs.rds
+    Modified:   output/crossRealizations/realizedCrossMetrics.rds
+    Modified:   output/crossRealizations/realizedCrossVars.rds
+    Modified:   output/crossRealizations/realizedCrossVars_BLUPs.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_covs_traits.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_vars_selindices.rds
+    Modified:   output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
+    Modified:   output/gblups_geneticgroups.rds
+    Modified:   output/gblups_parentwise_crossVal_folds.rds
+    Modified:   output/gebvs_ModelA_GroupAll_stdSI.rds
+    Modified:   output/mtMarkerEffects/mt_All_A.rds
+    Modified:   output/mtMarkerEffects/mt_All_AD.rds
+    Modified:   output/mtMarkerEffects/mt_All_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_GG_A.rds
+    Modified:   output/mtMarkerEffects/mt_GG_AD.rds
+    Modified:   output/mtMarkerEffects/mt_GG_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_DirectionalDom.rds
+    Modified:   output/obsVSpredMeans.rds
+    Modified:   output/obsVSpredUC.rds
+    Modified:   output/obsVSpredVars.rds
+    Modified:   output/pmv_DirectionalDom_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups_tidy_includingSIvars.rds
+    Modified:   workflowr_log.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/observedCrossVars.Rmd</code>) and HTML (<code>docs/observedCrossVars.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/observedCrossVars.html" target="_blank">22e6c87</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-01-03
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/e77d0dfd1c6d5ca299521d8f87a806bb4dce522c/analysis/observedCrossVars.Rmd" target="_blank">e77d0df</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-12-08
+</td>
+<td>
+Also compute the mean of top 1% of the family, correspond approx. to std. intensity = 2.67. Provides alternative validation data for usefulness criteria invariant to actual selection intensity
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/2e136289e34d8913365f5229074816fbc2322602/analysis/observedCrossVars.Rmd" target="_blank">2e13628</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-11-25
+</td>
+<td>
+Misc minor changes
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/observedCrossVars.html" target="_blank">3dbb1e8</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-10-08
+</td>
+<td>
+Site built for first COMPLETE draft, shared with co-authors.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/observedCrossVars.html" target="_blank">b06eee7</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-08-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/7a4e1684dedda75930f532a96ff8f9bc4e959b51/docs/observedCrossVars.html" target="_blank">7a4e168</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/a5ac99f7a0ceee031621663d0f7f002da5da9706/docs/observedCrossVars.html" target="_blank">a5ac99f</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/ff4fc8b600f41b40529bb56cdbc6dbdfeb8889f8/docs/observedCrossVars.html" target="_blank">ff4fc8b</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/e6f8fe897e8e40f3979d93851113fb6c4fa55ca4/docs/observedCrossVars.html" target="_blank">e6f8fe8</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/07509a85610724115ea285840737c07f17a52dcd/analysis/observedCrossVars.Rmd" target="_blank">07509a8</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-31
+</td>
+<td>
+Organized and ready to be published as a workflowr HTML page.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/a1950f7e2b475a8cec38bd3bb7b69d697b1beb5c/analysis/observedCrossVars.Rmd" target="_blank">a1950f7</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-07-29
+</td>
+<td>
+Directional dominance fully implemented, except in prediction of untested crosses. Presentation to NGC Leader’s call included.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/c96001fcc9011c3a7c952f90964af4b4bdd89a1b/analysis/observedCrossVars.Rmd" target="_blank">c96001f</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-06-28
+</td>
+<td>
+Results and organization nearly complete. Prediction of Usefulness might be wrong (NEEDS REVIEW).
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6db64377674c7a4c3f46dbf18f75ed165c3b1481/analysis/observedCrossVars.Rmd" target="_blank">6db6437</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2020-06-24
+</td>
+<td>
+Computation of validation data (empirical means and vars for each cross) now in it’s own Rmd.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>This step is to create validation data to which predictions of cross means and variances will be correlated.</p>
+<p>Compute the empirical means and variances for each validation-family:</p>
+<ol style="list-style-type: decimal">
+<li>testset GEBV/GETGV of actual offspring</li>
+</ol>
+<ul>
+<li><p>VarBV_a</p></li>
+<li><p>VarBV_dirdom</p></li>
+<li><p>VarTGV_ad</p></li>
+<li><p>VarTGV_dirdom</p></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Phenotypic BLUPs of actual offspring</li>
+</ol>
+<div id="observed-cross-means-and-covars" class="section level1">
+<h1>Observed cross means and (co)vars</h1>
+<div id="observedCrossVarsGBLUPs" class="section level2">
+<h2>1. Testset GBLUPs of actual offspring</h2>
+<p>Compute the empirical means and variances for each validation-family, based on the GEBV/GETGV of actual offspring, and using the marker-effects from models fit to the test-set for each fold/rep of parent-wise cross-validation.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>());</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr); <span class="fu">library</span>(predCrossVar); <span class="fu">library</span>(BGLR);</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Testing datasets -----------</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>parentfolds<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;parentwise_crossVal_folds.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Repeat=</span>id,<span class="at">Fold=</span>id2) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,testparents)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Pedigree -----------</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ped<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;ped_awc.rds&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">FamilyMembers=</span>FullSampleName)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Crosses To Predict -------------</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>parentfolds <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CrossesToPredict=</span><span class="fu">map</span>(testparents,<span class="sc">~</span><span class="fu">filter</span>(ped,sireID <span class="sc">%in%</span> . <span class="sc">|</span> damID <span class="sc">%in%</span> .))) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>testparents)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Genomic BLUPs from testsets --------------</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>gblups<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;gblups_parentwise_crossVal_folds.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Dataset<span class="sc">==</span><span class="st">&quot;testset&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>Dataset,<span class="sc">-</span>outName)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>gblups_dd<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;gblups_DirectionalDom_parentwise_crossVal_folds.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Dataset<span class="sc">==</span><span class="st">&quot;testset&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>Dataset,<span class="sc">-</span>sampleIDs) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Model=</span><span class="st">&quot;DirDom&quot;</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>gblups <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(GBLUPs) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">GBLUPs=</span><span class="sc">-</span><span class="fu">c</span>(Repeat,Fold,Model,predOf)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(parentfolds)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>gblups_dd <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,GBLUPs) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(GBLUPs) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">GBLUPs=</span><span class="sc">-</span><span class="fu">c</span>(Repeat,Fold,Model,predOf)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(parentfolds)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>gblups<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(gblups,gblups_dd); </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(gblups_dd,parentfolds,ped)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Selection weights -----------</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>indices<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;selection_index_weights_4traits.rds&quot;</span>))</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>gblups <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,predOf)</span></code></pre></div>
+<div id="component-traits" class="section level3">
+<h3>Component Traits</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>getCrossMeansAndCovs<span class="ot">&lt;-</span><span class="cf">function</span>(CrossesToPredict,GBLUPs,...){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  CrossesToPredict <span class="sc">%&lt;&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">famgblups=</span><span class="fu">map</span>(FamilyMembers,<span class="sc">~</span><span class="fu">rename</span>(.,<span class="at">germplasmName=</span>FullSampleName) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">left_join</span>(GBLUPs) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                           as.data.frame <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">&quot;germplasmName&quot;</span>)),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">means=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">summarise_all</span>(.,mean,<span class="at">na.rm=</span>T)),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">covMat=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">cov</span>(.,<span class="at">use=</span><span class="st">&#39;pairwise.complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>FamilyMembers)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(CrossesToPredict) </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs<span class="ot">&lt;-</span>gblups <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">observedCrossMeansAndCovs=</span><span class="fu">pmap</span>(.,getCrossMeansAndCovs)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>CrossesToPredict,<span class="sc">-</span>GBLUPs)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs <span class="sc">%&lt;&gt;%</span> <span class="fu">unnest</span>(observedCrossMeansAndCovs)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(realized_means_and_covs,<span class="at">file =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realized_cross_means_and_covs_traits.rds&quot;</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre></div>
+</div>
+<div id="selection-indices" class="section level3">
+<h3>Selection indices</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs_si<span class="ot">&lt;-</span>realized_means_and_covs <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">meanStdSI=</span><span class="fu">map_dbl</span>(means,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>stdSI),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">meanBiofortSI=</span><span class="fu">map_dbl</span>(means,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>biofortSI),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">varStdSI=</span><span class="fu">map_dbl</span>(covMat,<span class="sc">~</span>indices<span class="sc">$</span>stdSI<span class="sc">%*%</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>stdSI),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">varBiofortSI=</span><span class="fu">map_dbl</span>(covMat,<span class="sc">~</span>indices<span class="sc">$</span>biofortSI<span class="sc">%*%</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>biofortSI)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>famgblups,<span class="sc">-</span>means,<span class="sc">-</span>covMat)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(realized_means_and_covs_si,<span class="at">file =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realized_cross_means_and_vars_selindices.rds&quot;</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs_si <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre></div>
+</div>
+<div id="tidy" class="section level3">
+<h3>Tidy</h3>
+<p>Tidy / format the realized cross means and variances.<br />
+Combine traits and sel. indices. Split into two separate tibbles, one for means, one for variances.<br />
+Output will be ready to combine with predictions to measure accuracy.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr);</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs_traits<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realized_cross_means_and_covs_traits.rds&quot;</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs_si<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realized_cross_means_and_vars_selindices.rds&quot;</span>))</span></code></pre></div>
+<div id="realized-means" class="section level4">
+<h4>Realized means</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Means ---------------</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Traits</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>realized_means_traits<span class="ot">&lt;-</span>realized_means_and_covs_traits <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,predOf,sireID,damID,means) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(means) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="sc">-</span>Repeat,<span class="sc">-</span>Fold,<span class="sc">-</span>Model,<span class="sc">-</span>predOf,<span class="sc">-</span>sireID,<span class="sc">-</span>damID),<span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsMean&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obsOf=</span><span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;MeanBV&quot;</span>,<span class="st">&quot;MeanTGV&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predOf) </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">## SIs</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>realized_means_si<span class="ot">&lt;-</span>realized_means_and_covs_si <span class="sc">%&gt;%</span> </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,predOf,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;mean&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">stdSI=</span>meanStdSI,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span>meanBiofortSI) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="sc">-</span>Repeat,<span class="sc">-</span>Fold,<span class="sc">-</span>Model,<span class="sc">-</span>predOf,<span class="sc">-</span>sireID,<span class="sc">-</span>damID),<span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsMean&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obsOf=</span><span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;MeanBV&quot;</span>,<span class="st">&quot;MeanTGV&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predOf)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Combine</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>realized_means<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(realized_means_si,realized_means_traits)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(realized_means_traits,realized_means_si)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>realized_means <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,obsOf) <span class="sc">%&gt;%</span> <span class="fu">spread</span>(obsOf,n)</span></code></pre></div>
+</div>
+<div id="realized-covariances" class="section level4">
+<h4>Realized (co)variances</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (Co)variances -------------</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Traits</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>realized_vars_traits<span class="ot">&lt;-</span>realized_means_and_covs_traits <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,predOf,sireID,damID,covMat) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covMat=</span><span class="fu">map</span>(covMat,<span class="cf">function</span>(covMat){</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    covMat[<span class="fu">lower.tri</span>(covMat, <span class="at">diag =</span> F)]<span class="ot">&lt;-</span><span class="cn">NA</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    covMat <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      as.data.frame <span class="sc">%&gt;%</span> </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;Trait1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Trait1, <span class="at">names_to =</span> <span class="st">&quot;Trait2&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsVar&quot;</span>,<span class="at">values_drop_na =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(covMat)})) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(covMat) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obsOf=</span><span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;VarBV&quot;</span>,<span class="st">&quot;VarTGV&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predOf) </span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="do">## SIs</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>realized_vars_si<span class="ot">&lt;-</span>realized_means_and_covs_si <span class="sc">%&gt;%</span> </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,predOf,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;var&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">stdSI=</span>varStdSI,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span>varBiofortSI) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="sc">-</span>Repeat,<span class="sc">-</span>Fold,<span class="sc">-</span>Model,<span class="sc">-</span>predOf,<span class="sc">-</span>sireID,<span class="sc">-</span>damID),<span class="at">names_to =</span> <span class="st">&quot;Trait1&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsVar&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obsOf=</span><span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;VarBV&quot;</span>,<span class="st">&quot;VarTGV&quot;</span>),</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">Trait2=</span>Trait1) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predOf)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="do">## Combine</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>realized_vars<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(realized_vars_si,realized_vars_traits)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># rename(obsVar=VarSCA))</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(realized_vars_si,realized_vars_traits)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>realized_vars <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,obsOf) <span class="sc">%&gt;%</span> <span class="fu">spread</span>(obsOf,n)</span></code></pre></div>
+</div>
+<div id="save" class="section level4">
+<h4>–&gt; Save</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(realized_means,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossMeans.rds&quot;</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(realized_vars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossVars.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="observedCrossVarsiidBLUPs" class="section level2">
+<h2>2. Phenotypic BLUPs of actual offspring</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>());</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr); <span class="fu">library</span>(predCrossVar); <span class="fu">library</span>(BGLR);</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Testing datasets -----------</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>parentfolds<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;parentwise_crossVal_folds.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Repeat=</span>id,<span class="at">Fold=</span>id2) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,testparents)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Pedigree -----------</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ped<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;ped_awc.rds&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">FamilyMembers=</span>FullSampleName)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Crosses To Predict -------------</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>parentfolds <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CrossesToPredict=</span><span class="fu">map</span>(testparents,<span class="sc">~</span><span class="fu">filter</span>(ped,sireID <span class="sc">%in%</span> . <span class="sc">|</span> damID <span class="sc">%in%</span> .))) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>testparents)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Selection weights -----------</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>indices<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;selection_index_weights_4traits.rds&quot;</span>))</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co"># BLUPs -----------</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>blups<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;blups_forawcdata.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Trait,blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Trait,germplasmName,BLUP) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(Trait,BLUP)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>crossblups<span class="ot">&lt;-</span>parentfolds <span class="sc">%&gt;%</span> </span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(CrossesToPredict) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(sireID,damID,FamilyMembers) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(FamilyMembers) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">germplasmName=</span>FullSampleName) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sireID,damID,germplasmName,<span class="fu">all_of</span>(indices<span class="sc">$</span>Trait)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">famblups=</span><span class="fu">c</span>(germplasmName,<span class="fu">all_of</span>(indices<span class="sc">$</span>Trait))) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stdSI=</span><span class="fu">map</span>(famblups,<span class="sc">~</span><span class="fu">as.data.frame</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">&quot;germplasmName&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>stdSI),</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span><span class="fu">map</span>(famblups,<span class="sc">~</span><span class="fu">as.data.frame</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">&quot;germplasmName&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>biofortSI))</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross Means</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>crossmeans<span class="ot">&lt;-</span>crossblups <span class="sc">%&gt;%</span> </span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">means=</span><span class="fu">map</span>(famblups,<span class="sc">~</span><span class="fu">summarize_if</span>(.,is.numeric,mean,<span class="at">na.rm=</span>T))) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(means) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stdSI=</span><span class="fu">map_dbl</span>(stdSI,mean,<span class="at">na.rm=</span>T),</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span><span class="fu">map_dbl</span>(biofortSI,mean,<span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>famblups) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="sc">-</span>sireID,<span class="sc">-</span>damID), <span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsMean&quot;</span>, <span class="at">values_drop_na =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross (Co)Vars</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>crossvars<span class="ot">&lt;-</span>crossblups <span class="sc">%&gt;%</span> </span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">varcovars=</span><span class="fu">map</span>(famblups,<span class="sc">~</span><span class="fu">cov</span>(<span class="fu">as.data.frame</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">&quot;germplasmName&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>                                       as.matrix, </span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">use =</span> <span class="st">&#39;pairwise.complete.obs&#39;</span>)),</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>         <span class="at">varcovars=</span><span class="fu">map</span>(varcovars,<span class="cf">function</span>(varcovars){</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>           varcovars[<span class="fu">lower.tri</span>(varcovars, <span class="at">diag =</span> F)]<span class="ot">&lt;-</span><span class="cn">NA</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>           varcovars <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>             as.data.frame <span class="sc">%&gt;%</span> </span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>             <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;Trait1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>             <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Trait1, <span class="at">names_to =</span> <span class="st">&quot;Trait2&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsVar&quot;</span>,<span class="at">values_drop_na =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>           <span class="fu">return</span>(varcovars)})) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>famblups,<span class="sc">-</span>stdSI,<span class="sc">-</span>biofortSI) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(varcovars)</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>crossvars<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(crossvars,crossblups <span class="sc">%&gt;%</span> </span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">mutate</span>(<span class="at">stdSI=</span><span class="fu">map_dbl</span>(stdSI,var,<span class="at">na.rm=</span>T),</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>                              <span class="at">biofortSI=</span><span class="fu">map_dbl</span>(biofortSI,var,<span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">select</span>(<span class="sc">-</span>famblups) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="sc">-</span>sireID,<span class="sc">-</span>damID), <span class="at">names_to =</span> <span class="st">&quot;Trait1&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;obsVar&quot;</span>, <span class="at">values_drop_na =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">mutate</span>(<span class="at">Trait2=</span>Trait1))</span></code></pre></div>
+<div id="save-1" class="section level4">
+<h4>–&gt; Save</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(crossmeans,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossMeans_BLUPs.rds&quot;</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(crossvars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossVars_BLUPs.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="realIntensity" class="section level1">
+<h1>Measures of Post-cross Selection</h1>
+<div id="metrics-as-parents" class="section level2">
+<h2>Metrics as parents</h2>
+<p>For each family, compute the proportion of offspring subsequently used as parents.</p>
+<p>Compute the realized “Usefulness” of the cross in terms of population improvement / parent-development as the mean GEBV of family members that are themselves parents.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr); <span class="fu">library</span>(predCrossVar)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>indices<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;selection_index_weights_4traits.rds&quot;</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>realized_means_and_covs<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realized_cross_means_and_covs_traits.rds&quot;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ped<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;ped_awc.rds&quot;</span>))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>parents<span class="ot">&lt;-</span><span class="fu">union</span>(ped<span class="sc">$</span>sireID,ped<span class="sc">$</span>damID)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>realized_cross_gebvs_si<span class="ot">&lt;-</span>realized_means_and_covs <span class="sc">%&gt;%</span> </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stdSI=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>stdSI),</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>biofortSI),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">GEBV=</span><span class="fu">map2</span>(stdSI,biofortSI,<span class="sc">~</span><span class="fu">tibble</span>(<span class="at">germplasmName=</span><span class="fu">rownames</span>(.x),<span class="at">stdSI=</span>.x,<span class="at">biofortSI=</span>.y))) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>famgblups,<span class="sc">-</span>means,<span class="sc">-</span>covMat,<span class="sc">-</span>stdSI,<span class="sc">-</span>biofortSI)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>realizedparentmetrics<span class="ot">&lt;-</span>realized_cross_gebvs_si <span class="sc">%&gt;%</span> </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(GEBV) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">IsParent=</span><span class="fu">ifelse</span>(germplasmName <span class="sc">%in%</span> parents,<span class="cn">TRUE</span>,<span class="cn">FALSE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">Family=</span><span class="fu">c</span>(germplasmName,IsParent,stdSI,biofortSI)) </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>realizedparentmetrics <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">FamSize=</span><span class="fu">map_dbl</span>(Family,nrow),</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">NmembersUsedAsParent=</span><span class="fu">map_dbl</span>(Family,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>IsParent<span class="sc">==</span><span class="cn">TRUE</span>))),</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">propUsedAsParent=</span><span class="fu">map_dbl</span>(Family,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>IsParent<span class="sc">==</span><span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">nrow</span>(.)),</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCparent_stdSI=</span><span class="fu">map_dbl</span>(Family,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>stdSI[.<span class="sc">$</span>IsParent<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCparent_biofortSI=</span><span class="fu">map_dbl</span>(Family,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>biofortSI[.<span class="sc">$</span>IsParent<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>         <span class="co"># also compute the mean of top 1% of the family</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>         <span class="co"># correspond ~std. intensity = 2.67</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>         <span class="co"># provides alternative validation data for usefulness criteria</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>         <span class="co"># invariant to actual selection intensity </span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>         <span class="at">meanTop1pctGEBV_stdSI=</span><span class="fu">map_dbl</span>(Family, <span class="sc">~</span><span class="fu">slice_max</span>(<span class="at">.data =</span> .,</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                                                          <span class="at">order_by =</span> stdSI, </span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>                                                          <span class="at">n=</span><span class="fu">ceiling</span>(<span class="fl">0.01</span><span class="sc">*</span><span class="fu">nrow</span>(.))) <span class="sc">%$%</span> <span class="fu">mean</span>(stdSI)),</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>         <span class="at">meanTop1pctGEBV_biofortSI=</span><span class="fu">map_dbl</span>(Family, <span class="sc">~</span><span class="fu">slice_max</span>(<span class="at">.data =</span> .,</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>                                                              <span class="at">order_by =</span> biofortSI, </span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>                                                              <span class="at">n=</span><span class="fu">ceiling</span>(<span class="fl">0.01</span><span class="sc">*</span><span class="fu">nrow</span>(.))) <span class="sc">%$%</span> <span class="fu">mean</span>(biofortSI))) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>Family) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(realized_cross_gebvs_si)</span></code></pre></div>
+</div>
+<div id="metrics-as-varieties" class="section level2">
+<h2>Metrics as varieties</h2>
+<p>For each family, compute the proportion of offspring that have been advanced on the variety development pipeline (VDP) to different stages.</p>
+<p>Compute the stage-specific “Usefulness” of the cross in terms of variety development as the mean GETGV of family members advanced to each stage.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read for web the raw plot-data used as of summer 2019 for IITA GS</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>trials<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">&quot;https://raw.github.com/wolfemd/IITA_2019GS/master/data/IITA_ExptDesignsDetected_72619.rds&quot;</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>realizedVDPmetrics<span class="ot">&lt;-</span>ped <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">GID=</span>FullSampleName) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(trials <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">filter</span>(Trait <span class="sc">%in%</span> indices<span class="sc">$</span>Trait) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">unnest_legacy</span>(TrialData) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(germplasmName,observationUnitDbId,TrialType) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>              distinct <span class="sc">%&gt;%</span> </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>              <span class="fu">count</span>(germplasmName,TrialType,<span class="at">name =</span> <span class="st">&quot;Nplots&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>              <span class="fu">filter</span>(TrialType <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;CET&quot;</span>,<span class="st">&quot;ExpCET&quot;</span>,<span class="st">&quot;PYT&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rename</span>(<span class="at">GID=</span>germplasmName) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>              <span class="fu">spread</span>(TrialType,Nplots) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">&quot;GID&quot;</span>,<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;CET&quot;</span>,<span class="st">&quot;ExpCET&quot;</span>,<span class="st">&quot;PYT&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">IsPhenotyped=</span><span class="fu">rowSums</span>(.[,<span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;CET&quot;</span>,<span class="st">&quot;ExpCET&quot;</span>,<span class="st">&quot;PYT&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>)],<span class="at">na.rm =</span> T)<span class="sc">&gt;</span><span class="dv">0</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">advancedPastCET=</span><span class="fu">rowSums</span>(.[,<span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;PYT&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>)],<span class="at">na.rm =</span> T)<span class="sc">&gt;</span><span class="dv">0</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">advancedPastPYT=</span><span class="fu">rowSums</span>(.[,<span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>)],<span class="at">na.rm =</span> T)<span class="sc">&gt;</span><span class="dv">0</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">advancedPastAYT=</span><span class="fu">rowSums</span>(.[,<span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;UYT&quot;</span>)],<span class="at">na.rm =</span> T)<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">&quot;GeneticGain&quot;</span>,<span class="st">&quot;CET&quot;</span>,<span class="st">&quot;ExpCET&quot;</span>,<span class="st">&quot;PYT&quot;</span>,<span class="st">&quot;AYT&quot;</span>,<span class="st">&quot;UYT&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">germplasmName=</span>GID)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>realized_cross_getgvs_si<span class="ot">&lt;-</span>realized_means_and_covs <span class="sc">%&gt;%</span> </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(predOf<span class="sc">==</span><span class="st">&quot;TGV&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stdSI=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>stdSI),</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">biofortSI=</span><span class="fu">map</span>(famgblups,<span class="sc">~</span><span class="fu">as.matrix</span>(.)<span class="sc">%*%</span>indices<span class="sc">$</span>biofortSI),</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">GETGV=</span><span class="fu">map2</span>(stdSI,biofortSI,<span class="sc">~</span><span class="fu">tibble</span>(<span class="at">germplasmName=</span><span class="fu">rownames</span>(.x),<span class="at">stdSI=</span>.x,<span class="at">biofortSI=</span>.y))) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>famgblups,<span class="sc">-</span>means,<span class="sc">-</span>covMat,<span class="sc">-</span>stdSI,<span class="sc">-</span>biofortSI)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>realizedVDPmetrics<span class="ot">&lt;-</span>realized_cross_getgvs_si <span class="sc">%&gt;%</span> </span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(GETGV) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(realizedVDPmetrics) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">data=</span><span class="fu">c</span>(germplasmName,stdSI,biofortSI,IsPhenotyped,<span class="fu">contains</span>(<span class="st">&quot;advancedPast&quot;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">FamSize=</span><span class="fu">map_dbl</span>(data,nrow),</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>         <span class="at">NmembersPhenotyped=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>IsPhenotyped<span class="sc">==</span><span class="cn">TRUE</span>))),</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>         <span class="at">NmembersPastCET=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastCET<span class="sc">==</span><span class="cn">TRUE</span>))),</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>         <span class="at">NmembersPastPYT=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastPYT<span class="sc">==</span><span class="cn">TRUE</span>))),</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>         <span class="at">NmembersPastAYT=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastAYT<span class="sc">==</span><span class="cn">TRUE</span>))),</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>         <span class="at">propPhenotyped=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>IsPhenotyped<span class="sc">==</span><span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">nrow</span>(.)),</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>         <span class="at">propPastCET=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastCET<span class="sc">==</span><span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">nrow</span>(.)),</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>         <span class="at">propPastPYT=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastPYT<span class="sc">==</span><span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">nrow</span>(.)),</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>         <span class="at">propPastAYT=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">length</span>(<span class="fu">which</span>(.<span class="sc">$</span>advancedPastAYT<span class="sc">==</span><span class="cn">TRUE</span>))<span class="sc">/</span><span class="fu">nrow</span>(.)),</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatCET_stdSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>stdSI[.<span class="sc">$</span>IsPhenotyped<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatPYT_stdSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>stdSI[.<span class="sc">$</span>advancedPastCET<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatAYT_stdSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>stdSI[.<span class="sc">$</span>advancedPastPYT<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatUYT_stdSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>stdSI[.<span class="sc">$</span>advancedPastAYT<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatCET_biofortSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>biofortSI[.<span class="sc">$</span>IsPhenotyped<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatPYT_biofortSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>biofortSI[.<span class="sc">$</span>advancedPastCET<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatAYT_biofortSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>biofortSI[.<span class="sc">$</span>advancedPastPYT<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>         <span class="at">realizedUCatUYT_biofortSI=</span><span class="fu">map_dbl</span>(data,<span class="sc">~</span><span class="fu">mean</span>(.<span class="sc">$</span>biofortSI[.<span class="sc">$</span>advancedPastAYT<span class="sc">==</span><span class="cn">TRUE</span>],<span class="at">na.rm =</span> T)),</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>         <span class="co"># also compute the mean of top 1% of the family</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>         <span class="co"># correspond ~std. intensity = 2.67</span></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>         <span class="co"># provides alternative validation data for usefulness criteria</span></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>         <span class="co"># invariant to actual selection intensity </span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>         <span class="at">meanTop1pctGETGV_stdSI=</span><span class="fu">map_dbl</span>(data, <span class="sc">~</span><span class="fu">slice_max</span>(<span class="at">.data =</span> .,</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>                                                          <span class="at">order_by =</span> stdSI, </span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>                                                          <span class="at">n=</span><span class="fu">ceiling</span>(<span class="fl">0.01</span><span class="sc">*</span><span class="fu">nrow</span>(.))) <span class="sc">%$%</span> <span class="fu">mean</span>(stdSI)),</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>         <span class="at">meanTop1pctGETGV_biofortSI=</span><span class="fu">map_dbl</span>(data, <span class="sc">~</span><span class="fu">slice_max</span>(<span class="at">.data =</span> .,</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>                                                              <span class="at">order_by =</span> biofortSI, </span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>                                                              <span class="at">n=</span><span class="fu">ceiling</span>(<span class="fl">0.01</span><span class="sc">*</span><span class="fu">nrow</span>(.))) <span class="sc">%$%</span> <span class="fu">mean</span>(biofortSI))) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>data) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(realized_cross_getgvs_si,trials)</span></code></pre></div>
+<p>Combine parent + variety metrics</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>realizedcrossmetrics<span class="ot">&lt;-</span><span class="fu">left_join</span>(realizedparentmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">select</span>(<span class="sc">-</span>predOf) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;A&quot;</span>,<span class="st">&quot;ClassicAD&quot;</span>,Model)),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                realizedVDPmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">select</span>(<span class="sc">-</span>predOf) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;AD&quot;</span>,<span class="st">&quot;ClassicAD&quot;</span>,Model))) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div>
+</div>
+<div id="realized-intensities" class="section level2">
+<h2>Realized intensities</h2>
+<p>To compare realized and predicted “usefulness criteria”, we need to compute the realized, standardized selection intensity.</p>
+<ol style="list-style-type: decimal">
+<li>For pop improve / UC_parent: prop of family members used as parents</li>
+<li>For variety devel / UC_variety: prop of family members advanced &gt;SDN, &gt;CET, &gt;PYT, &gt;AYT</li>
+</ol>
+<p>Compute the standrardized selection intensity from the proportion selected. This will give NaN for propSel==0. Progeny as crosses with NaN UC were never themselves used as parents. Their “usefulness” has not be “observed” / “evaluated”.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>realizedcrossmetrics <span class="sc">%&lt;&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">realIntensityParent=</span><span class="fu">map_dbl</span>(propUsedAsParent,intensity),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">realIntensityCET=</span><span class="fu">map_dbl</span>(propPhenotyped,intensity),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">realIntensityPYT=</span><span class="fu">map_dbl</span>(propPastCET,intensity),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">realIntensityAYT=</span><span class="fu">map_dbl</span>(propPastPYT,intensity),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">realIntensityUYT=</span><span class="fu">map_dbl</span>(propPastAYT,intensity))</span></code></pre></div>
+</div>
+<div id="save-2" class="section level2">
+<h2>–&gt; Save</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(realizedcrossmetrics,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossMetrics.rds&quot;</span>))</span></code></pre></div>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.5      rstudioapi_0.13 whisker_0.4     knitr_1.30     
+ [5] magrittr_2.0.1  R6_2.5.0        rlang_0.4.9     stringr_1.4.0  
+ [9] tools_4.0.2     xfun_0.19       git2r_0.27.1    htmltools_0.5.0
+[13] ellipsis_0.3.1  rprojroot_2.0.2 yaml_2.2.1      digest_0.6.27  
+[17] tibble_3.0.4    lifecycle_0.2.0 crayon_1.3.4    later_1.1.0.1  
+[21] vctrs_0.3.5     promises_1.1.1  fs_1.5.0        glue_1.4.2     
+[25] evaluate_0.14   rmarkdown_2.6   stringi_1.5.3   compiler_4.0.2 
+[29] pillar_1.4.7    httpuv_1.5.4    pkgconfig_2.0.3</code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

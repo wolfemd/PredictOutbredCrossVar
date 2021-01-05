@@ -1,0 +1,468 @@
+---
+title: "Presentation at ICQG6"
+site: workflowr::wflow_site
+date: "2020-October-28"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+```{r}
+library(tidyverse); library(magrittr)
+```
+
+# Haplotypes
+
+```{r, fig.width=5, fig.height=2}
+library(ggforce)
+matrix(sample(0:1,20, replace = T),nrow=2)
+library(AlphaSimR)
+founderPop<-quickHaplo(nInd=2, nChr=1, segSites=20)
+SP = SimParam$new(founderPop)
+pop = newPop(founderPop, simParam=SP)
+crossPlan = matrix(c(1,10), nrow=1, ncol=2)
+prog<-randCross(pop, nCrosses = 1,nProgeny = 50)
+pullSegSiteHaplo(pop[1]) %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "GID") %>% 
+  pivot_longer(cols = contains("SITE"), names_to = "SNP_ID", values_to = "Hap") %>% 
+  ggplot(.,aes(x=SNP_ID,y=GID,fill=as.factor(Hap))) + geom_tile(show.legend = F) + ggraph::theme_graph() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid4"))
+```
+```{r, fig.width=5, fig.height=2}
+pullSegSiteHaplo(pop[2]) %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "GID") %>% 
+  pivot_longer(cols = contains("SITE"), names_to = "SNP_ID", values_to = "Hap") %>% 
+  ggplot(.,aes(x=SNP_ID,y=GID,fill=as.factor(Hap))) + geom_tile(show.legend = F) + ggraph::theme_graph() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid4"))
+```
+
+```{r, fig.width=5, fig.height=10}
+pullSegSiteHaplo(prog[1:20]) %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "GID") %>% 
+  pivot_longer(cols = contains("SITE"), names_to = "SNP_ID", values_to = "Hap") %>% 
+  ggplot(.,aes(x=SNP_ID,y=GID,fill=as.factor(Hap))) + geom_tile(show.legend = F) + ggraph::theme_graph() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid4"))
+```
+
+# Importance of non-additive effects
+
+## All traits
+
+```{r, fig.width=12, fig.height=5}
+library(tidyverse); library(magrittr); library(patchwork)
+## Table S15: Variance estimates for genetic groups
+varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
+forplot<-varcomps %>% 
+  filter(VarMethod=="PMV", Method=="M2",Model == "AD",Group=="All") %>% 
+  select(-VarMethod,-Method,-Model,-Group) %>% 
+  mutate(Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")))
+p1<-forplot %>% 
+  filter(Trait1==Trait2,grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Trait1,y=propDom,fill=Trait1)) + 
+  geom_bar(stat = 'identity', position="dodge2", color='grey40') + 
+  #facet_grid(.~Trait1, scales='free_y') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold', size=18),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14),
+        legend.position = 'none') +
+  labs(y = "Prop. Dominance")
+p2<-forplot %>% 
+  filter(Trait1==Trait2,!grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Trait1,y=propDom,fill=Trait1)) + 
+  geom_bar(stat = 'identity', position="dodge2", color='grey40') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold', angle=60,color='black',size=12, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_blank(),#text(face='bold'),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14)) + 
+  labs(y = "Prop. Dominance")
+```
+
+```{r figure4, fig.width=10}
+(p1 + p2 + 
+   plot_layout(widths = c(1, 2),guides = 'collect')) + 
+  plot_annotation(tag_levels = 'A') & 
+  theme(axis.text.x = element_text(face='bold', angle=60,color='black',size=18, hjust = 1),
+        axis.text.y = element_text(face='bold', color='black',size=14),
+        legend.position = 'none',
+        plot.tag = element_text(size = 13, face='bold'),
+        strip.text.x = element_text(size=11, face='bold'))
+```
+
+```{r, fig.width=14, fig.height=6}
+forplot %>% 
+  filter(Trait1!=Trait2,!grepl("SI",Trait1)) %>% 
+  mutate(Covar=paste0(Trait1,"-\n",Trait2)) %>% 
+  select(-propDom) %>% 
+  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "Var") %>% 
+  mutate(VarComp=ifelse(VarComp=="VarA","Var(Additive)","Var(Dominance)")) %>% 
+  ggplot(.,aes(x=Covar,y=Var,fill=VarComp)) + 
+  geom_bar(stat = 'identity', position = 'stack', color='grey40') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() +   
+  facet_wrap(~Covar, scales='free',nrow = 1) + #, space = 'free') + 
+  theme(axis.text.x = element_blank(),#text(face='bold', angle=60,color='black',size=12, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(),
+        axis.title.y = element_text(face='bold',size=18,color='black'),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=16),
+        legend.title = element_text(size = 16, face='bold'),
+        legend.text = element_text(color = "black", size = 16)) + 
+  labs(y = "Covariance Estimates")
+```
+
+## Simplified
+
+```{r, fig.width=10, fig.height=5}
+library(tidyverse); library(magrittr); library(patchwork)
+## Table S15: Variance estimates for genetic groups
+varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
+forplot<-varcomps %>% 
+  filter(VarMethod=="PMV", Method=="M2",Model == "AD",Group=="All",Trait1!="biofortSI",Trait2!="biofortSI") %>% 
+  select(-VarMethod,-Method,-Model,-Group) %>% 
+  mutate(Trait1=factor(Trait1,levels=c("stdSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","DM","logFYLD","MCMDS","TCHART")))
+forplot %>% 
+  filter(Trait1==Trait2,!grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Trait1,y=propDom,fill=Trait1)) + 
+  geom_bar(stat = 'identity', position="dodge2", color='grey40') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold',color='black',size=20, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold',size=18,color='black'),
+        title = element_text(),legend.position = 'none',
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14)) + 
+  labs(y = "Prop. Dominance")
+```
+
+
+# Inbreeding Effect Estimates
+```{r figure5, fig.width=10, fig.height=5}
+library(tidyverse); library(magrittr);
+## Table S16: Directional dominance effects estimates
+ddEffects<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS16")
+forplot<-ddEffects %>% 
+  filter(Group %in% c("ParentwiseCV")) #
+  # mutate(Group=ifelse(Group=="All","Full Model","CrossVal Folds")) %>% 
+  # mutate(Group=factor(Group,levels=c("Full Model","CrossVal Folds")))
+ggplot(forplot,aes(x=Trait,y=InbreedingEffect,fill=Trait)) + 
+  geom_boxplot(color='grey30',size=1.1, notch = T) +
+  facet_wrap(~Trait,nrow=1, scales='free') + 
+  geom_hline(yintercept = 0, color='darkred', size=1.25) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  theme(axis.text.x = element_blank(),#text(angle=60,face='bold', color='black',size=12, hjust = 1),
+        axis.title.x = element_text(face='bold',size=12),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold',size=18),
+        title = element_text(face='bold'),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=18),legend.position = 'none') + 
+  labs(
+    #title = "Population-level Estimates of Inbreeding Effect",
+     #  subtitle = "Fixed-effect estimate of prop(Homozygous) effect, from the Directional Dominance Models",
+       y = "Inbreeding Effect", x = NULL)
+```
+
+# Simplified accuracies
+
+```{r}
+library(tidyverse); library(magrittr); library(patchwork)
+path<-"~/Google Drive/PredictOutbredCrossVar/manuscript/"
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS10")
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS11")
+## Table S12: Accuracies predicting the variances
+accUC<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS12")
+
+
+acc<-accMeans %>% 
+  filter(ValidationData=="GBLUPs",Trait=="stdSI") %>% 
+  mutate(Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+         VarComp=gsub("Mean","",VarComp),
+         PredOf="Mean") %>% 
+  bind_rows(accVars %>% 
+              filter(VarMethod=="PMV",ValidationData=="GBLUPs",Trait1=="stdSI",Trait2=="stdSI") %>% 
+              mutate(Trait=Trait1,
+                     Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+                     VarComp=gsub("Var","",VarComp),
+                     PredOf="Var") %>% 
+              rename(Accuracy=AccuracyWtCor) %>% 
+              select(Repeat,Fold,Model,VarComp,PredOf,Trait,Accuracy)) %>% 
+  bind_rows(accUC %>% 
+              filter(VarMethod=="PMV",Stage %in% c("Parent","AYT"),Trait=="stdSI") %>% 
+              mutate(PredOf="UC",
+                     Model=gsub("ClassicAD","Classic",Model)) %>% 
+              rename(Accuracy=AccuracyWtCor) %>% 
+              select(Repeat,Fold,Model,VarComp,PredOf,Trait,Accuracy))
+```
+
+```{r, fig.width=10}
+acc %>% 
+  mutate(PredOf=factor(PredOf,levels=c("Mean","Var","UC")),
+         VarComp=factor(VarComp,levels=c("BV","TGV")),
+         Pred=paste0(VarComp,"_",Model), 
+         Pred=factor(Pred,levels=c("BV_Classic","TGV_Classic","BV_DirDom","TGV_DirDom"))) %>% 
+  ggplot(.,aes(x=Pred,y=Accuracy,fill=Pred)) +
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='white',outlier.color = 'grey60', notch = TRUE) + 
+  theme_bw() + 
+#  scale_fill_manual(values = c("goldenrod3","darkorchid3")) + 
+  scale_fill_viridis_d(option="A") + 
+#  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold',color='black',size=14),
+        axis.title.y = element_text(face='bold', size = 18),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=18),
+        legend.position = 'bottom',
+        legend.text = element_text(face='bold',size = 16),
+        legend.title = element_blank()) + 
+  facet_grid(.~PredOf)
+```
+
+
+# Simplified accuracies - No DirDom
+
+```{r}
+library(tidyverse); library(magrittr); library(patchwork)
+path<-"~/Google Drive/PredictOutbredCrossVar/manuscript/"
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS10")
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS11")
+## Table S12: Accuracies predicting the variances
+accUC<-readxl::read_xlsx(paste0(path,"SupplementaryTables.xlsx"),sheet = "TableS12")
+
+
+acc<-accMeans %>% 
+  filter(ValidationData=="GBLUPs",Trait=="stdSI",Model %in% c("A","AD")) %>% 
+  mutate(Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+         VarComp=gsub("Mean","",VarComp),
+         PredOf="Mean") %>% 
+  bind_rows(accVars %>% 
+              filter(VarMethod=="PMV",ValidationData=="GBLUPs",Trait1=="stdSI",Trait2=="stdSI") %>% 
+              mutate(Trait=Trait1,
+                     Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+                     VarComp=gsub("Var","",VarComp),
+                     PredOf="Var") %>% 
+              rename(Accuracy=AccuracyWtCor) %>% 
+              select(Repeat,Fold,Model,VarComp,PredOf,Trait,Accuracy)) %>% 
+  bind_rows(accUC %>% 
+              filter(VarMethod=="PMV",Stage %in% c("Parent","AYT"),Trait=="stdSI") %>% 
+              mutate(PredOf="UC",
+                     Model=gsub("ClassicAD","Classic",Model)) %>% 
+              rename(Accuracy=AccuracyWtCor) %>% 
+              select(Repeat,Fold,Model,VarComp,PredOf,Trait,Accuracy))
+acc %<>% filter(Model=="Classic")
+```
+
+```{r, fig.width=10}
+acc %>% 
+  mutate(PredOf=factor(PredOf,levels=c("Mean","Var","UC")),
+         VarComp=factor(VarComp,levels=c("BV","TGV")),
+         Pred=paste0(VarComp,"_",Model), 
+         Pred=factor(Pred,levels=c("BV_Classic","TGV_Classic","BV_DirDom","TGV_DirDom"))) %>% 
+  ggplot(.,aes(x=VarComp,y=Accuracy,fill=VarComp)) +
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='grey40',outlier.color = 'grey60', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid2")) + 
+  #scale_fill_viridis_d() + 
+#  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold',color='black',size=14),
+        axis.title.y = element_text(face='bold', size = 18),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=18),
+        legend.position = 'bottom',
+        legend.text = element_text(face='bold',size = 16),
+        legend.title = element_blank()) + 
+  facet_grid(.~PredOf)
+```
+
+
+
+# Exploring Untested Crosses
+
+```{r}
+library(tidyverse); library(magrittr); library(patchwork);
+library(ggforce); library(concaveman); library(V8)
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
+preds_std<-predUntestedCrosses %>% filter(Trait=="stdSI", Model=="ClassicAD")
+top50crosses_std<-preds_std %>% 
+  filter(PredOf!="Sd") %>%
+  group_by(Trait,Model,PredOf,Component) %>% 
+  slice_max(order_by = Pred,n=50) %>% ungroup()
+
+forplot_std<-preds_std %>% 
+  spread(PredOf,Pred) %>% 
+  mutate(CrossType=ifelse(IsSelf==TRUE,"SelfCross","Outcross")) %>% 
+  left_join(top50crosses_std %>% 
+              distinct(sireID,damID) %>% 
+              mutate(Group="NewCrosses")) %>% 
+  mutate(Group=ifelse(CrossPrevMade=="Yes","PreviousCrosses",Group))
+```
+
+
+```{r, fig.width=10}
+forplot_std %>% 
+  ggplot(.,aes(x=Mean,y=Sd,shape=CrossType)) + 
+  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  # geom_mark_ellipse(data=forplot_std %>% 
+  #                     filter(Group=="NewCrosses") %>% 
+  #                     mutate(desc=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
+  #                   aes(fill=Group,label=desc), expand = unit(2.5, "mm"), label.buffer = unit(15, 'mm')) + 
+  geom_point(data = forplot_std %>% filter(!is.na(Group),Group=="PreviousCrosses",IsSelf==FALSE),
+             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F) +
+  geom_point(data = forplot_std %>% filter(!is.na(Group),Group=="PreviousCrosses",IsSelf==TRUE),
+             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F) +
+  scale_color_viridis_d() + 
+  scale_fill_manual(values = c("darkorchid2")) + #"goldenrod2"
+  facet_grid(.~Component, scales='free') + 
+  theme_bw() + 
+  theme(axis.title = element_text(face='bold', color='black',size=14),
+        axis.text = element_text(face='bold', color='black'),
+        strip.background = element_blank(),
+        strip.text = element_text(face='bold', size=14),
+        strip.text.y = element_text(angle=0)) + 
+  labs(x = "Predicted Cross Mean", y = "Predicted Cross SD")
+```
+
+```{r, fig.width=10}
+forplot_std %>% 
+  ggplot(.,aes(x=Mean,y=Sd,shape=CrossType)) + 
+  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  geom_mark_ellipse(data=forplot_std %>% 
+                      filter(Group=="NewCrosses") %>% 
+                      mutate(desc=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
+                    aes(fill=Group,label=desc), expand = unit(2.5, "mm"), label.buffer = unit(15, 'mm')) + 
+  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==FALSE),
+             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F) + 
+  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==TRUE),
+             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F) + 
+  scale_color_viridis_d() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid2")) + 
+  facet_grid(.~Component, scales='free') + 
+  theme_bw() + 
+  theme(axis.title = element_text(face='bold', color='black',size=14),
+        axis.text = element_text(face='bold', color='black'),
+        strip.background = element_blank(),
+        strip.text = element_text(face='bold', size=14),
+        strip.text.y = element_text(angle=0)) + 
+  labs(x = "Predicted Cross Mean", y = "Predicted Cross SD")
+```
+
+
+```{r, fig.width=10}
+forplot_std_bvVStgv<-forplot_std %>% 
+  select(-Mean,-Sd) %>% 
+  spread(Component,UC)
+bvVStgv<-forplot_std_bvVStgv %>% 
+  ggplot(.,aes(x=BV,y=TGV,shape=CrossType)) + 
+  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  geom_abline(slope=1, color='darkred') +
+  geom_mark_ellipse(data=forplot_std_bvVStgv %>% 
+                      filter(Group=="NewCrosses") %>% 
+                      mutate(lab=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
+                    aes(fill=Group,label=lab), expand = unit(2.5, "mm")) + 
+  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==FALSE),
+             aes(x=BV,y=TGV,fill=Group), shape=21, color='black',inherit.aes = F) + 
+  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==TRUE),
+             aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F) + 
+  scale_color_viridis_d() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid2")) + 
+  #facet_grid(.~Model, scales='free') + 
+  theme_bw() + 
+  theme(axis.title = element_text(face='bold', color='black', size=14),
+        axis.text = element_text(face='bold', color='black'),
+        strip.background = element_blank(),
+        strip.text = element_text(face='bold', size=14),
+        strip.text.x = element_blank()) + 
+  labs(x = expression(bold("UC"["parent"]~" (BV)")), y=expression(bold("UC"["variety"]~" (TGV)")))
+bvVStgv
+```
+# Network plot of selected parents and matings
+
+```{r}
+library(ggraph); library(tidygraph)
+#set_graph_style(plot_margin = margin(0.5,0.5,0.5,0.5))
+graph_classic<-as_tbl_graph(top50crosses_std %>% filter(Model=="ClassicAD"),directed = F) %>% 
+  mutate(degree = centrality_degree()) %>% 
+  ggraph(., layout = 'nicely') +
+  geom_edge_fan(aes(colour = Component, linetype = PredOf),strength = 3) +
+  geom_edge_loop(aes(colour = Component, linetype = PredOf),strength = 3) + 
+  geom_node_point(aes(size = degree),show.legend = F) + 
+  scale_edge_color_manual(values = c("goldenrod2","darkorchid4")) + 
+  theme_bw() + 
+  theme(strip.text.x = element_text(face='bold',size=14),strip.background.x = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        plot.title = element_text(face='bold',size=14),
+        plot.tag = element_text(size = 14, face='bold'))
+#  labs(title="ClassicAD Model")
+```
+```{r figure7, fig.width=10, fig.height=6}
+library(patchwork)
+(graph_classic) +
+  plot_layout(guides = 'collect') +
+#  plot_annotation(tag_levels = 'A') + # ,title = "Network of parents and crosses selected for the StdSI"
+  theme(plot.tag = element_text(size = 14, face='bold'))
+```
+
+Number of distinct crosses selected per Trait
+```{r}
+top50crosses_std %>% 
+  distinct(Trait,sireID,damID) %>% 
+  count(Trait)
+```
+Number of Self vs. Outcross selected by Trait
+```{r}
+top50crosses_std %>% 
+  distinct(Trait,sireID,damID,IsSelf) %>% 
+  count(Trait,IsSelf)
+```
+```{r}
+top50crosses_std %>% 
+  mutate(Family=paste0(sireID,"x",damID)) %>% 
+  select(Trait,Family,sireID,damID) %>% 
+  pivot_longer(cols = c(sireID,damID), names_to = "Parent", values_to = "germplasmName") %>% 
+  count(Trait,germplasmName) %>% 
+  group_by(Trait) %>% 
+  summarize(Nparents=length(unique(germplasmName)),
+            minProg=min(n),maxProg=max(n),medianProg=median(n))
+```
+

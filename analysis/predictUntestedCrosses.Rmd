@@ -1,0 +1,676 @@
+---
+title: "Predict Untested Cross Means and Variances"
+site: workflowr::wflow_site
+date: "2020-July-30"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r, eval=F}
+# devtools::install_github("wolfemd/predCrossVar", ref = 'master', force=T) 
+```
+
+# Crosses to predict
+
+-   The 462 crosses actually made
+-   The 100 clones with top rank on the StdSI
+-   The 209 clones already used as parents
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+
+# GEBVs --------------
+gebvs<-readRDS(here::here("output","gblups_geneticgroups.rds")) %>% 
+  filter(Group=="All",Model=="A") %>% 
+  unnest(GBLUPs) %>% 
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART")))
+gebvMat<-gebvs %>% 
+  column_to_rownames(var = "germplasmName") %>% 
+  as.matrix
+## GEBVs on the "standard" selection index
+gebvs %<>% 
+  mutate(stdSI=as.numeric(gebvMat%*%indices$stdSI))
+saveRDS(gebvs,here::here("output","gebvs_ModelA_GroupAll_stdSI.rds"))
+## The top 100 on the index
+top100stdSI<-gebvs %>% 
+  arrange(desc(stdSI)) %>% 
+  slice(1:100) %$% germplasmName
+saveRDS(top100stdSI,here::here("output","top100stdSI.rds"))
+
+# table(top100stdSI %in% parents) # only 3
+# length(grep("TMS13|TMS14|TMS15",top100stdSI, invert = T)) # 2
+# length(grep("TMS13",top100stdSI)) # 52
+# length(grep("TMS14",top100stdSI)) # 31
+# length(grep("TMS15",top100stdSI)) # 15
+
+## Highest BV -------------
+# gebvs %>% 
+#   slice_max(order_by = stdSI, n=1) # TMS13F1095P0013
+## Lowest BV
+# gebvs %>% 
+#   filter(germplasmName %in% union(parents,top100stdSI)) %>% 
+#   slice_min(order_by = stdSI, n=1) # IITA-TMS-IBA011371
+
+# Crosses To Predict -------------
+CrossesToPredict<-crosses2predict(union(parents,top100stdSI)) %>%  # makes df of pairwise non-recprical, selfs-included crosses
+  bind_rows(ped %>% # add the crosses already made (for convenience)
+              distinct(sireID,damID)) %>% 
+  distinct # avoid duplication
+# nrow(CrossesToPredict) # [1] 47083
+saveRDS(CrossesToPredict,here::here("output","CrossesToPredict_top100stdSI_and_209originalParents.rds"))
+```
+
+# Preducted untested cross variances
+
+## Model A and AD
+
+### Set-up
+
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88; 
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# Crosses To Predict -------------
+CrossesToPredict<-readRDS(here::here("output","CrossesToPredict_top100stdSI_and_209originalParents.rds"))
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+top100stdSI<-readRDS(here::here("output","top100stdSI.rds"))
+
+# Recomb frequency matrix ------------
+recombFreqMat<-readRDS(here::here("data","recombFreqMat_1minus2c_awcmap_May2020.rds"))
+
+# Haplotype Matrix ------------
+haploMat<-readRDS(file=here::here("data","haps_awc.rds"))
+parenthaps<-sort(c(paste0(union(parents,top100stdSI),"_HapA"),
+                   paste0(union(parents,top100stdSI),"_HapB")))
+haploMat<-haploMat[parenthaps,colnames(recombFreqMat)]; dim(haploMat)
+
+# Parallelization specs ---------
+require(furrr); 
+options(future.globals.maxSize=50000*1024^2)
+ncores<-10; 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# Path for output ----------
+outpath<-"output/crossPredictions"
+
+# getUntestedMtCrossVarPreds function -------------
+## Function to run for each rep-fold-Model (==unique set of marker effects), predict the relevant cross variances.
+source(here::here("code","getUntestedMtCrossVarPreds.R"))
+
+# Divide CrossesToPredict into chunks for each server ------------
+nchunks<-5
+CrossesToPredict %<>% 
+  mutate(Chunk=rep(1:nchunks, each=ceiling(nrow(.)/nchunks), length.out=nrow(.))) %>% 
+  nest(data=c(sireID,damID))
+```
+
+### Run Var(TGV) predictions (Model AD)
+
+```{r, eval=F}
+# cbsulm13 - done
+chunk<-1;
+# cbsulm15 - done
+chunk<-2;
+# cbsulm20 - done
+chunk<-3;
+# cbsulm22 - done
+chunk<-4;
+# cbsulm23 - done
+chunk<-5;
+
+# Start run on each server / chunk:  Aug 03 at 6:50AM
+getUntestedMtCrossVarPreds(inprefix = "mt_All_AD",
+                           outpath = "output/crossPredictions",
+                           outprefix = paste0("predUntestedCrossTGVs_chunk",chunk,"_AD"),
+                           predType="VPM", Model = "AD", nIter=30000, burnIn=5000,thin=5,
+                           CrossesToPredict=CrossesToPredict$data[[chunk]],
+                           recombFreqMat=recombFreqMat,haploMat=haploMat,ncores=ncores)
+
+```
+
+### Run Var(BV) predictions (Model A)
+
+```{r, eval=F}
+# cbsulm13 - aug 4, 10pm - done
+chunk<-1;
+# cbsulm15 - aug 4, 10pm - done
+chunk<-2;
+# cbsulm20 - aug 4, 6:55am - done
+chunk<-3;
+# cbsulm22 - aug 4, 10pm - done 
+chunk<-4;
+# cbsulm23 - aug 4, 6:55am - done
+chunk<-5;
+
+# Start run on each server / chunk: 
+getUntestedMtCrossVarPreds(inprefix = "mt_All_A",
+                           outpath = "output/crossPredictions",
+                           outprefix = paste0("predUntestedCrossBVs_chunk",chunk,"_A"),
+                           predType="VPM", Model = "A", nIter=30000, burnIn=5000,thin=5,
+                           CrossesToPredict=CrossesToPredict$data[[chunk]],
+                           recombFreqMat=recombFreqMat,haploMat=haploMat,ncores=ncores)
+```
+
+## Model DirDom
+
+### Set-up
+
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=112; 
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# Crosses To Predict -------------
+CrossesToPredict<-readRDS(here::here("output","CrossesToPredict_top100stdSI_and_209originalParents.rds"))
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+top100stdSI<-readRDS(here::here("output","top100stdSI.rds"))
+
+# Recomb frequency matrix ------------
+recombFreqMat<-readRDS(here::here("data","recombFreqMat_1minus2c_awcmap_May2020.rds"))
+
+# Haplotype Matrix ------------
+haploMat<-readRDS(file=here::here("data","haps_awc.rds"))
+parenthaps<-sort(c(paste0(union(parents,top100stdSI),"_HapA"),
+                   paste0(union(parents,top100stdSI),"_HapB")))
+haploMat<-haploMat[parenthaps,colnames(recombFreqMat)]; dim(haploMat)
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); 
+
+# Parallelization specs ---------
+require(furrr); 
+options(future.globals.maxSize=50000*1024^2)
+ncores<-10; 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# Path for output ----------
+outpath<-"output/crossPredictions"
+
+# getUntestedMtCrossVarPreds function -------------
+## Function to run for each rep-fold-Model (==unique set of marker effects), predict the relevant cross variances.
+source(here::here("code","getUntestedMtCrossVarPreds.R"))
+
+# Divide CrossesToPredict into chunks for each server ------------
+nchunks<-4
+CrossesToPredict %<>% 
+  mutate(Chunk=rep(1:nchunks, each=ceiling(nrow(.)/nchunks), length.out=nrow(.))) %>% 
+  nest(data=c(sireID,damID))
+```
+
+### Run Var(TGV) predictions
+
+```{r, eval=F}
+# cbsulm13 - Done!
+chunk<-1;
+# cbsulm17 - Done!
+chunk<-2;
+# cbsulm12 - Done!
+chunk<-3;
+# cbsulm16 - Done!
+chunk<-4;
+
+# Start run on each server / chunk: 
+getDirDomUntestedMtCrossVarTGVpreds(inprefix = "mt_All_DirectionalDom",
+                                    outpath = "output/crossPredictions",
+                                    outprefix = paste0("predUntestedCrossTGVs_chunk",chunk,"_DirDom"),
+                                    predType="VPM", nIter=30000, burnIn=5000,thin=5,
+                                    CrossesToPredict=CrossesToPredict$data[[chunk]],
+                                    recombFreqMat=recombFreqMat,haploMat=haploMat,ncores=ncores)
+```
+
+### Run Var(BV) predictions
+
+```{r, eval=F}
+# cbsulm26 - Done! (~32hrs)
+chunk<-1;
+# cbsulm15 - Done!
+chunk<-2;
+# cbsulm26 - Done!
+chunk<-3;
+# cbsulm17 - Done!
+chunk<-4;
+
+# Start run on each server / chunk: 
+getDirDomUntestedMtCrossVarBVpreds(inprefix = "mt_All_DirectionalDom",
+                                   outpath = "output/crossPredictions",
+                                   outprefix = paste0("predUntestedCrossBVs_chunk",chunk,"_DirDom"),
+                                   predType="VPM", nIter=30000, burnIn=5000,thin=5,
+                                   CrossesToPredict=CrossesToPredict$data[[chunk]],
+                                   recombFreqMat=recombFreqMat,haploMat=haploMat,doseMat=snps,ncores=ncores)
+```
+
+## Re-predict self-crosses
+
+Discovered a bug effecting self-crosses. The original version of **predCrossVar** run (circa July 2020) incorrectly calculated gametic LD matrices with duplicated haplotypes for cases where sireID==damID. Fixed the bug in the package, archived the original version via Git/GitHub. Re-install **predCrossVar** on server and re-do predictions of selfs.
+
+### Model A and AD
+
+#### Set-up
+
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88; 
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# Crosses To Predict -------------
+CrossesToPredict<-readRDS(here::here("output","CrossesToPredict_top100stdSI_and_209originalParents.rds"))
+# just the selfs
+CrossesToPredict %<>% filter(sireID==damID)
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+top100stdSI<-readRDS(here::here("output","top100stdSI.rds"))
+
+# Recomb frequency matrix ------------
+recombFreqMat<-readRDS(here::here("data","recombFreqMat_1minus2c_awcmap_May2020.rds"))
+
+# Haplotype Matrix ------------
+haploMat<-readRDS(file=here::here("data","haps_awc.rds"))
+parenthaps<-sort(c(paste0(union(parents,top100stdSI),"_HapA"),
+                   paste0(union(parents,top100stdSI),"_HapB")))
+haploMat<-haploMat[parenthaps,colnames(recombFreqMat)]; dim(haploMat)
+
+# Parallelization specs ---------
+require(furrr); 
+options(future.globals.maxSize=50000*1024^2)
+ncores<-10; 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# Path for output ----------
+outpath<-"output/crossPredictions"
+
+# getUntestedMtCrossVarPreds function -------------
+## Function to run for each rep-fold-Model (==unique set of marker effects), predict the relevant cross variances.
+source(here::here("code","getUntestedMtCrossVarPreds.R"))
+```
+
+#### Run Var(TGV) predictions (Model AD)
+
+```{r, eval=F}
+# Start run on each server / chunk:  
+getUntestedMtCrossVarPreds(inprefix = "mt_All_AD",
+                           outpath = "output/crossPredictions",
+                           outprefix = paste0("predUntestedCrossTGVs_ReDoSelfs_AD"),
+                           predType="VPM", Model = "AD", 
+                           nIter=30000, burnIn=5000,thin=5,
+                           CrossesToPredict=CrossesToPredict,
+                           recombFreqMat=recombFreqMat,
+                           haploMat=haploMat,ncores=ncores)
+
+```
+
+#### Run Var(BV) predictions (Model A)
+
+```{r, eval=F}
+# Start run on each server / chunk: 
+getUntestedMtCrossVarPreds(inprefix = "mt_All_A",
+                           outpath = "output/crossPredictions",
+                           outprefix = paste0("predUntestedCrossBVs_ReDoSelfs_A"),
+                           predType="VPM", Model = "A", 
+                           nIter=30000, burnIn=5000,thin=5,
+                           CrossesToPredict=CrossesToPredict,
+                           recombFreqMat=recombFreqMat,
+                           haploMat=haploMat,ncores=ncores)
+```
+
+# Predict untested cross means
+
+## Set-up
+
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=112; 
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# Crosses To Predict -------------
+CrossesToPredict<-readRDS(here::here("output","CrossesToPredict_top100stdSI_and_209originalParents.rds"))
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+top100stdSI<-readRDS(here::here("output","top100stdSI.rds"))
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); 
+
+# Parallelization specs ---------
+require(furrr); 
+options(future.globals.maxSize=50000*1024^2)
+ncores<-10; 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# Path for output ----------
+outpath<-"output/crossPredictions"
+
+# getMtCrossMeanPreds function -------------
+source(here::here("code","getMtCrossMeanPreds.R"))
+# getDirectionalDomMtCrossMeanPreds function -------------
+source(here::here("code","getDirectionalDomMtCrossMeanPreds.R"))
+
+# sampleIDs -------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>% 
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+sampleIDs<-blups$germplasmName[blups$germplasmName %in% rownames(snps)]
+rm(blups)
+
+```
+
+## Run mean predictions (Model A and AD)
+
+```{r, eval=F}
+# Done Aug 8
+predictedUntestedCrossMeansBV<-getMtCrossMeanPreds(outprefix="mt_All_A",
+                                                   Model="A",
+                                                   CrossesToPredict=CrossesToPredict,
+                                                   doseMat=snps,
+                                                   sampleIDs = sampleIDs)
+predictedUntestedCrossMeansTGV<-getMtCrossMeanPreds(outprefix="mt_All_AD",
+                                                    Model="AD",
+                                                    CrossesToPredict=CrossesToPredict,
+                                                    doseMat=snps,
+                                                    sampleIDs = sampleIDs)
+
+saveRDS(predictedUntestedCrossMeansBV,file=here::here("output/crossPredictions","predictedUntestedCrossMeansBV.rds"))
+saveRDS(predictedUntestedCrossMeansTGV,file=here::here("output/crossPredictions","predictedUntestedCrossMeansTGV.rds"))
+```
+
+## Run mean predictions (Model DirDom)
+
+```{r, eval=F}
+predictedUntestedCrossMeansDirDom<-getDirectionalDomMtCrossMeanPreds(outprefix="mt_All_DirectionalDom",
+                                                                     CrossesToPredict=CrossesToPredict,
+                                                                     doseMat=snps,
+                                                                     sampleIDs = sampleIDs)
+
+saveRDS(predictedUntestedCrossMeansDirDom,
+        file=here::here("output/crossPredictions","predictedUntestedCrossMeansDirDom.rds"))
+```
+
+# Process prediction results
+
+## Tidy predicted variances
+
+Next step, used a server, unpacking output for 10 varcomps x \~47K crosses.
+
+Keep the dom. variance in the "tidied" output long enough to calculate dom. variance on the sel. indices. This was previously not done. 
+
+Calc. VarTGV=VarA + VarD only for the sup. tables (Tables S17 and S18), which are used for plots and summaries in the manuscript. 
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar) 
+# Model A
+predUntestedCrossVarBVs<-list.files(here::here("output/crossPredictions")) %>% 
+  grep("predUntestedCrossBVs",.,value = T) %>% 
+  tibble(File=.) %>% 
+  mutate(Model=ifelse(grepl("_A_",File),"A","DirDomBV"),
+         crossPredictions=map(File,~readRDS(here::here("output/crossPredictions",.)))) %>% 
+  unnest_wider(crossPredictions) %>% 
+  unnest(varcovars) %>% 
+  select(-totcomputetime) %>% 
+  unnest_wider(varcomps) # 10 variances/covariances x 5 chunks x 1 models = 50 blocks of ~10K crosses chunk per varcomp
+
+require(furrr); options(mc.cores=50); plan(multiprocess)
+predUntestedCrossVarBVs %<>% # in parallel across the 50 chunks
+  mutate(predictedfamvars=future_map(predictedfamvars,~unnest(.,predVars) %>% select(-PMV))) %>% 
+  select(-totcomputetime) %>% 
+  unnest(predictedfamvars) %>% 
+  rename(predVar=VPM) %>% 
+  mutate(predOf="VarBV")
+predUntestedCrossVarBVs %<>% select(-VarComp,-totcomputetime)
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar) 
+
+# Model AD
+predUntestedCrossVarTGVs<-list.files(here::here("output/crossPredictions")) %>% 
+  grep("predUntestedCrossTGVs",.,value = T) %>% 
+  tibble(File=.) %>% 
+  mutate(Model=ifelse(grepl("_AD_",File),"AD","DirDomAD"),
+         crossPredictions=map(File,~readRDS(here::here("output/crossPredictions",.)))) %>% 
+  unnest_wider(crossPredictions) %>% 
+  unnest(varcovars) %>% 
+  select(-totcomputetime) %>% 
+  unnest_wider(varcomps) # 10 variances/covariances x 5 chunks x 2 models = 100 blocks of ~10K crosses chunk per varcomp
+predUntestedCrossVarTGVs$predictedfamvars[[1]] %>% 
+  mutate(Nsegsnps=map_dbl(predVars,~.$Nsegsnps[1]))
+require(furrr); options(mc.cores=50); plan(multiprocess)
+predUntestedCrossVarTGVs %<>% # in parallel across the 100 chunks
+  mutate(predictedfamvars=future_map(predictedfamvars,function(predictedfamvars){
+    return(predictedfamvars %<>% 
+             # format each families output in serial 
+             mutate(Nsegsnps=map_dbl(predVars,~.$Nsegsnps[1]),
+                    predVars=map(predVars,function(predVars){ 
+                      return(predVars %>%
+                               select(VarComp,VPM)) })) %>% 
+             unnest(predVars))})) %>% 
+  select(-totcomputetime) %>% 
+  unnest(predictedfamvars) %>% 
+  rename(predVar=VPM) %>% 
+  rename(predOf=VarComp)
+```
+
+Remove the original predictions for selfs and replace with the correct predictions.
+```{r, eval=F}
+# verify nrow before removing "re-do's"
+predUntestedCrossVarBVs %>% dim() # [1] 947780      9
+# df of re-predicted selfs
+## should only be from the ClassicAD model
+redoBVs<-predUntestedCrossVarBVs %>% 
+  filter(grepl("_ReDoSelfs_",File))
+dim(redoBVs) # [1] 6120    9
+redoBVs %>% count(Model,predOf)
+#   Model predOf     n
+#   <chr> <chr>  <int>
+# 1 A     VarBV   3060
+
+# df of original predictions (selfs and outcrosses)
+# predUntestedCrossVarBVs %>% 
+#   filter(!grepl("_ReDoSelfs_",File)) %>% # dim() # [1] 941660      9 # verify redo's removed
+#   filter(sireID==damID) %>% # dim() # [1] 6120    9 original self's predictions remain at this point
+predUntestedCrossVarBVs %<>% 
+  # remove all selfs from the ClassicAD model
+  filter(sireID!=damID | (sireID==damID & Model=="DirDomBV")) %>% # dim() # [1] 935540      9
+  # add back the corrected predictions for selfs
+  bind_rows(.,redoBVs)
+
+redoTGVs<-predUntestedCrossVarTGVs %>% 
+  filter(grepl("_ReDoSelfs_",File))
+dim(redoTGVs) # [1] 12240   11
+predUntestedCrossVarTGVs %<>% 
+  # remove all selfs
+  filter(sireID!=damID | (sireID==damID & Model=="DirDomAD")) %>% # dim() # [1] 1871080     11
+  # add back the corrected predictions for selfs
+  bind_rows(.,redoTGVs)
+# dim(predUntestedCrossVarTGVs) # [1] 1883320       9
+```
+
+```{r, eval=F}
+predUntestedCrossVars<-bind_rows(predUntestedCrossVarBVs,
+                                 predUntestedCrossVarTGVs)
+  # left_join(predUntestedCrossVarBVs %>% 
+  #                                  rename(predVarBV=predVarA) %>% 
+  #                                  select(-totcomputetime,-File),
+  #                                predUntestedCrossVarTGVs %>% 
+  #                                  rename(predVarTGV=predVarTot) %>% 
+  #                                  select(-predVarA,-predVarD,-totcomputetime,-File)) %>% 
+  # pivot_longer(cols=c(predVarBV,predVarTGV),
+  #              names_to = "predOf",values_to = "predVar")
+# predUntestedCrossVars<-bind_rows(predUntestedCrossVarBVs,
+#                                  predUntestedCrossVarTGVs)
+#predUntestedCrossVars %<>% select(Model,Trait1,Trait2,sireID,damID,predOf,predVar,Nsegsnps,totcomputetime)
+
+saveRDS(predUntestedCrossVars,here::here("output/crossPredictions","predictedUntestedCrossVars_tidy_traits.rds"))
+
+```
+
+## Tidy predicted means
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar)
+predictedUntestedCrossMeansBV<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeansBV.rds")) %>%
+  pluck("predictedCrossMeans")
+predictedUntestedCrossMeansTGV<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeansTGV.rds")) %>%
+  pluck("predictedCrossMeans")
+predictedUntestedCrossMeansDirDom<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeansDirDom.rds")) %>%
+  pluck("predictedCrossMeans")
+predictedUntestedCrossMeans<-predictedUntestedCrossMeansBV %>% 
+  left_join(predictedUntestedCrossMeansTGV) %>% 
+  mutate(Model="ClassicAD") %>% 
+  bind_rows(predictedUntestedCrossMeansDirDom %>% 
+              mutate(Model="DirDom"))
+saveRDS(predictedUntestedCrossMeans,here::here("output/crossPredictions","predictedUntestedCrossMeans_tidy_traits.rds"))
+```
+
+## Compute predictions on SI
+
+Our focus in evaluating predictions of untested crosses will be on predictions on the two SI.
+
+-   predVarBV - Model A (ClassicAD)
+-   predVarTGV - Model AD (ClassicAD)
+-   predVarBV - DirDomA (DirDom)
+-   predVarTGV - DirDomAD (DirDom)
+
+times
+
+-   stdSI
+-   biofortSI
+
+for predicted means and variances.
+
+### Variances
+
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+
+predictedUntestedCrossVars<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossVars_tidy_traits.rds"))  
+#  select(-predVarD,-totcomputetime)
+
+## Predicted Index Variances
+predictedUntestedCrossVars_SI<-predictedUntestedCrossVars %>% 
+  # filter(Model=="A") %>% 
+  # mutate(Model="ClassicAD") %>% 
+  # rename(predVarBV=predVarA) %>% 
+  # select(-predVarTot) %>% 
+  # left_join(predictedUntestedCrossVars %>% 
+  #             filter(Model=="ClassicAD") %>% 
+  #             rename(predVarTGV=predVarTot) %>% 
+  #             select(-predVarA)) %>% 
+  # bind_rows(predictedUntestedCrossVars %>% 
+  #             filter(Model=="DirDomAD") %>% 
+  #             rename(predVarBV=predVarA,
+  #                    predVarTGV=predVarTot)) %>% 
+  # pivot_longer(cols=c(predVarBV,predVarTGV),names_to = "predOf",values_to = "predVar") %>% 
+  nest(varcovars=c(Trait1,Trait2,predVar)) 
+require(furrr); options(mc.cores=50); plan(multiprocess)
+predictedUntestedCrossVars_SI %<>% 
+  mutate(varcovars=future_map(varcovars,
+                       function(varcovars){
+                         # pairwise to square symmetric matrix
+                         gmat<-varcovars %>% 
+                           spread(Trait2,predVar) %>% 
+                           column_to_rownames(var = "Trait1") %>% 
+                           as.matrix %>% 
+                           .[indices$Trait,indices$Trait]
+                         gmat[lower.tri(gmat)]<-t(gmat)[lower.tri(gmat)]
+                         return(gmat) }))
+
+predictedUntestedCrossVars_SI %<>% 
+  mutate(stdSI=future_map_dbl(varcovars,~t(indices$stdSI)%*%.%*%indices$stdSI),
+         biofortSI=future_map_dbl(varcovars,~t(indices$biofortSI)%*%.%*%indices$biofortSI)) %>% 
+  select(-varcovars)
+predictedUntestedCrossVars_SI %<>% 
+  pivot_longer(cols = c(stdSI,biofortSI),
+               names_to = "Trait1", 
+               values_to = "predVar") %>% 
+  mutate(Trait2=Trait1)
+#   pivot_wider(names_from = "predOf", values_from = "predVar")
+# predictedUntestedCrossVars_SI %<>% 
+#   pivot_longer(cols = c(predVarBV,predVarTGV), names_to = "predOf", values_to = "predVar")
+
+predictedUntestedCrossVars_SI %<>% 
+  select(Trait1,Trait2,sireID,damID,Nsegsnps,Model,predOf,predVar)
+saveRDS(predictedUntestedCrossVars_SI,here::here("output/crossPredictions","predictedUntestedCrossVars_SelIndices.rds"))
+```
+
+### Means
+
+```{r, eval=F}
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+predictedUntestedCrossMeans<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeans_tidy_traits.rds"))
+predictedUntestedCrossMeans %<>% 
+  pivot_longer(cols = c(sireGEBV,damGEBV,predMeanBV,predMeanGV), names_to = "predOf", values_to = "predMean") 
+
+## Predicted Index Means
+predictedUntestedCrossMeans %<>% 
+  spread(Trait,predMean) %>% 
+  nest(predMeans=all_of(indices$Trait)) %>% 
+  mutate(stdSI=map_dbl(predMeans,~as.matrix(.)%*%indices$stdSI),
+         biofortSI=map_dbl(predMeans,~as.matrix(.)%*%indices$biofortSI)) %>% 
+  select(-predMeans) %>% 
+  pivot_longer(cols = c(stdSI,biofortSI), names_to = "Trait", values_to = "predMean")
+
+predictedUntestedCrossMeans %<>% 
+  pivot_wider(names_from = "predOf", values_from = "predMean") %>% 
+  select(sireID,damID,Model,Trait,sireGEBV,damGEBV,predMeanBV,predMeanGV)
+
+saveRDS(predictedUntestedCrossMeans,here::here("output/crossPredictions","predictedUntestedCrossMeans_SelIndices.rds"))
+```
+

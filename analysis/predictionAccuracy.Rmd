@@ -1,0 +1,306 @@
+---
+title: "Compute prediction accuracies"
+site: workflowr::wflow_site
+date: "2020-July-30"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+# Observed vs. Predicted
+
+Format predicted and observed values so prediction accuracy can be computed.
+
+## Means
+```{r, eval=T}
+library(tidyverse); library(magrittr); library(predCrossVar)
+predmeans<-readRDS(here::here("output/crossPredictions","predictedCrossMeans_tidy_withSelIndices.rds"))
+predmeans_dd<-readRDS(here::here("output/crossPredictions","predictedCrossMeans_DirectionalDom_tidy_withSelIndices.rds"))
+#predmeans %>% count(Model,predOf)
+#predmeans_dd %>% count(predOf)
+predmeans %<>% 
+  bind_rows(predmeans_dd %>% 
+              mutate(Model=ifelse(predOf=="MeanBV","DirDomBV","DirDomAD"))) %>% 
+  #rename(VarComp=predOf) %>% 
+  mutate(predOf=gsub("MeanGV","MeanTGV",predOf))
+rm(predmeans_dd)
+#predmeans %>% count(Model,VarComp)
+obsMeans<-readRDS(here::here("output/crossRealizations","realizedCrossMeans.rds")) %>% 
+  rename(predOf=obsOf) %>% 
+  mutate(Model=ifelse(Model=="DirDom",
+                      ifelse(predOf=="MeanBV","DirDomBV","DirDomAD"),
+                      Model))
+#obsMeans %>% count(Model,predOf)
+obsMeanBLUPs<-readRDS(here::here("output/crossRealizations","realizedCrossMeans_BLUPs.rds"))
+
+obsVSpredMeans<-bind_rows(left_join(predmeans,obsMeans) %>% mutate(ValidationData="GBLUPs"),
+                          left_join(predmeans,obsMeanBLUPs) %>% mutate(ValidationData="iidBLUPs"))
+# obsVSpredMeans %>% count(Model,ValidationData,VarComp) %>% spread(ValidationData,n)
+```
+## Variances
+```{r, eval=T}
+# Variances
+predvars<-readRDS(here::here("output/crossPredictions","predictedCrossVars_tidy_withSelIndices.rds")) %>% 
+  bind_rows(readRDS(here::here("output/crossPredictions","predictedCrossVars_DirectionalDom_tidy_withSelIndices.rds"))) %>% 
+  select(-Nsegsnps,-totcomputetime) %>% 
+  pivot_longer(cols=c(VPM,PMV),names_to = "VarMethod",values_to = "predVar") %>% 
+  group_by(Repeat,Fold,Model,sireID,damID,Trait1,Trait2,VarMethod) %>%  
+  # sum over VarComps (ModelA = VarA, ModelAD = VarA+VarD)
+  summarize(predVar=sum(predVar),.groups="drop") %>%  
+  mutate(predOf=ifelse(Model %in% c("A","DirDomBV"),"VarBV",
+                       ifelse(Model %in% c("AD","DirDomAD"),"VarTGV",NA))) 
+predvars %>% 
+  count(Model,predOf)
+```
+
+```{r, eval=T}
+obsVars<-readRDS(here::here("output/crossRealizations","realizedCrossVars.rds")) %>% 
+  rename(predOf=obsOf) %>% 
+  mutate(Model=ifelse(Model=="DirDom",
+                      ifelse(predOf=="VarBV","DirDomBV","DirDomAD"),
+                      Model))
+obsVars %>% count(Model,predOf)
+obsVarBLUPs<-readRDS(here::here("output/crossRealizations","realizedCrossVars_BLUPs.rds"))
+
+obsVSpredVars<-bind_rows(left_join(predvars,obsVars) %>% mutate(ValidationData="GBLUPs"),
+                         left_join(predvars,obsVarBLUPs) %>% mutate(ValidationData="iidBLUPs"))
+obsVSpredVars %>% count(Model,ValidationData,predOf)
+```
+
+
+### Values for Weighted Corr
+
+For ValidationData=="GBLUPs", weight by the observed "FamSize".
+```{r, eval=T}
+# add Family Sizes, for weighted correlations
+obsVSpredVars %<>% 
+  left_join(readRDS(file=here::here("output/crossRealizations","realizedCrossMetrics.rds")) %>% 
+              distinct(Repeat,Fold,sireID,damID,FamSize) %>% ungroup())
+obsVSpredVars %>% head
+```
+
+For ValidationData=="iidBLUPs", weight by the number of observed non-missing BLUPs per family per trait.
+```{r, eval=T}
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,testparents)
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  nest(FamilyMembers=FullSampleName)
+parentfolds %<>% 
+  mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .))) %>% 
+  select(-testparents)
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,BLUP) %>% 
+  spread(Trait,BLUP) %>%  
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+crossblups<-parentfolds %>% 
+  unnest(CrossesToPredict) %>% 
+  distinct(sireID,damID,FamilyMembers) %>% 
+  unnest(FamilyMembers) %>% 
+  rename(germplasmName=FullSampleName) %>% 
+  left_join(blups) %>% 
+  select(sireID,damID,germplasmName,all_of(indices$Trait)) %>% 
+  nest(famblups=c(germplasmName,all_of(indices$Trait))) %>% 
+  mutate(stdSI=map(famblups,~as.data.frame(.) %>% 
+                       column_to_rownames(var = "germplasmName") %>% 
+                       as.matrix(.)%*%indices$stdSI),
+         biofortSI=map(famblups,~as.data.frame(.) %>% 
+                       column_to_rownames(var = "germplasmName") %>% 
+                       as.matrix(.)%*%indices$biofortSI))
+nObs<-bind_rows(crossblups %>% 
+                  select(-famblups) %>% 
+                  mutate(stdSI=map_dbl(stdSI,~length(which(!is.na(.)))),
+                         biofortSI=map_dbl(biofortSI,~length(which(!is.na(.))))) %>% 
+                  pivot_longer(cols = c(stdSI,biofortSI), names_to = "Trait1", values_to = "Nobs",values_drop_na = TRUE) %>% 
+                  mutate(Trait2=Trait1),
+                crossblups %>% 
+                  select(sireID,damID,famblups) %>% 
+                  mutate(famblups=map(famblups,function(famblups){
+                    NobsMat<-psych::pairwiseCount(famblups %>% select(-germplasmName),diagonal=TRUE)
+                    NobsMat[lower.tri(NobsMat, diag = F)]<-NA
+                    NobsMat %<>% 
+                      as.data.frame %>% 
+                      rownames_to_column(var = "Trait1") %>% 
+                      pivot_longer(cols = -Trait1, names_to = "Trait2", values_to = "Nobs",values_drop_na = TRUE)
+                    return(NobsMat) })) %>% 
+                  unnest(famblups))
+rm(parentfolds,ped,indices,blups,crossblups)
+# add N obs, for weighted correlations
+obsVSpredVars %<>%
+  left_join(nObs) %>%
+  mutate(CorrWeight=ifelse(ValidationData=="GBLUPs",FamSize,Nobs))
+```
+
+## Usefulness
+```{r, eval=T}
+# Usefulness
+realizedcrossmetrics<-readRDS(file=here::here("output/crossRealizations","realizedCrossMetrics.rds"))
+## Join the predicted means and variances
+## Only for Sel Indices
+#predvars %>% count(Model,predOf)
+#predmeans %>%  count(Model,predOf)
+predUsefulness<-left_join(predvars %>% # Variances
+                            filter(Trait1 %in% c("stdSI","biofortSI"),
+                                   Trait1==Trait2) %>% 
+                            rename(Trait=Trait1) %>% 
+                            select(-Trait2) %>% 
+                            mutate(predOf=gsub("Var","",predOf)),
+                          predmeans %>% # Means
+                            filter(Trait %in% c("stdSI","biofortSI")) %>% 
+                            mutate(predOf=gsub("Mean","",predOf))) %>% 
+  mutate(predSD=sqrt(predVar)) %>% 
+  select(-predVar)
+```
+
+
+```{r, eval=T}
+## Add the realized selection intensities
+## Create a variable "Stage" for which there are several applying to "Usefulness" for TGV
+predBVs<-predUsefulness %>% 
+  filter(predOf=="BV") %>% 
+  left_join(realizedcrossmetrics %>% 
+              select(Repeat,Fold,Model,sireID,damID,FamSize,realIntensityParent) %>% 
+              rename(realIntensity=realIntensityParent) %>% 
+              mutate(Stage="Parent",
+                     Model=ifelse(Model=="ClassicAD","A","DirDomBV")))
+predTGVs<-predUsefulness %>% 
+  filter(predOf=="TGV") %>% 
+  left_join(realizedcrossmetrics %>% 
+              select(Repeat,Fold,Model,sireID,damID,FamSize,contains("realIntensity"),-realIntensityParent) %>% 
+              pivot_longer(cols = contains("realIntensity"),
+                           names_to = "Stage", 
+                           values_to = "realIntensity", 
+                           names_prefix = "realIntensity") %>% 
+              mutate(Model=ifelse(Model=="ClassicAD","AD","DirDomAD")))
+predUsefulness<-bind_rows(predBVs,
+                          predTGVs) %>% 
+  # include a "stage" (=="ConstIntensity") 
+  # where intensity for predicted UC is set to 2.67
+  bind_rows(predUsefulness %>% 
+              left_join(realizedcrossmetrics %>% 
+                          distinct(Repeat,Fold,sireID,damID,FamSize)) %>% 
+              mutate(Stage="ConstIntensity",
+                     realIntensity=2.67))
+
+## Compute predicted UCs
+predUsefulness %<>% 
+  dplyr::mutate(predUC=predMean+(realIntensity*predSD))
+predUsefulness %>% count(Model,predOf,Stage)
+predUsefulness %>% filter(!is.na(predUC)) %>% count(Model,predOf,Stage)
+
+```
+
+```{r, eval=T}
+## Format observed UCs
+obsUCgca<-realizedcrossmetrics %>% 
+  select(Repeat,Fold,Model,sireID,damID,contains("realizedUCparent")) %>% 
+  pivot_longer(cols = contains("realizedUCparent"),
+               names_to = "Trait", 
+               values_to = "obsUC", 
+               names_prefix = "realizedUCparent_",
+               values_drop_na = T) %>% 
+  mutate(predOf="BV",
+         Stage="Parent")
+#obsUCgca %>% count(VarComp,Stage,Model,Trait)
+obsUCtgv<-realizedcrossmetrics %>% 
+  select(Repeat,Fold,Model,sireID,damID,contains("realizedUCat")) %>% 
+  pivot_longer(cols = contains("realizedUCat"),
+               names_to = "Trait", 
+               values_to = "obsUC", 
+               names_prefix = "realizedUCat",
+               values_drop_na = T) %>% 
+  separate(Trait,c("Stage","Trait"),"_") %>% 
+  mutate(predOf="TGV")
+#obsUCtgv %>% count(VarComp,Stage,Model)
+obsUsefulness<-bind_rows(obsUCgca,obsUCtgv)
+obsUsefulness %<>% 
+  bind_rows(realizedcrossmetrics %>% 
+              select(Repeat,Fold,Model,sireID,damID,contains("meanTop1pctGEBV")) %>% 
+              pivot_longer(cols = contains("meanTop1pctGEBV"),
+                           names_to = "Trait", 
+                           values_to = "obsUC",
+                           names_prefix = "meanTop1pctGEBV_",
+                           values_drop_na = T) %>% 
+              mutate(predOf="BV",
+                     Stage="ConstIntensity")) %>% 
+  bind_rows(realizedcrossmetrics %>% 
+              select(Repeat,Fold,Model,sireID,damID,contains("meanTop1pctGETGV")) %>% 
+              pivot_longer(cols = contains("meanTop1pctGETGV"),
+                           names_to = "Trait", 
+                           values_to = "obsUC",
+                           names_prefix = "meanTop1pctGETGV_",
+                           values_drop_na = T) %>% 
+              mutate(predOf="TGV",
+                     Stage="ConstIntensity"))
+obsUsefulness %<>% 
+  mutate(Model=ifelse(Model=="ClassicAD",
+                      ifelse(predOf=="BV","A","AD"),
+                      ifelse(predOf=="BV","DirDomBV","DirDomAD")))
+# obsUsefulness
+# predUsefulness %>% count(Model,predOf,Stage)
+# obsUsefulness %>% count(Model,predOf,Stage)
+# obsUsefulness %>% filter(!is.na(obsUC))
+# predUsefulness %>% filter(!is.na(predUC)) %>% count(Model,predOf,Stage)
+#predUsefulness %>% filter(is.na(FamSize)) %>% count(Model,predOf,VarMethod,Stage)
+```
+
+
+```{r, eval=T}
+obsVSpredUC<-left_join(predUsefulness,obsUsefulness) %>% ungroup()
+obsVSpredUC %<>% drop_na(.) %>% ungroup()
+obsVSpredUC %>% str
+#obsVSpredUC %>% count(Model,predOf,Stage)
+```
+
+## --> Save
+```{r, eval=T}
+saveRDS(obsVSpredMeans,here::here("output","obsVSpredMeans.rds"))
+saveRDS(obsVSpredVars,here::here("output","obsVSpredVars.rds"))
+saveRDS(obsVSpredUC,here::here("output","obsVSpredUC.rds"))
+```
+
+# Compute prediction accuracies
+```{r, eval=T}
+rm(list=ls())
+library(tidyverse); library(magrittr);
+obsVSpredMeans<-readRDS(here::here("output","obsVSpredMeans.rds"))
+obsVSpredVars<-readRDS(here::here("output","obsVSpredVars.rds"))
+obsVSpredUC<-readRDS(here::here("output","obsVSpredUC.rds"))
+
+# Means
+obsVSpredMeans %<>%
+  drop_na(.) %>% 
+  nest(predVSobs=c(sireID,damID,predMean,obsMean)) %>% 
+  mutate(Accuracy=map_dbl(predVSobs,~cor(.$predMean,.$obsMean,use = 'complete.obs'))) %>% 
+  select(-predVSobs)
+
+# Variances
+obsVSpredVars %<>% 
+  drop_na(.) %>% 
+  select(-FamSize,-Nobs) %>% 
+  nest(predVSobs=c(sireID,damID,predVar,obsVar,CorrWeight)) %>% 
+  mutate(AccuracyWtCor=map_dbl(predVSobs,~psych::cor.wt(.[,3:4],w = .$CorrWeight) %$% r[1,2]),
+         AccuracyCor=map_dbl(predVSobs,~cor(.$predVar,.$obsVar,use = 'complete.obs'))) %>% 
+  select(-predVSobs)
+
+# Usefulness
+obsVSpredUC %<>% 
+  select(-predMean,-predSD,-realIntensity) %>% 
+  nest(predVSobs=c(sireID,damID,predUC,obsUC,FamSize)) %>% 
+  mutate(AccuracyWtCor=map_dbl(predVSobs,~psych::cor.wt(.[,3:4],w = .$FamSize) %$% r[1,2]),
+         AccuracyCor=map_dbl(predVSobs,~cor(.$predUC,.$obsUC,use = 'complete.obs'))) %>% 
+  select(-predVSobs)
+obsVSpredUC %>% count(Model,predOf,Stage)
+```
+
+## --> Save
+```{r, eval=T}
+saveRDS(obsVSpredMeans,here::here("output","accuraciesMeans.rds"))
+saveRDS(obsVSpredVars,here::here("output","accuraciesVars.rds"))
+saveRDS(obsVSpredUC,here::here("output","accuraciesUC.rds"))
+```
+
+

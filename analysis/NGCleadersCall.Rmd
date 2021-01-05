@@ -1,0 +1,885 @@
+---
+title: "Figures for NGC Leader's Call on July 22nd"
+site: workflowr::wflow_site
+date: "2020-July-15"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+# Selection Indices
+
+```{r}
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+indices %>% mutate_if(is.numeric,~round(.,2))
+```
+```{r}
+library(tidyverse); library(magrittr);
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,BLUP) %>% 
+  spread(Trait,BLUP)
+blups %<>% 
+  select(germplasmName,all_of(indices$Trait)) %>% 
+  mutate(stdSI=blups %>% 
+           select(all_of(indices$Trait)) %>% 
+           as.data.frame(.) %>% 
+           as.matrix(.)%*%indices$stdSI,
+         biofortSI=blups %>% 
+           select(all_of(indices$Trait)) %>% 
+           as.data.frame(.) %>% 
+           as.matrix(.)%*%indices$biofortSI)
+```
+
+```{r}
+corrplot::corrplot(cor(blups[,-1],use = 'pairwise.complete.obs'), 
+                   type = 'lower', col = viridis::viridis(n = 10), diag = T,addCoef.col = "black")
+```
+```{r}
+ggplot(blups,aes(x=stdSI,y=biofortSI)) + geom_point(size=1.25) + theme_bw()
+```
+## Families vs. BLUPs for Xiaofei
+```{r}
+#crossvars<-readRDS(here::here("output/crossRealizations","realizedCrossVars_BLUPs.rds"))
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# Testing datasets -----------
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,testparents)
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  nest(FamilyMembers=FullSampleName)
+
+# Crosses To Predict -------------
+parentfolds %<>% 
+  mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .))) %>% 
+  select(-testparents)
+
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,BLUP) %>% 
+  spread(Trait,BLUP)
+
+crossblups<-parentfolds %>% 
+  unnest(CrossesToPredict) %>% 
+  distinct(sireID,damID,FamilyMembers) %>% 
+  unnest(FamilyMembers) %>% 
+  rename(germplasmName=FullSampleName) %>% 
+  left_join(blups) %>% 
+  select(sireID,damID,germplasmName,DM,logFYLD)
+crossblups %>% 
+  left_join(crossblups %>% 
+              group_by(sireID,damID) %>%
+              summarize(meanDM=mean(DM,na.rm=T))) %>% 
+  mutate(Family=paste0(sireID,"_",damID),
+         Family=fct_reorder(Family,meanDM)) %>% 
+  ggplot(.,aes(x=Family,y=DM)) + geom_boxplot()# theme(axis.text.x = element_text(angle=90))
+```
+```{r}
+crossblups %>% 
+  left_join(crossblups %>% 
+              group_by(sireID,damID) %>%
+              summarize(meanFYLD=mean(logFYLD,na.rm=T))) %>% 
+  mutate(Family=paste0(sireID,"_",damID),
+         Family=fct_reorder(Family,meanFYLD)) %>% 
+  ggplot(.,aes(x=Family,y=logFYLD)) + geom_boxplot()#
+```
+
+# Cartoon Haplotypes
+```{r, fig.width=5, fig.height=1.5}
+library(tidyverse); library(magrittr);
+crossing(SNP=paste0("SNP",1:10),Hap=c("A","B")) %>% 
+  mutate(SNP=factor(SNP,levels=paste0("SNP",1:10)),Allele=sample(0:1,n(),replace = T)) %>% 
+  ggplot(.,aes(x=SNP,y=Hap,fill=as.character(Allele))) + geom_tile(height=0.99,color='black') + scale_fill_viridis_d() + theme_bw() +
+  theme(legend.position = "none",
+        axis.title.x = element_text(angle=90, face='bold')) + labs(x=NULL,y=NULL)
+```
+```{r, fig.width=5, fig.height=1.5}
+crossing(SNP=paste0("SNP",1:10),Hap=c("A","B")) %>% 
+  mutate(SNP=factor(SNP,levels=paste0("SNP",1:10)),Allele=sample(0:1,n(),replace = T)) %>% 
+  ggplot(.,aes(x=SNP,y=Hap,fill=as.character(Allele))) + geom_tile(height=0.99,color='black') + scale_fill_viridis_d() + theme_bw() +
+  theme(legend.position = "none",
+        axis.title.x = element_text(angle=90, face='bold')) + labs(x=NULL,y=NULL)
+```
+
+# Variance components
+
+## Fix trait labels (non dirdom) varcomps
+
+### NEED TO RERUN AFTER TALK
+```{r}
+library(tidyverse); library(magrittr);
+geneticgroups<-readRDS(file=here::here("output","pmv_varcomps_geneticgroups.rds"))
+geneticgroups %<>% 
+  unnest_wider(PMV)  %>% 
+  select(-blups,-runtime) %>%
+  unnest(pmv) %>% 
+  pivot_longer(c(VPM,PMV),values_to = "Var", names_to = "VarMethod")
+geneticgroups_all_pmv<-geneticgroups %>% 
+  filter(Group=="All",VarMethod=="PMV",Method=="M2")
+geneticgroups_all_pmv %<>% 
+  left_join(bind_cols(bind_rows(tibble(Trait1=c("DM","MCMDS","TCHART","logFYLD"),
+                                       Trait2=c("DM","MCMDS","TCHART","logFYLD")), # trait variances
+                                combn(c("DM","MCMDS","TCHART","logFYLD"),2,simplify = T) %>% # covariances
+                                  t(.) %>% #
+                                  `colnames<-`(.,c("Trait1","Trait2")) %>%
+                                  as_tibble),
+                      bind_rows(tibble(CorrectTrait1=c("DM","logFYLD","MCMDS","TCHART"),
+                                       CorrectTrait2=c("DM","logFYLD","MCMDS","TCHART")), # trait variances
+                                combn(c("DM","logFYLD","MCMDS","TCHART"),2,simplify = T) %>% # covariances
+                                  t(.) %>% #
+                                  `colnames<-`(.,c("CorrectTrait1","CorrectTrait2")) %>%
+                                  as_tibble))) %>% 
+  select(-Trait1,-Trait2) %>% 
+  rename(Trait1=CorrectTrait1,
+         Trait2=CorrectTrait2)
+geneticgroups_dirdom<-readRDS(file=here::here("output","pmv_DirectionalDom_varcomps_geneticgroups.rds"))
+geneticgroups_dirdom %<>% 
+  unnest_wider(PMV)  %>% 
+  select(-blups,-runtime) %>%
+  unnest(pmv) %>% 
+  pivot_longer(c(VPM,PMV),values_to = "Var", names_to = "VarMethod")
+geneticgroups_all_pmv_dirdom<-geneticgroups_dirdom %>% 
+  filter(Group=="All",VarMethod=="PMV",Method=="M2")
+geneticgroups_all_pmv<-bind_rows(geneticgroups_all_pmv,
+                         geneticgroups_all_pmv_dirdom)
+```
+
+## Compute index vars
+```{r}
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+## Predicted Index Variances
+geneticgroups_all_pmv_SI<-geneticgroups_all_pmv %>% 
+  nest(varcovars=c(Trait1,Trait2,Var)) %>% 
+  mutate(varcovars=map2(varcovars,Model,
+                        function(varcovars,Model){
+                          if(!grepl("DirDom",Model)){
+                            # pairwise to square symmetric matrix
+                            gmat<-varcovars %>% 
+                              spread(Trait2,Var) %>% 
+                              column_to_rownames(var = "Trait1") %>% 
+                              as.matrix %>% 
+                              .[indices$Trait,indices$Trait]
+                            gmat[lower.tri(gmat)]<-t(gmat)[lower.tri(gmat)]
+                          }
+                          if(grepl("DirDom",Model)){
+                            gmat<-varcovars %>% 
+                              arrange(Trait1,Trait2) %>% 
+                              spread(Trait2,Var) %>% 
+                              column_to_rownames(var = "Trait1") %>% 
+                              as.matrix
+                            gmat["logFYLD","MCMDS"]<-gmat["MCMDS","logFYLD"]
+                            gmat["logFYLD","TCHART"]<-gmat["TCHART","logFYLD"]
+                            gmat %<>% 
+                              .[indices$Trait,indices$Trait]
+                            gmat[lower.tri(gmat)]<-t(gmat)[lower.tri(gmat)]
+                          }
+                          return(gmat) }))
+geneticgroups_all_pmv_SI %<>% 
+  mutate(stdSI=map_dbl(varcovars,~t(indices$stdSI)%*%.%*%indices$stdSI),
+         biofortSI=map_dbl(varcovars,~t(indices$biofortSI)%*%.%*%indices$biofortSI)) %>% 
+  select(-varcovars) %>% 
+  pivot_longer(cols = c(stdSI,biofortSI),
+               names_to = "Trait1", 
+               values_to = "Var") %>% 
+  mutate(Trait2=Trait1)
+geneticgroups_all_pmv %<>% bind_rows(geneticgroups_all_pmv_SI,.)
+rm(geneticgroups_all_pmv_SI)
+```
+
+
+## PLOTS of Group=="All", PMV, M2
+
+### Variances
+```{r}
+library(patchwork)
+geneticgroups_all_pmv %>% 
+  filter(Trait1==Trait2,
+         Method=="M2", VarMethod=="PMV",
+         Model!="DirDomA") %>% 
+  mutate(Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART"))) %>%
+  ggplot(.,aes(x=Model,y=Var,fill=VarComp)) + 
+  geom_bar(stat = 'identity', position="stack", color='gray') + 
+  facet_wrap(~Trait1, scales='free', nrow=1) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle=90)) + 
+  scale_fill_viridis_d()
+```
+
+### Covariances
+
+```{r}
+geneticgroups_all_pmv %<>%
+  filter(!(Trait1=="MCMDS" & Trait2=="logFYLD" & grepl("DirDom",Model)),
+         !(Trait1=="TCHART" & Trait2=="logFYLD" & grepl("DirDom",Model))) %>%
+  bind_rows(geneticgroups_all_pmv %>%
+              filter(Trait1=="MCMDS" & Trait2=="logFYLD" & grepl("DirDom",Model)) %>%
+              mutate(Trait1a=Trait2,
+                     Trait2a=Trait1) %>%
+              select(-Trait1,-Trait2) %>%
+              rename(Trait1=Trait1a,
+                     Trait2=Trait2a)) %>%
+  bind_rows(geneticgroups_all_pmv %>%
+              filter(Trait1=="TCHART" & Trait2=="logFYLD" & grepl("DirDom",Model)) %>%
+              mutate(Trait1a=Trait2,
+                     Trait2a=Trait1) %>%
+              select(-Trait1,-Trait2) %>%
+              rename(Trait1=Trait1a,
+                     Trait2=Trait2a))
+
+geneticgroups_all_pmv %>% 
+  filter(Trait1!=Trait2,
+         Method=="M2", VarMethod=="PMV",
+         Model!="DirDomA") %>% 
+  mutate(Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART"))) %>%
+  ggplot(.,aes(x=Model,y=Var,fill=VarComp)) + 
+  geom_bar(stat = 'identity', position="stack", color='gray') + 
+  facet_wrap(~Trait1+Trait2, scales='free_y', nrow=1) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle=90)) + 
+  scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred')
+
+```
+
+# Inbreeding coefficients
+```{r}
+mt_dirdom_all<-readRDS(here::here("output/mtMarkerEffects","mt_All_DirectionalDom.rds"))
+mt_dirdom_gg<-readRDS(here::here("output/mtMarkerEffects","mt_GG_DirectionalDom.rds"))
+mt_dirdom_tms13<-readRDS(here::here("output/mtMarkerEffects","mt_TMS13_DirectionalDom.rds"))
+mt_dirdom_tms14<-readRDS(here::here("output/mtMarkerEffects","mt_TMS14_DirectionalDom.rds"))
+mt_dirdom_tms15<-readRDS(here::here("output/mtMarkerEffects","mt_TMS15_DirectionalDom.rds"))
+mt_dirdom<-tibble(Group=c("All","GG","TMS13","TMS14","TMS15"),
+                  MtBrrFit=list(mt_dirdom_all,mt_dirdom_gg,mt_dirdom_tms13,mt_dirdom_tms14,mt_dirdom_tms15))
+mt_dirdom %<>% 
+  mutate(inbreff=map(MtBrrFit,function(MtBrrFit){
+    traits<-colnames(MtBrrFit$mtbrrFit$yHat)
+    beta<-MtBrrFit$mtbrrFit$ETA$GmeanD$beta
+    SD.beta<-MtBrrFit$mtbrrFit$ETA$GmeanD$SD.beta
+    colnames(beta)<-colnames(SD.beta)<-traits
+    
+    inbeffs<-bind_rows(as_tibble(beta),as_tibble(SD.beta)) %>% 
+      t(.) %>% 
+      as.data.frame %>% 
+      rownames_to_column(var="Trait") %>% 
+      rename(InbreedingEffect=V1,
+             InbreedingEffectSD=V2)
+    return(inbeffs) })) %>% 
+  select(-MtBrrFit) %>% 
+  unnest(inbreff)
+```
+
+
+```{r}
+mt_dirdom %>% 
+  mutate(Group=factor(Group,levels=c("All","GG","TMS13","TMS14","TMS15"))) %>% 
+  ggplot(.,aes(x=Group,y=InbreedingEffect,fill=Group)) + 
+  geom_bar(stat='identity') + 
+  geom_errorbar(aes(ymin=InbreedingEffect-InbreedingEffectSD,ymax=InbreedingEffect+InbreedingEffectSD),
+                width=0.2) + 
+  facet_wrap(~Trait,nrow=1, scales='free') + 
+  geom_hline(yintercept = 0, color='darkred', size=1.25) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  theme(axis.text.x = element_text(angle=90,face='bold'))
+
+```
+
+# Prediction Accuracy
+
+## Means
+```{r}
+library(tidyverse); library(magrittr);
+obsVSpredMeans<-readRDS(here::here("output","accuraciesMeans.rds"))
+```
+
+### Boxplot
+#### GBLUPs as validation 
+
+```{r, fig.width=10}
+obsVSpredMeans %>% 
+  filter((Model=="A" & VarComp=="MeanGCA") | 
+           (Model=="AD" & VarComp=="MeanTGV") | 
+           (Model=="DirDom" & VarComp=="MeanTGV"),
+         ValidationData=="GBLUPs") %>% 
+  mutate(Pred=paste0(VarComp,"_",Model),
+         Pred=factor(Pred,levels=c("MeanGCA_A","MeanTGV_AD","MeanTGV_DirDom")),
+         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         VarComp=factor(VarComp,levels=c("MeanGCA","MeanTGV"))) %>% 
+  ggplot(.,aes(x=Trait,y=Accuracy,fill=Pred)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10))
+#    facet_grid(.~ValidationData)
+```
+### Scatterplot: A-AD + DirDomA-DirDomAD
+#### GBLUPs as validation 
+```{r, fig.width=10}
+# A vs. AD and DirDomA vs. DirDomAD
+obsVSpredMeans %>% 
+  filter(Model=="A" & VarComp=="MeanGCA" & ValidationData=="GBLUPs") %>% 
+  mutate(Model="ClassicAD") %>% 
+  select(-VarComp) %>% 
+  rename(ModelA_accuracy=Accuracy) %>% 
+  left_join(obsVSpredMeans %>% 
+              filter(Model=="AD" & VarComp=="MeanTGV" & ValidationData=="GBLUPs") %>% 
+              mutate(Model="ClassicAD") %>% 
+              select(-VarComp) %>% 
+              rename(ModelAD_accuracy=Accuracy)) %>% 
+  bind_rows(obsVSpredMeans %>% 
+              filter(Model=="DirDom" & VarComp=="MeanGCA" & ValidationData=="GBLUPs") %>% 
+              select(-VarComp) %>% 
+              rename(ModelA_accuracy=Accuracy) %>% 
+              left_join(obsVSpredMeans %>% 
+                          filter(Model=="DirDom" & VarComp=="MeanTGV" & ValidationData=="GBLUPs") %>% 
+                          select(-VarComp) %>% 
+                          rename(ModelAD_accuracy=Accuracy))) %>% 
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART"))) %>% 
+  ggplot(.,aes(x=ModelA_accuracy,y=ModelAD_accuracy,color=Model,shape=Trait)) + 
+  geom_point(size=2) + theme_bw() + scale_color_viridis_d() + 
+  geom_abline(slope = 1, color='darkred', size=1.25) + 
+  theme(axis.text.x = element_text(face='bold'),
+        axis.text.y = element_text(face='bold')) + 
+  labs(title="A vs. AD and DirDomA vs. DirDomAD")
+#    facet_grid(.~ValidationData)
+```
+### Scatterplot: A-AD + A-DirDomAD
+
+#### GBLUPs as validation 
+```{r, fig.width=10}
+# A vs. AD and A vs. DirDomAD
+obsVSpredMeans %>% 
+  filter(Model=="A" & VarComp=="MeanGCA" & ValidationData=="GBLUPs") %>% 
+  mutate(Model="ClassicAD") %>% 
+  select(-VarComp) %>% 
+  rename(ModelA_accuracy=Accuracy) %>% 
+  left_join(obsVSpredMeans %>% 
+              filter(Model=="AD" & VarComp=="MeanTGV" & ValidationData=="GBLUPs") %>% 
+              mutate(Model="ClassicAD") %>% 
+              select(-VarComp) %>% 
+              rename(ModelAD_accuracy=Accuracy)) %>% 
+  bind_rows(obsVSpredMeans %>% 
+              filter(Model=="A" & VarComp=="MeanGCA" & ValidationData=="GBLUPs") %>% 
+              mutate(Model="DirDom") %>% 
+              select(-VarComp) %>% 
+              rename(ModelA_accuracy=Accuracy) %>% 
+              left_join(obsVSpredMeans %>% 
+                          filter(Model=="DirDom" & VarComp=="MeanTGV" & ValidationData=="GBLUPs") %>% 
+                          select(-VarComp) %>% 
+                          rename(ModelAD_accuracy=Accuracy))) %>% 
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART"))) %>% 
+  ggplot(.,aes(x=ModelA_accuracy,y=ModelAD_accuracy,color=Model,shape=Trait)) + 
+  geom_point(size=2) + theme_bw() + scale_color_viridis_d() + 
+  geom_abline(slope = 1, color='darkred', size=1.25) + 
+  theme(axis.text.x = element_text(face='bold'),
+        axis.text.y = element_text(face='bold')) + 
+  labs(title="A vs. AD and A vs. DirDomAD")
+#    facet_grid(.~ValidationData)
+```
+#### iidBLUPs as validation 
+
+
+```{r, fig.width=10}
+# A vs. AD and A vs. DirDomAD
+obsVSpredMeans %>% 
+  filter(Model=="A" & VarComp=="MeanGCA" & ValidationData=="iidBLUPs") %>% 
+  mutate(Model="ClassicAD") %>% 
+  select(-VarComp) %>% 
+  rename(ModelA_accuracy=Accuracy) %>% 
+  left_join(obsVSpredMeans %>% 
+              filter(Model=="AD" & VarComp=="MeanTGV" & ValidationData=="iidBLUPs") %>% 
+              mutate(Model="ClassicAD") %>% 
+              select(-VarComp) %>% 
+              rename(ModelAD_accuracy=Accuracy)) %>% 
+  bind_rows(obsVSpredMeans %>% 
+              filter(Model=="A" & VarComp=="MeanGCA" & ValidationData=="iidBLUPs") %>% 
+              mutate(Model="DirDom") %>% 
+              select(-VarComp) %>% 
+              rename(ModelA_accuracy=Accuracy) %>% 
+              left_join(obsVSpredMeans %>% 
+                          filter(Model=="DirDom" & VarComp=="MeanTGV" & ValidationData=="iidBLUPs") %>% 
+                          select(-VarComp) %>% 
+                          rename(ModelAD_accuracy=Accuracy))) %>% 
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART"))) %>% 
+  ggplot(.,aes(x=ModelA_accuracy,y=ModelAD_accuracy,color=Model,shape=Trait)) + 
+  geom_point(size=2) + theme_bw() + scale_color_viridis_d() + 
+  geom_abline(slope = 1, color='darkred', size=1.25) + 
+  theme(axis.text.x = element_text(face='bold'),
+        axis.text.y = element_text(face='bold')) + 
+  labs(title="A vs. AD and A vs. DirDomAD [iidBLUPs as Validation]")
+#    facet_grid(.~ValidationData)
+```
+
+## Variances
+### GBLUPs validation & PMV
+```{r}
+obsVSpredVars<-readRDS(here::here("output","accuraciesVars.rds"))
+```
+
+```{r, fig.width=10}
+obsVSpredVars %>% 
+  filter(Trait1==Trait2,
+         (VarComp=="VarGCA" & Model=="A") | (VarComp=="VarTGV" & Model=="AD") | (VarComp=="VarTGV" & Model=="DirDom"),
+         VarMethod=="PMV",
+         ValidationData=="GBLUPs") %>% 
+  mutate(Pred=paste0(VarComp,"_",Model),
+         Pred=factor(Pred,levels=c("VarGCA_A","VarTGV_AD","VarTGV_DirDom")),
+         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         VarComp=factor(VarComp,levels=c("VarGCA","VarTGV"))) %>% 
+  ggplot(.,aes(x=Trait1,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10))
+  # facet_grid(.~VarMethod+ValidationData)
+```
+## Covariances
+```{r, fig.width=10}
+obsVSpredVars %>% 
+  filter(Trait1!=Trait2,
+         (VarComp=="VarGCA" & Model=="A") | (VarComp=="VarTGV" & Model=="AD") | (VarComp=="VarTGV" & Model=="DirDom"),
+         VarMethod=="PMV",
+         ValidationData=="GBLUPs") %>% 
+  mutate(Pred=paste0(VarComp,"_",Model),
+         Pred=factor(Pred,levels=c("VarGCA_A","VarTGV_AD","VarTGV_DirDom")),
+         #Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         VarComp=factor(VarComp,levels=c("VarGCA","VarTGV")),
+         TraitCoVar=paste0(Trait1,"_",Trait2)) %>% 
+  ggplot(.,aes(x=TraitCoVar,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10))
+  # facet_grid(.~VarMethod+ValidationData)
+```
+
+## Usefulness
+```{r cor obs vs pred variances}
+obsVSpredUC<-readRDS(here::here("output","accuraciesUC.rds"))
+obsVSpredUC %>% filter(VarMethod=="PMV",
+                       (Stage=="Parent" & Model=="ClassicAD") | (Stage=="AYT")) %>% 
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI")),
+         Pred=paste0(Model,"_",Stage),
+         Pred=factor(Pred,levels=c("ClassicAD_Parent","ClassicAD_AYT","DirDom_AYT"))) %>% 
+  ggplot(.,aes(x=Pred,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_grid(.~Trait)
+```
+
+# Predict untested crosses
+
+```{r}
+library(tidyverse); library(magrittr);
+predictedUntestedCrossMeans<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeans_SelIndices.rds"))
+predictedUntestedCrossVars<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossVars_SelIndices.rds"))
+predUntestedCrosses<-left_join(predictedUntestedCrossMeans,
+                               predictedUntestedCrossVars %>% rename(Trait=Trait1) %>% select(-Trait2)) %>% 
+  mutate(predSdBV=sqrt(predVarBV),
+         predSdTGV=sqrt(predVarTGV)) %>% 
+  select(-predVarBV,-predVarTGV) %>% 
+  mutate(predUCparent=predMeanBV+(2*predSdBV),
+         predUCvariety=predMeanGV+(2*predSdTGV))
+
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parents<-union(ped$sireID,ped$damID)
+CrossesToPredict<-crosses2predict(parents) # makes df of pairwise non-recprical, selfs-included crosses
+```
+
+## Scatterplots
+
+### CrossMade Yes vs. No
+
+#### GEBV
+```{r}
+predUntestedCrosses %>% 
+  left_join(predUntestedCrosses %>% 
+              semi_join(ped) %>% 
+              bind_rows(predUntestedCrosses %>% 
+                          semi_join(ped %>% 
+                                      rename(sireID=damID,damID=sireID))) %>% 
+              distinct(sireID,damID,Trait) %>% 
+              mutate(CrossMade="Yes")) -> forplot
+forplot %>% 
+  filter(is.na(CrossMade)) %>%  
+  ggplot(.,aes(x=predMeanBV,y=predSdBV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=forplot %>% filter(CrossMade=="Yes"),
+             color="darkorchid4",size=2) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+#### GETGV
+```{r}
+predUntestedCrosses %>% 
+  left_join(predUntestedCrosses %>% 
+              semi_join(ped) %>% 
+              bind_rows(predUntestedCrosses %>% 
+                          semi_join(ped %>% 
+                                      rename(sireID=damID,damID=sireID))) %>% 
+              distinct(sireID,damID,Trait) %>% 
+              mutate(CrossMade="Yes")) -> forplot
+forplot %>% 
+  filter(is.na(CrossMade)) %>% 
+  anti_join(CrossesToPredict)
+forplot %>% 
+  filter(is.na(CrossMade)) %>%  
+  ggplot(.,aes(x=predMeanGV,y=predSdTGV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=forplot %>% filter(CrossMade=="Yes"),
+             color="darkorchid4",size=2) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+
+### Top100 vs. CrossMade vs. 209 par
+
+```{r}
+# GEBVs --------------
+gebvs<-readRDS(here::here("output","gblups_geneticgroups.rds")) %>% 
+  filter(Group=="All",Model=="A") %>% 
+  unnest(GBLUPs) %>% 
+  select(-Group,-Model,-outName)
+gebvMat<-gebvs %>%
+  column_to_rownames(var = "germplasmName") %>% 
+  select(-predOf) %>% 
+  as.matrix
+## GEBVs on the "standard" selection index
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+gebvs %<>% 
+  mutate(stdSI=as.numeric(gebvMat%*%indices$stdSI))
+## The top 100 on the index
+top100stdSI<-gebvs %>% 
+  arrange(desc(stdSI)) %>% 
+  slice(1:100) %$% germplasmName
+# table(top100stdSI %in% parents) # only 3 
+# length(grep("TMS13|TMS14|TMS15",top100stdSI, invert = T)) # 2
+# length(grep("TMS13",top100stdSI)) # 52
+# length(grep("TMS14",top100stdSI)) # 31
+# length(grep("TMS15",top100stdSI)) # 15
+# Crosses To Predict -------------
+CrossesToPredictTop100<-crosses2predict(top100stdSI)
+```
+
+```{r}
+predUntestedCrosses %>% 
+  left_join(predUntestedCrosses %>% 
+                        semi_join(ped) %>% 
+                        bind_rows(predUntestedCrosses %>% 
+                                    semi_join(ped %>% 
+                                                rename(sireID=damID,damID=sireID))) %>% 
+                        distinct(sireID,damID,Trait) %>% 
+                        mutate(CrossMade="Yes")) -> x1
+
+predUntestedCrosses %>% 
+  left_join(predUntestedCrosses %>% 
+                        semi_join(CrossesToPredictTop100) %>% 
+                        mutate(CrossType="AmongTop100")) -> x2
+
+x1 %>% 
+  filter(is.na(CrossMade)) %>%  
+  ggplot(.,aes(x=predMeanGV,y=predSdTGV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% filter(CrossMade=="Yes"),
+             color="darkorchid4",size=3, alpha=0.75) + 
+  geom_point(data=x2 %>% filter(CrossType=="AmongTop100"),
+             color="darkred",size=1,alpha=0.75) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+```{r}
+x1 %>% 
+  filter(is.na(CrossMade)) %>%  
+  ggplot(.,aes(x=predMeanBV,y=predSdBV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% filter(CrossMade=="Yes"),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% filter(CrossType=="AmongTop100"),
+             color="darkred",size=1,alpha=0.65) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+
+```{r}
+x1 %>% 
+  filter(is.na(CrossMade),
+         sireID!=damID) %>%  
+  ggplot(.,aes(x=predMeanGV,y=predSdTGV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% filter(CrossMade=="Yes",sireID!=damID),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% filter(CrossType=="AmongTop100",sireID!=damID),
+             color="darkred",size=1,alpha=0.65) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+
+```{r}
+x1 %>% 
+  filter(is.na(CrossMade),
+         sireID!=damID) %>%  
+  ggplot(.,aes(x=predMeanBV,y=predSdBV)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% filter(CrossMade=="Yes",sireID!=damID),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% filter(CrossType=="AmongTop100",sireID!=damID),
+             color="darkred",size=1,alpha=0.65) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+```{r, fig.width=10}
+x1 %>% 
+  filter(is.na(CrossMade)) %>%  
+  mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+  ggplot(.,aes(x=predUCparent,y=predUCvariety,shape=isSelf)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% filter(CrossMade=="Yes") %>% mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% filter(CrossType=="AmongTop100") %>% mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)),
+             color="darkred",size=1,alpha=0.65) + 
+  facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+
+```{r, fig.width=10}
+x1 %>% 
+  filter(is.na(CrossMade)) %>% 
+  select(sireID,damID,Trait,predUCparent,CrossMade) %>% 
+  spread(Trait,predUCparent) %>% mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+  ggplot(.,aes(x=stdSI,y=biofortSI,shape=isSelf)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% 
+               select(sireID,damID,Trait,predUCparent,CrossMade) %>% 
+               mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+               spread(Trait,predUCparent) %>% 
+               filter(CrossMade=="Yes"),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% 
+               select(sireID,damID,Trait,predUCparent,CrossType) %>% 
+               mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+               spread(Trait,predUCparent) %>% 
+               filter(CrossType=="AmongTop100"),
+             color="darkred",size=1,alpha=0.65) + 
+  #facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+```{r, fig.width=10}
+x1 %>% 
+  filter(is.na(CrossMade)) %>% 
+  select(sireID,damID,Trait,predUCvariety,CrossMade) %>% 
+  mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+  spread(Trait,predUCvariety) %>% 
+  ggplot(.,aes(x=stdSI,y=biofortSI,shape=isSelf)) + 
+  geom_point(size=1, alpha=0.75, color='gray') +
+  geom_point(data=x1 %>% 
+               select(sireID,damID,Trait,predUCvariety,CrossMade) %>% 
+               mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+               spread(Trait,predUCvariety) %>% 
+               filter(CrossMade=="Yes"),
+             color="darkorchid4",size=1.5, alpha=0.75) + 
+  geom_point(data=x2 %>% 
+               select(sireID,damID,Trait,predUCvariety,CrossType) %>% 
+               mutate(isSelf=ifelse(sireID==damID,TRUE,FALSE)) %>% 
+               spread(Trait,predUCvariety) %>% 
+               filter(CrossType=="AmongTop100"),
+             color="darkred",size=1,alpha=0.65) + 
+  #facet_wrap(~Trait, scales = 'free') + 
+  theme_bw()
+```
+
+## Heatmaps
+```{r, fig.width=12, fig.height=11}
+x<-predUntestedCrosses %>% 
+  filter(Trait=="stdSI") %>% 
+  semi_join(CrossesToPredict)
+x %>% select(sireID,sireGEBV) %>% distinct %>% arrange(sireGEBV) %$% sireID -> theorder
+```
+
+
+```{r, fig.width=12, fig.height=11}
+x %>% 
+  select(sireID,damID,predMeanBV) %>% 
+  spread(damID,predMeanBV) %>% 
+  column_to_rownames(var = "sireID") %>% 
+  as.matrix %>% 
+  .[parents,parents] -> y
+y[lower.tri(y)]<-t(y)[lower.tri(y,diag = F)]
+y<-y[theorder,theorder]
+y[lower.tri(y)]<-NA
+y %>% 
+  as.data.frame %>% 
+  rownames_to_column(var="sireID") %>% 
+  pivot_longer(cols = -sireID, names_to = "damID", values_to = "predMeanBV") %>% 
+  mutate(sireID=factor(sireID,levels=theorder),
+         damID=factor(damID,levels=theorder)) %>% 
+  ggplot(.,aes(y=damID,x=sireID,fill=predMeanBV)) + 
+  geom_tile() + 
+  scale_fill_viridis_c() + 
+  theme_bw() + 
+  theme(axis.text.y = element_text(size=5),
+        axis.text.x = element_text(angle=90, size=5))
+
+```
+```{r, fig.width=12, fig.height=11}
+x %>% 
+  select(sireID,damID,predMeanGV) %>% 
+  spread(damID,predMeanGV) %>% 
+  column_to_rownames(var = "sireID") %>% 
+  as.matrix %>% 
+  .[parents,parents] -> y
+y[lower.tri(y)]<-t(y)[lower.tri(y,diag = F)]
+y<-y[theorder,theorder]
+y[lower.tri(y)]<-NA
+y %>% 
+  as.data.frame %>% 
+  rownames_to_column(var="sireID") %>% 
+  pivot_longer(cols = -sireID, names_to = "damID", values_to = "predMeanGV") %>% 
+  mutate(sireID=factor(sireID,levels=theorder),
+         damID=factor(damID,levels=theorder)) %>% 
+  ggplot(.,aes(y=damID,x=sireID,fill=predMeanGV)) + 
+  geom_tile() + 
+  scale_fill_viridis_c() + 
+  theme_bw() + 
+  theme(axis.text.y = element_text(size=5),
+        axis.text.x = element_text(angle=90, size=5))
+
+```
+```{r, fig.width=12, fig.height=11}
+x %>% 
+  select(sireID,damID,predUCparent) %>% 
+  spread(damID,predUCparent) %>% 
+  column_to_rownames(var = "sireID") %>% 
+  as.matrix %>% 
+  .[parents,parents] -> y
+y[lower.tri(y)]<-t(y)[lower.tri(y,diag = F)]
+y<-y[theorder,theorder]
+y[lower.tri(y)]<-NA
+y %>% 
+  as.data.frame %>% 
+  rownames_to_column(var="sireID") %>% 
+  pivot_longer(cols = -sireID, names_to = "damID", values_to = "predUCparent") %>% 
+  mutate(sireID=factor(sireID,levels=theorder),
+         damID=factor(damID,levels=theorder)) %>% 
+  ggplot(.,aes(y=damID,x=sireID,fill=predUCparent)) + 
+  geom_tile() + 
+  scale_fill_viridis_c() + 
+  theme_bw() + 
+  theme(axis.text.y = element_text(size=5),
+        axis.text.x = element_text(angle=90, size=5))
+
+```
+```{r, fig.width=12, fig.height=11}
+x %>% 
+  select(sireID,damID,predUCvariety) %>% 
+  spread(damID,predUCvariety) %>% 
+  column_to_rownames(var = "sireID") %>% 
+  as.matrix %>% 
+  .[parents,parents] -> y
+y[lower.tri(y)]<-t(y)[lower.tri(y,diag = F)]
+y<-y[theorder,theorder]
+y[lower.tri(y)]<-NA
+y %>% 
+  as.data.frame %>% 
+  rownames_to_column(var="sireID") %>% 
+  pivot_longer(cols = -sireID, names_to = "damID", values_to = "predUCvariety") %>% 
+  mutate(sireID=factor(sireID,levels=theorder),
+         damID=factor(damID,levels=theorder)) %>% 
+  ggplot(.,aes(y=damID,x=sireID,fill=predUCvariety)) + 
+  geom_tile() + 
+  scale_fill_viridis_c() + 
+  theme_bw() + 
+  theme(axis.text.y = element_text(size=5),
+        axis.text.x = element_text(angle=90, size=5))
+
+```
+
+
+
+# Illustrating Usefulness
+
+
+
+```{r}
+candidates
+backgroundgebv<-tibble(Candidate=1:10000,GEBV=rnorm(10000,mean = 0,sd = 10))
+tibble()
+%>% 
+  ggplot(.,aes(x=GEBV)) + 
+  geom_density(fill="gray",color='black' ,n=50) + 
+  geom_rug() +
+  geom_density()
+#%>% hist
+p9 <- ggplot(data.frame(x = c(0, 1)), aes(x = x)) +
+        stat_function(fun = dnorm, args = list(0.2, 0.1)) +
+        stat_function(fun = dnorm, args = list(0.7, 0.05))
+p9
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1),color='darkorchid4') + ylab("") +
+  scale_y_continuous(breaks = NULL)
+ggplot(NULL, aes(c(-3,3))) + 
+  geom_area(stat = "function", fun = dnorm, fill='white', color='black', xlim = c(-3, 3)) +
+  geom_area(stat = "function", fun = dnorm, fill = "darkred", color='black',xlim = c(1.75, 3))
+```
+
+```{r}
+parentgebv<-tibble(GEBV=rnorm(20,mean = 0, sd = 10))
+parent1gebv<-parentgebv %>% 
+  arrange(desc(GEBV)) %>% 
+  slice(1) %$% GEBV
+
+parent2gebv<-parentgebv %>% 
+  arrange(desc(GEBV)) %>% 
+  slice(2) %$% GEBV
+
+parent6gebv<-parentgebv %>% 
+  arrange(desc(GEBV)) %>% 
+  slice(6) %$% GEBV
+```
+
+```{r}
+ggplot(NULL, aes(c(-25,25))) + theme_bw() + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 0, sd = 10), fill='lightgray', color='black', xlim = c(-25, 25)) + 
+  geom_rug(data=parentgebv,aes(x=GEBV)) + 
+  geom_rug(data=tibble(GEBV=c(parent1gebv,parent2gebv,parent6gebv)),aes(x=GEBV),color='darkred',size=2) +
+  labs(title='Current Cohort of Candidates', x="Distribution of Breeding Values", y='Frequency')
+```
+```{r}
+parentgebv %<>% 
+  mutate(Parent=1:nrow(.)) %>% 
+  arrange(desc(GEBV))
+parentgebv
+parentgebv %<>% 
+  mutate(Parent1=factor(Parent))
+```
+
+
+
+```{r}
+ggplot(NULL, aes(c(-25,25))) + theme_bw() + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = 0, sd = 10), fill='lightgray', color='black', xlim = c(-25, 25)) + 
+  geom_rug(data=parentgebv,aes(x=GEBV)) + 
+  geom_vline(aes(xintercept=c(parent1gebv,parent2gebv,parent6gebv)),color='darkred',linetype='dashed') + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = parent1gebv, sd = 1), 
+            fill='darkred',alpha=0.75, color='black', xlim = c(-25, 25)) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = parent2gebv, sd = 4), 
+            fill='darkorchid4',alpha=0.75, color='black', xlim = c(-25, 25))
+```
+

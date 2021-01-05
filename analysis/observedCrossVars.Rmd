@@ -1,0 +1,406 @@
+---
+title: "Compute observed cross means and (co)variances"
+site: workflowr::wflow_site
+date: "2020-June-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+This step is to create validation data to which predictions of cross means and variances will be correlated. 
+
+Compute the empirical means and variances for each validation-family: 
+
+1. testset GEBV/GETGV of actual offspring
+
+* VarBV_a
+* VarBV_dirdom
+
+* VarTGV_ad
+* VarTGV_dirdom
+
+2. Phenotypic BLUPs of actual offspring 
+
+# Observed cross means and (co)vars 
+
+## 1. Testset GBLUPs of actual offspring {#observedCrossVarsGBLUPs}
+
+Compute the empirical means and variances for each validation-family, based on the GEBV/GETGV of actual offspring, and using the marker-effects from models fit to the test-set for each fold/rep of parent-wise cross-validation.
+
+```{r, eval=F}
+rm(list=ls());
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# Testing datasets -----------
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,testparents)
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  nest(FamilyMembers=FullSampleName)
+
+# Crosses To Predict -------------
+parentfolds %<>% 
+  mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .))) %>% 
+  select(-testparents)
+
+# Genomic BLUPs from testsets --------------
+gblups<-readRDS(here::here("output","gblups_parentwise_crossVal_folds.rds")) %>% 
+  filter(Dataset=="testset") %>% select(-Dataset,-outName)
+gblups_dd<-readRDS(here::here("output","gblups_DirectionalDom_parentwise_crossVal_folds.rds")) %>% 
+  filter(Dataset=="testset") %>% select(-Dataset,-sampleIDs) %>% 
+  mutate(Model="DirDom")
+gblups %<>% 
+  unnest(GBLUPs) %>% 
+  nest(GBLUPs=-c(Repeat,Fold,Model,predOf)) %>% 
+  left_join(parentfolds)
+gblups_dd %<>% 
+  select(Repeat,Fold,Model,GBLUPs) %>% 
+  unnest(GBLUPs) %>% 
+  nest(GBLUPs=-c(Repeat,Fold,Model,predOf)) %>% 
+  left_join(parentfolds)
+gblups<-bind_rows(gblups,gblups_dd); 
+rm(gblups_dd,parentfolds,ped)
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+gblups %>% count(Model,predOf)
+```
+
+### Component Traits
+```{r, eval=F}
+getCrossMeansAndCovs<-function(CrossesToPredict,GBLUPs,...){
+  CrossesToPredict %<>%
+    mutate(famgblups=map(FamilyMembers,~rename(.,germplasmName=FullSampleName) %>% 
+                           left_join(GBLUPs) %>% 
+                           as.data.frame %>% 
+                           column_to_rownames(var = "germplasmName")),
+           means=map(famgblups,~summarise_all(.,mean,na.rm=T)),
+           covMat=map(famgblups,~cov(.,use='pairwise.complete.obs'))) %>% 
+    select(-FamilyMembers)
+  return(CrossesToPredict) 
+}
+```
+```{r, eval=F}
+realized_means_and_covs<-gblups %>% 
+  mutate(observedCrossMeansAndCovs=pmap(.,getCrossMeansAndCovs)) %>% 
+  select(-CrossesToPredict,-GBLUPs)
+realized_means_and_covs %<>% unnest(observedCrossMeansAndCovs)
+saveRDS(realized_means_and_covs,file = here::here("output/crossRealizations","realized_cross_means_and_covs_traits.rds"))
+realized_means_and_covs %>% slice(1:3)
+```
+
+### Selection indices
+```{r, eval=F}
+realized_means_and_covs_si<-realized_means_and_covs %>% 
+  mutate(meanStdSI=map_dbl(means,~as.matrix(.)%*%indices$stdSI),
+         meanBiofortSI=map_dbl(means,~as.matrix(.)%*%indices$biofortSI),
+         varStdSI=map_dbl(covMat,~indices$stdSI%*%as.matrix(.)%*%indices$stdSI),
+         varBiofortSI=map_dbl(covMat,~indices$biofortSI%*%as.matrix(.)%*%indices$biofortSI)) %>% 
+  select(-famgblups,-means,-covMat)
+saveRDS(realized_means_and_covs_si,file = here::here("output/crossRealizations","realized_cross_means_and_vars_selindices.rds"))
+realized_means_and_covs_si %>% slice(1:3)
+```
+
+### Tidy
+
+Tidy / format the realized cross means and variances.  
+Combine traits and sel. indices. Split into two separate tibbles, one for means, one for variances.  
+Output will be ready to combine with predictions to measure accuracy.
+
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+realized_means_and_covs_traits<-readRDS(here::here("output/crossRealizations","realized_cross_means_and_covs_traits.rds"))
+realized_means_and_covs_si<-readRDS(here::here("output/crossRealizations","realized_cross_means_and_vars_selindices.rds"))
+```
+
+#### Realized means
+```{r, eval=F}
+# Means ---------------
+## Traits
+realized_means_traits<-realized_means_and_covs_traits %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,means) %>% 
+  unnest(means) %>% 
+  pivot_longer(cols = c(-Repeat,-Fold,-Model,-predOf,-sireID,-damID),names_to = "Trait", values_to = "obsMean") %>% 
+  mutate(obsOf=ifelse(predOf=="BV","MeanBV","MeanTGV")) %>% 
+  select(-predOf) 
+## SIs
+realized_means_si<-realized_means_and_covs_si %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,contains("mean")) %>% 
+  rename(stdSI=meanStdSI,
+         biofortSI=meanBiofortSI) %>% 
+  pivot_longer(cols = c(-Repeat,-Fold,-Model,-predOf,-sireID,-damID),names_to = "Trait", values_to = "obsMean") %>% 
+  mutate(obsOf=ifelse(predOf=="BV","MeanBV","MeanTGV")) %>% 
+  select(-predOf)
+## Combine
+realized_means<-bind_rows(realized_means_si,realized_means_traits)
+rm(realized_means_traits,realized_means_si)
+realized_means %>% count(Model,obsOf) %>% spread(obsOf,n)
+```
+#### Realized (co)variances
+```{r, eval=F}
+# (Co)variances -------------
+## Traits
+realized_vars_traits<-realized_means_and_covs_traits %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,covMat) %>% 
+  mutate(covMat=map(covMat,function(covMat){
+    covMat[lower.tri(covMat, diag = F)]<-NA
+    covMat %<>% 
+      as.data.frame %>% 
+      rownames_to_column(var = "Trait1") %>% 
+      pivot_longer(cols = -Trait1, names_to = "Trait2", values_to = "obsVar",values_drop_na = TRUE)
+    return(covMat)})) %>% 
+  unnest(covMat) %>% 
+  mutate(obsOf=ifelse(predOf=="BV","VarBV","VarTGV")) %>% 
+  select(-predOf) 
+## SIs
+realized_vars_si<-realized_means_and_covs_si %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,contains("var")) %>% 
+  rename(stdSI=varStdSI,
+         biofortSI=varBiofortSI) %>% 
+  pivot_longer(cols = c(-Repeat,-Fold,-Model,-predOf,-sireID,-damID),names_to = "Trait1", values_to = "obsVar") %>% 
+  mutate(obsOf=ifelse(predOf=="BV","VarBV","VarTGV"),
+         Trait2=Trait1) %>% 
+  select(-predOf)
+## Combine
+realized_vars<-bind_rows(realized_vars_si,realized_vars_traits)
+                          # rename(obsVar=VarSCA))
+rm(realized_vars_si,realized_vars_traits)
+realized_vars %>% count(Model,obsOf) %>% spread(obsOf,n)
+```
+
+#### --> Save
+```{r, eval=F}
+saveRDS(realized_means,here::here("output/crossRealizations","realizedCrossMeans.rds"))
+saveRDS(realized_vars,here::here("output/crossRealizations","realizedCrossVars.rds"))
+```
+
+## 2. Phenotypic BLUPs of actual offspring{#observedCrossVarsiidBLUPs}
+```{r, eval=F}
+rm(list=ls());
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# Testing datasets -----------
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,testparents)
+
+# Pedigree -----------
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  nest(FamilyMembers=FullSampleName)
+
+# Crosses To Predict -------------
+parentfolds %<>% 
+  mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .))) %>% 
+  select(-testparents)
+
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,BLUP) %>% 
+  spread(Trait,BLUP)
+
+crossblups<-parentfolds %>% 
+  unnest(CrossesToPredict) %>% 
+  distinct(sireID,damID,FamilyMembers) %>% 
+  unnest(FamilyMembers) %>% 
+  rename(germplasmName=FullSampleName) %>% 
+  left_join(blups) %>% 
+  select(sireID,damID,germplasmName,all_of(indices$Trait)) %>% 
+  nest(famblups=c(germplasmName,all_of(indices$Trait))) %>% 
+  mutate(stdSI=map(famblups,~as.data.frame(.) %>% 
+                       column_to_rownames(var = "germplasmName") %>% 
+                       as.matrix(.)%*%indices$stdSI),
+         biofortSI=map(famblups,~as.data.frame(.) %>% 
+                       column_to_rownames(var = "germplasmName") %>% 
+                       as.matrix(.)%*%indices$biofortSI))
+# Cross Means
+crossmeans<-crossblups %>% 
+  mutate(means=map(famblups,~summarize_if(.,is.numeric,mean,na.rm=T))) %>% 
+  unnest(means) %>% 
+  mutate(stdSI=map_dbl(stdSI,mean,na.rm=T),
+         biofortSI=map_dbl(biofortSI,mean,na.rm=T)) %>% 
+  select(-famblups) %>% 
+  pivot_longer(cols = c(-sireID,-damID), names_to = "Trait", values_to = "obsMean", values_drop_na = TRUE)
+# Cross (Co)Vars
+crossvars<-crossblups %>% 
+  mutate(varcovars=map(famblups,~cov(as.data.frame(.) %>% 
+                                       column_to_rownames(var = "germplasmName") %>% 
+                                       as.matrix, 
+                                     use = 'pairwise.complete.obs')),
+         varcovars=map(varcovars,function(varcovars){
+           varcovars[lower.tri(varcovars, diag = F)]<-NA
+           varcovars %<>% 
+             as.data.frame %>% 
+             rownames_to_column(var = "Trait1") %>% 
+             pivot_longer(cols = -Trait1, names_to = "Trait2", values_to = "obsVar",values_drop_na = TRUE)
+           return(varcovars)})) %>% 
+  select(-famblups,-stdSI,-biofortSI) %>% 
+  unnest(varcovars)
+crossvars<-bind_rows(crossvars,crossblups %>% 
+                       mutate(stdSI=map_dbl(stdSI,var,na.rm=T),
+                              biofortSI=map_dbl(biofortSI,var,na.rm=T)) %>% 
+                       select(-famblups) %>% 
+                       pivot_longer(cols = c(-sireID,-damID), names_to = "Trait1", values_to = "obsVar", values_drop_na = TRUE) %>% 
+                       mutate(Trait2=Trait1))
+```
+
+#### --> Save
+```{r, eval=F}
+saveRDS(crossmeans,here::here("output/crossRealizations","realizedCrossMeans_BLUPs.rds"))
+saveRDS(crossvars,here::here("output/crossRealizations","realizedCrossVars_BLUPs.rds"))
+```
+
+# Measures of Post-cross Selection {#realIntensity}
+
+## Metrics as parents
+
+For each family, compute the proportion of offspring subsequently used as parents.  
+
+Compute the realized "Usefulness" of the cross in terms of population improvement / parent-development as the mean GEBV of family members that are themselves parents. 
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar)
+indices<-readRDS(here::here("data","selection_index_weights_4traits.rds"))
+realized_means_and_covs<-readRDS(here::here("output/crossRealizations","realized_cross_means_and_covs_traits.rds"))
+
+ped<-readRDS(here::here("data","ped_awc.rds"))
+parents<-union(ped$sireID,ped$damID)
+
+realized_cross_gebvs_si<-realized_means_and_covs %>% 
+  filter(predOf=="BV") %>% 
+  mutate(stdSI=map(famgblups,~as.matrix(.)%*%indices$stdSI),
+         biofortSI=map(famgblups,~as.matrix(.)%*%indices$biofortSI),
+         GEBV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y))) %>% 
+  select(-famgblups,-means,-covMat,-stdSI,-biofortSI)
+
+realizedparentmetrics<-realized_cross_gebvs_si %>% 
+  unnest(GEBV) %>% 
+  mutate(IsParent=ifelse(germplasmName %in% parents,TRUE,FALSE)) %>% 
+  nest(Family=c(germplasmName,IsParent,stdSI,biofortSI)) 
+
+realizedparentmetrics %<>% 
+  mutate(FamSize=map_dbl(Family,nrow),
+         NmembersUsedAsParent=map_dbl(Family,~length(which(.$IsParent==TRUE))),
+         propUsedAsParent=map_dbl(Family,~length(which(.$IsParent==TRUE))/nrow(.)),
+         realizedUCparent_stdSI=map_dbl(Family,~mean(.$stdSI[.$IsParent==TRUE],na.rm = T)),
+         realizedUCparent_biofortSI=map_dbl(Family,~mean(.$biofortSI[.$IsParent==TRUE],na.rm = T)),
+         # also compute the mean of top 1% of the family
+         # correspond ~std. intensity = 2.67
+         # provides alternative validation data for usefulness criteria
+         # invariant to actual selection intensity 
+         meanTop1pctGEBV_stdSI=map_dbl(Family, ~slice_max(.data = .,
+                                                          order_by = stdSI, 
+                                                          n=ceiling(0.01*nrow(.))) %$% mean(stdSI)),
+         meanTop1pctGEBV_biofortSI=map_dbl(Family, ~slice_max(.data = .,
+                                                              order_by = biofortSI, 
+                                                              n=ceiling(0.01*nrow(.))) %$% mean(biofortSI))) %>% 
+  select(-Family) %>% 
+  ungroup()
+rm(realized_cross_gebvs_si)
+```
+
+## Metrics as varieties
+
+For each family, compute the proportion of offspring that have been advanced on the variety development pipeline (VDP) to different stages. 
+
+Compute the stage-specific "Usefulness" of the cross in terms of variety development as the mean GETGV of family members advanced to each stage.
+```{r, eval=F}
+# Read for web the raw plot-data used as of summer 2019 for IITA GS
+trials<-readRDS(url("https://raw.github.com/wolfemd/IITA_2019GS/master/data/IITA_ExptDesignsDetected_72619.rds"))
+realizedVDPmetrics<-ped %>% 
+  rename(GID=FullSampleName) %>% 
+  left_join(trials %>% 
+              filter(Trait %in% indices$Trait) %>% 
+              unnest_legacy(TrialData) %>% 
+              select(germplasmName,observationUnitDbId,TrialType) %>% 
+              distinct %>% 
+              count(germplasmName,TrialType,name = "Nplots") %>% 
+              filter(TrialType %in% c("GeneticGain","CET","ExpCET","PYT","AYT","UYT")) %>% 
+              rename(GID=germplasmName) %>% 
+              spread(TrialType,Nplots) %>% 
+              select(c("GID","GeneticGain","CET","ExpCET","PYT","AYT","UYT"))) %>% 
+  mutate(IsPhenotyped=rowSums(.[,c("GeneticGain","CET","ExpCET","PYT","AYT","UYT")],na.rm = T)>0,
+         advancedPastCET=rowSums(.[,c("GeneticGain","PYT","AYT","UYT")],na.rm = T)>0,
+         advancedPastPYT=rowSums(.[,c("GeneticGain","AYT","UYT")],na.rm = T)>0,
+         advancedPastAYT=rowSums(.[,c("GeneticGain","UYT")],na.rm = T)>0) %>% 
+  select(-c("GeneticGain","CET","ExpCET","PYT","AYT","UYT")) %>% 
+  rename(germplasmName=GID)
+realized_cross_getgvs_si<-realized_means_and_covs %>% 
+  filter(predOf=="TGV") %>% 
+  mutate(stdSI=map(famgblups,~as.matrix(.)%*%indices$stdSI),
+         biofortSI=map(famgblups,~as.matrix(.)%*%indices$biofortSI),
+         GETGV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y))) %>% 
+  select(-famgblups,-means,-covMat,-stdSI,-biofortSI)
+realizedVDPmetrics<-realized_cross_getgvs_si %>% 
+  unnest(GETGV) %>% 
+  left_join(realizedVDPmetrics) %>% 
+  nest(data=c(germplasmName,stdSI,biofortSI,IsPhenotyped,contains("advancedPast"))) %>% 
+  mutate(FamSize=map_dbl(data,nrow),
+         NmembersPhenotyped=map_dbl(data,~length(which(.$IsPhenotyped==TRUE))),
+         NmembersPastCET=map_dbl(data,~length(which(.$advancedPastCET==TRUE))),
+         NmembersPastPYT=map_dbl(data,~length(which(.$advancedPastPYT==TRUE))),
+         NmembersPastAYT=map_dbl(data,~length(which(.$advancedPastAYT==TRUE))),
+         propPhenotyped=map_dbl(data,~length(which(.$IsPhenotyped==TRUE))/nrow(.)),
+         propPastCET=map_dbl(data,~length(which(.$advancedPastCET==TRUE))/nrow(.)),
+         propPastPYT=map_dbl(data,~length(which(.$advancedPastPYT==TRUE))/nrow(.)),
+         propPastAYT=map_dbl(data,~length(which(.$advancedPastAYT==TRUE))/nrow(.)),
+         realizedUCatCET_stdSI=map_dbl(data,~mean(.$stdSI[.$IsPhenotyped==TRUE],na.rm = T)),
+         realizedUCatPYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastCET==TRUE],na.rm = T)),
+         realizedUCatAYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastPYT==TRUE],na.rm = T)),
+         realizedUCatUYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastAYT==TRUE],na.rm = T)),
+         realizedUCatCET_biofortSI=map_dbl(data,~mean(.$biofortSI[.$IsPhenotyped==TRUE],na.rm = T)),
+         realizedUCatPYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastCET==TRUE],na.rm = T)),
+         realizedUCatAYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastPYT==TRUE],na.rm = T)),
+         realizedUCatUYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastAYT==TRUE],na.rm = T)),
+         # also compute the mean of top 1% of the family
+         # correspond ~std. intensity = 2.67
+         # provides alternative validation data for usefulness criteria
+         # invariant to actual selection intensity 
+         meanTop1pctGETGV_stdSI=map_dbl(data, ~slice_max(.data = .,
+                                                          order_by = stdSI, 
+                                                          n=ceiling(0.01*nrow(.))) %$% mean(stdSI)),
+         meanTop1pctGETGV_biofortSI=map_dbl(data, ~slice_max(.data = .,
+                                                              order_by = biofortSI, 
+                                                              n=ceiling(0.01*nrow(.))) %$% mean(biofortSI))) %>% 
+  select(-data) %>% 
+  ungroup()
+rm(realized_cross_getgvs_si,trials)
+```
+Combine parent + variety metrics
+```{r, eval=F}
+realizedcrossmetrics<-left_join(realizedparentmetrics %>% 
+                                  select(-predOf) %>% 
+                                  mutate(Model=ifelse(Model=="A","ClassicAD",Model)),
+                                realizedVDPmetrics %>% 
+                                  select(-predOf) %>% 
+                                  mutate(Model=ifelse(Model=="AD","ClassicAD",Model))) %>% 
+  ungroup()
+```
+
+## Realized intensities
+
+To compare realized and predicted "usefulness criteria", we need to compute the realized, standardized selection intensity. 
+
+1. For pop improve / UC_parent: prop of family members used as parents
+2. For variety devel / UC_variety: prop of family members advanced >SDN, >CET, >PYT, >AYT
+
+Compute the standrardized selection intensity from the proportion selected. 
+This will give NaN for propSel==0. Progeny as crosses with NaN UC were never themselves used as parents. Their "usefulness" has not be "observed" / "evaluated".
+
+```{r, eval=F}
+realizedcrossmetrics %<>%
+  mutate(realIntensityParent=map_dbl(propUsedAsParent,intensity),
+         realIntensityCET=map_dbl(propPhenotyped,intensity),
+         realIntensityPYT=map_dbl(propPastCET,intensity),
+         realIntensityAYT=map_dbl(propPastPYT,intensity),
+         realIntensityUYT=map_dbl(propPastAYT,intensity))
+```
+
+## --> Save
+```{r, eval=F}
+saveRDS(realizedcrossmetrics,file=here::here("output/crossRealizations","realizedCrossMetrics.rds"))
+```
+

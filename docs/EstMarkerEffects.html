@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+<meta name="date" content="2019-11-23" />
+
+<title>Estimate Marker Effects</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">PredictOutbredCrossVar</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="EstMarkerEffects.html">EstMarkerEffects</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Estimate Marker Effects</h1>
+<h4 class="date">2019-11-23</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-12-09
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>PredictOutbredCrossVar/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.5.0.9000). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20191123code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20191123)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20191123code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20191123)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong53c46fb"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 53c46fb </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong53c46fb" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    output/.DS_Store
+
+Untracked files:
+    Untracked:  output/markerEffects_20191126/
+    Untracked:  workflowr_log.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+53c46fb
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2019-12-09
+</td>
+<td>
+Publish the first version of analysis to get marker effects using REML
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>Techincally, should be <strong>Predict</strong> Marker Effects, because SNP-BLUP will be used.</p>
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>Part of a project to predict cross variances.</p>
+<p>First step is to get estimates of marker effects.</p>
+<p>Furthermore, we want to test different methods of getting marker effects on downstream variance prediction.</p>
+<p>Specifically, at this stage I will:</p>
+<ol style="list-style-type: decimal">
+<li>Training Populations</li>
+</ol>
+<ul>
+<li>GG, C1, C2, C3 alone</li>
+<li>GG+C1, GG+C1+C2, GG+C1+C2+C3</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Get marker effects for both <strong>additive</strong> and <strong>dominance</strong> terms.</li>
+</ol>
+<ul>
+<li><strong>Bayesian:</strong> Use <code>BGLR</code>, models <em>BRR</em> and <em>BayesB</em>, possibly others. Must ensure convergence.</li>
+<li><strong>REML:</strong> Use <code>sommer</code>. Either direct (SNP-BLUP) or indirect (backsolve from GBLUP) REML marker effects.</li>
+</ul>
+</div>
+<div id="add.-and-dom.-marker-matrices" class="section level1">
+<h1>Add. and dom. marker matrices</h1>
+<div id="load-dosages-and-blups" class="section level2">
+<h2>Load dosages and BLUPs</h2>
+<p>Marker effects estimates and other analyses for this study will start with BLUPs (de-regressed BLUPs + weights) for each clone.</p>
+<p>The BLUPs were obtained in July 2019 for IITA GS C4 selection. Documentation, including (most) data and code can be found <a href="https://wolfemd.github.io/IITA_2019GS/">here</a>.</p>
+<p>You can actually load them directly into R from the web:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">rm</span>(<span class="dt">list=</span><span class="kw">ls</span>()); <span class="kw">gc</span>()</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr); </span>
+<span id="cb1-3"><a href="#cb1-3"></a>blups&lt;-<span class="kw">readRDS</span>(<span class="kw">url</span>(<span class="st">&quot;https://raw.github.com/wolfemd/IITA_2019GS/master/data/iita_blupsForCrossVal_72619.rds&quot;</span>))</span>
+<span id="cb1-4"><a href="#cb1-4"></a>ped&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/IITA_Pedigree_51218.rds&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5"></a>snps&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/dosages_RefPanelAndGSprogeny_102319.rds&quot;</span>)</span></code></pre></div>
+</div>
+<div id="filter-samples" class="section level2">
+<h2>Filter samples</h2>
+<p>Samples to keep:</p>
+<p>pre-GS germplasm with phenos pre-GS germlasm with offspring 2013_|TMS13F|TMS14F|TMS15F|TMS18F</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># germplasm with BLUPs</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>gidWithBLUPs&lt;-blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="st">  </span><span class="kw">select</span>(Trait,blups) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="st">  </span><span class="kw">unnest</span>(blups) <span class="op">%$%</span><span class="st"> </span>GID <span class="op">%&gt;%</span><span class="st"> </span>unique</span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">length</span>(gidWithBLUPs) <span class="co"># 35270</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="co"># pre-GS germplasm with BLUPs</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>preGSgermWithGenoAndPheno&lt;-gidWithBLUPs <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="st">  </span>.[. <span class="op">%in%</span><span class="st"> </span><span class="kw">rownames</span>(snps)] <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;2013_|TMS13F|TMS14F|TMS15F|TMS18F&quot;</span>,.,<span class="dt">value =</span> T, <span class="dt">invert =</span> T) </span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="kw">length</span>(preGSgermWithGenoAndPheno) <span class="co"># 1228</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="co"># pre-GS germplasm with offspring</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a>preGSgermWithGenoAndOffspring&lt;-<span class="kw">rownames</span>(snps) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;2013_|TMS13F|TMS14F|TMS15F|TMS18F&quot;</span>,.,<span class="dt">value =</span> T, <span class="dt">invert =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="st">  </span>.[. <span class="op">%in%</span><span class="st"> </span><span class="kw">union</span>(ped<span class="op">$</span>FullSampleName,<span class="kw">union</span>(ped<span class="op">$</span>Sire,ped<span class="op">$</span>Dam))]</span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="kw">length</span>(preGSgermWithGenoAndOffspring) <span class="co"># 178</span></span>
+<span id="cb2-18"><a href="#cb2-18"></a></span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="co"># Do all pre-GS parents have BLUPs?</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a><span class="kw">table</span>(preGSgermWithGenoAndOffspring <span class="op">%in%</span><span class="st"> </span>preGSgermWithGenoAndPheno)</span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="co"># FALSE  TRUE </span></span>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="co">#     3   175</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a></span>
+<span id="cb2-24"><a href="#cb2-24"></a><span class="co"># GS progeny</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a>gsProgeny&lt;-<span class="kw">rownames</span>(snps) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;2013_|TMS13F|TMS14F|TMS15F|TMS18F&quot;</span>,.,<span class="dt">value =</span> T, <span class="dt">invert =</span> F)</span>
+<span id="cb2-27"><a href="#cb2-27"></a><span class="kw">length</span>(gsProgeny) <span class="co"># 10301</span></span>
+<span id="cb2-28"><a href="#cb2-28"></a></span>
+<span id="cb2-29"><a href="#cb2-29"></a><span class="co"># How many GS progeny with BLUPs?</span></span>
+<span id="cb2-30"><a href="#cb2-30"></a><span class="kw">table</span>(gsProgeny <span class="op">%in%</span><span class="st"> </span>gidWithBLUPs) <span class="co"># 5401</span></span>
+<span id="cb2-31"><a href="#cb2-31"></a></span>
+<span id="cb2-32"><a href="#cb2-32"></a><span class="co"># Total samples to keep:</span></span>
+<span id="cb2-33"><a href="#cb2-33"></a>samples2keep&lt;-<span class="kw">c</span>(preGSgermWithGenoAndPheno,</span>
+<span id="cb2-34"><a href="#cb2-34"></a>                preGSgermWithGenoAndOffspring,</span>
+<span id="cb2-35"><a href="#cb2-35"></a>                gsProgeny) <span class="op">%&gt;%</span><span class="st"> </span>unique</span>
+<span id="cb2-36"><a href="#cb2-36"></a><span class="kw">length</span>(samples2keep) <span class="co"># 11532 (out of 21856)</span></span>
+<span id="cb2-37"><a href="#cb2-37"></a></span>
+<span id="cb2-38"><a href="#cb2-38"></a><span class="co"># Number of accessions that actually have BLUPs</span></span>
+<span id="cb2-39"><a href="#cb2-39"></a><span class="kw">table</span>(samples2keep <span class="op">%in%</span><span class="st"> </span>gidWithBLUPs)</span>
+<span id="cb2-40"><a href="#cb2-40"></a><span class="co"># FALSE  TRUE </span></span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="co">#  4903  6629</span></span></code></pre></div>
+<p>Subset dosage matrix</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>snps <span class="op">%&lt;&gt;%</span><span class="st"> </span>.[samples2keep,]</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">dim</span>(snps) <span class="co"># [1] 11532 68814</span></span></code></pre></div>
+</div>
+<div id="test-dataset" class="section level2">
+<h2>Test dataset</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">set.seed</span>(<span class="dv">121212</span>)</span>
+<span id="cb4-2"><a href="#cb4-2"></a>snps_tst&lt;-snps[samples2keep[<span class="op">!</span>samples2keep <span class="op">%in%</span><span class="st"> </span>gsProgeny],</span>
+<span id="cb4-3"><a href="#cb4-3"></a>               <span class="kw">sort</span>(<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(snps),<span class="dt">size =</span> <span class="dv">1000</span>,<span class="dt">replace =</span> F))]</span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="kw">dim</span>(snps_tst) <span class="co"># [1] 1231 100</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="kw">saveRDS</span>(snps_tst,<span class="dt">file=</span><span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/snps_tst_20191124.rds&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">rm</span>(snps_tst)</span></code></pre></div>
+</div>
+<div id="filter-sites" class="section level2">
+<h2>Filter sites</h2>
+<div id="maf-filter" class="section level3">
+<h3>MAF filter</h3>
+<p>MAF&gt;1% filter</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>maf_filter&lt;-<span class="cf">function</span>(snps,thresh){</span>
+<span id="cb5-2"><a href="#cb5-2"></a>    freq&lt;-<span class="kw">colMeans</span>(snps, <span class="dt">na.rm=</span>T)<span class="op">/</span><span class="dv">2</span>; maf&lt;-freq;</span>
+<span id="cb5-3"><a href="#cb5-3"></a>    maf[<span class="kw">which</span>(maf <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.5</span>)]&lt;-<span class="dv">1</span><span class="op">-</span>maf[<span class="kw">which</span>(maf <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.5</span>)]</span>
+<span id="cb5-4"><a href="#cb5-4"></a>    snps1&lt;-snps[,<span class="kw">which</span>(maf<span class="op">&gt;</span>thresh)];</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    <span class="kw">return</span>(snps1) }</span>
+<span id="cb5-6"><a href="#cb5-6"></a>snps <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">maf_filter</span>(.,<span class="fl">0.01</span>)</span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="kw">dim</span>(snps) <span class="co"># [1] 11532 67912</span></span></code></pre></div>
+</div>
+<div id="check-for-invariant-markers" class="section level3">
+<h3>Check for invariant markers</h3>
+<p>An abundance of caution from a past experience.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>remove_invariant&lt;-<span class="cf">function</span>(snps){</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  snps1&lt;-snps[ ,<span class="kw">apply</span>(snps, <span class="dv">2</span>, var) <span class="op">!=</span><span class="st"> </span><span class="dv">0</span>]</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="kw">return</span>(snps1) }</span>
+<span id="cb6-4"><a href="#cb6-4"></a>snps <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">remove_invariant</span>(.)</span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="kw">dim</span>(snps) <span class="co"># [1] 11532 67912</span></span></code></pre></div>
+</div>
+</div>
+<div id="centered-dosages-and-dom.-devs." class="section level2">
+<h2>Centered dosages and dom. devs.</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>centerDosage&lt;-<span class="cf">function</span>(M){ </span>
+<span id="cb7-2"><a href="#cb7-2"></a>  <span class="co"># Modified from my &quot;kinship&quot; function</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="co"># Converts a dosage matrix into a centered-dosage</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>  <span class="co"># Purpose is for whole-genome regressions like rrBLUP</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>  <span class="co"># Assumes SNPs in M coded 0, 1, 2 (requires rounding dosages to integers)</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>  <span class="co"># M is Nind x Mrow, numeric matrix, with row/columanes to indicate SNP/ind ID</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>  freq &lt;-<span class="st"> </span><span class="kw">colMeans</span>(M,<span class="dt">na.rm=</span>T)<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>  P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(freq,<span class="kw">nrow</span>(M)),<span class="dt">byrow=</span>T,<span class="dt">ncol=</span><span class="kw">ncol</span>(M))</span>
+<span id="cb7-9"><a href="#cb7-9"></a>  Z &lt;-<span class="st"> </span>M<span class="dv">-2</span><span class="op">*</span>P</span>
+<span id="cb7-10"><a href="#cb7-10"></a>  <span class="kw">return</span>(Z)</span>
+<span id="cb7-11"><a href="#cb7-11"></a>}</span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a>dose2domDev&lt;-<span class="cf">function</span>(M){ </span>
+<span id="cb7-14"><a href="#cb7-14"></a>  <span class="co"># Modified from my &quot;kinship&quot; function</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a>  <span class="co"># Converts a dosage matrix into a matrix of centered dominance deviations</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a>  <span class="co"># Purpose is for whole-genome regressions like rrBLUP</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a>  <span class="co"># Assumes SNPs in M coded 0, 1, 2 (requires rounding dosages to integers)</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a>  <span class="co"># M is Nind x Mrow, numeric matrix, with row/columanes to indicate SNP/ind ID</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a>  <span class="co"># Vitezica et al. 2013. Genetics (&quot;Classical&quot;)</span></span>
+<span id="cb7-20"><a href="#cb7-20"></a>  freq &lt;-<span class="st"> </span><span class="kw">colMeans</span>(M,<span class="dt">na.rm=</span>T)<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a>  P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(freq,<span class="kw">nrow</span>(M)),<span class="dt">byrow=</span>T,<span class="dt">ncol=</span><span class="kw">ncol</span>(M))</span>
+<span id="cb7-22"><a href="#cb7-22"></a>  W&lt;-M; </span>
+<span id="cb7-23"><a href="#cb7-23"></a>  W[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">1</span>)]&lt;-<span class="dv">2</span><span class="op">*</span>P[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">1</span>)]; </span>
+<span id="cb7-24"><a href="#cb7-24"></a>  W[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">2</span>)]&lt;-(<span class="dv">4</span><span class="op">*</span>P[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">2</span>)]<span class="op">-</span><span class="dv">2</span>);</span>
+<span id="cb7-25"><a href="#cb7-25"></a>  W &lt;-<span class="st"> </span>W<span class="dv">-2</span><span class="op">*</span>(P<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb7-26"><a href="#cb7-26"></a>  <span class="kw">return</span>(W)</span>
+<span id="cb7-27"><a href="#cb7-27"></a>}</span>
+<span id="cb7-28"><a href="#cb7-28"></a></span>
+<span id="cb7-29"><a href="#cb7-29"></a>Madd&lt;-<span class="kw">centerDosage</span>(snps)</span>
+<span id="cb7-30"><a href="#cb7-30"></a>Mdom&lt;-<span class="kw">dose2domDev</span>(snps)</span></code></pre></div>
+</div>
+<div id="additive-and-dominance-kinships" class="section level2">
+<h2>Additive and dominance kinships</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>kinship&lt;-<span class="cf">function</span>(M,type){ </span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="co"># Assumes SNPs in M coded 0, 1, 2 (requires rounding dosages to integers)</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="co"># M is Nind x Mrow, numeric matrix, with row/columanes to indicate SNP/ind ID</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="co"># Two types of dominance matrix, as described in</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>    <span class="co"># Vitezica et al. 2013. Genetics (Genotypic and Classical)</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="co"># Both predict identically.</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="co"># Difference in meaning of variance components.</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a>    <span class="co"># type == &quot;Add&quot; should match A.mat() / Van Raden, Method 2</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a>    M&lt;-<span class="kw">round</span>(M)</span>
+<span id="cb8-10"><a href="#cb8-10"></a>    freq &lt;-<span class="st"> </span><span class="kw">colMeans</span>(M,<span class="dt">na.rm=</span>T)<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a>    P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(freq,<span class="kw">nrow</span>(M)),<span class="dt">byrow=</span>T,<span class="dt">ncol=</span><span class="kw">ncol</span>(M))</span>
+<span id="cb8-12"><a href="#cb8-12"></a>    <span class="cf">if</span>(type<span class="op">==</span><span class="st">&quot;Add&quot;</span>){</span>
+<span id="cb8-13"><a href="#cb8-13"></a>        Z &lt;-<span class="st"> </span>M<span class="dv">-2</span><span class="op">*</span>P</span>
+<span id="cb8-14"><a href="#cb8-14"></a>        varD&lt;-<span class="kw">sum</span>(<span class="dv">2</span><span class="op">*</span>freq<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>freq))</span>
+<span id="cb8-15"><a href="#cb8-15"></a>        K &lt;-<span class="st"> </span><span class="kw">tcrossprod</span>(Z)<span class="op">/</span><span class="st"> </span>varD</span>
+<span id="cb8-16"><a href="#cb8-16"></a>        <span class="kw">return</span>(K)</span>
+<span id="cb8-17"><a href="#cb8-17"></a>    }</span>
+<span id="cb8-18"><a href="#cb8-18"></a>    <span class="cf">if</span>(type<span class="op">==</span><span class="st">&quot;Dom&quot;</span>){</span>
+<span id="cb8-19"><a href="#cb8-19"></a>        W&lt;-M; </span>
+<span id="cb8-20"><a href="#cb8-20"></a>        W[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">1</span>)]&lt;-<span class="dv">2</span><span class="op">*</span>P[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">1</span>)]; </span>
+<span id="cb8-21"><a href="#cb8-21"></a>        W[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">2</span>)]&lt;-(<span class="dv">4</span><span class="op">*</span>P[<span class="kw">which</span>(W<span class="op">==</span><span class="dv">2</span>)]<span class="op">-</span><span class="dv">2</span>);</span>
+<span id="cb8-22"><a href="#cb8-22"></a>        W &lt;-<span class="st"> </span>W<span class="dv">-2</span><span class="op">*</span>(P<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb8-23"><a href="#cb8-23"></a>        varD&lt;-<span class="kw">sum</span>((<span class="dv">2</span><span class="op">*</span>freq<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>freq))<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb8-24"><a href="#cb8-24"></a>        D &lt;-<span class="st"> </span><span class="kw">tcrossprod</span>(W) <span class="op">/</span><span class="st"> </span>varD</span>
+<span id="cb8-25"><a href="#cb8-25"></a>        <span class="kw">return</span>(D)</span>
+<span id="cb8-26"><a href="#cb8-26"></a>    }</span>
+<span id="cb8-27"><a href="#cb8-27"></a>}</span>
+<span id="cb8-28"><a href="#cb8-28"></a></span>
+<span id="cb8-29"><a href="#cb8-29"></a>Kadd&lt;-<span class="kw">kinship</span>(snps,<span class="st">&quot;Add&quot;</span>)</span>
+<span id="cb8-30"><a href="#cb8-30"></a>Kdom&lt;-<span class="kw">kinship</span>(snps,<span class="st">&quot;Dom&quot;</span>)</span></code></pre></div>
+</div>
+<div id="save-matrices" class="section level2">
+<h2>Save matrices</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Centered dosages</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="kw">saveRDS</span>(Madd,<span class="dt">file=</span><span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="kw">saveRDS</span>(Mdom,<span class="dt">file=</span><span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># Kinships</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="kw">saveRDS</span>(Kadd,<span class="dt">file=</span><span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Kadd_IITA_20191124.rds&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="kw">saveRDS</span>(Kdom,<span class="dt">file=</span><span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Kdom_IITA_20191124.rds&quot;</span>)</span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#rm(snps); gc()</span></span></code></pre></div>
+<p>191 Mb each</p>
+</div>
+</div>
+<div id="set-up-training-datasets" class="section level1">
+<h1>Set-up training datasets</h1>
+<p>Use the following to initialize Bayesian and REML analyses below.</p>
+<p>In fresh R sessions…</p>
+<ul>
+<li>GG, C1, C2, C3 alone</li>
+<li>GG+C1, GG+C1+C2, GG+C1+C2+C3</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#rm(list=ls()); gc()</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr); </span>
+<span id="cb10-3"><a href="#cb10-3"></a>blups&lt;-<span class="kw">readRDS</span>(<span class="kw">url</span>(<span class="st">&quot;https://raw.github.com/wolfemd/IITA_2019GS/master/data/iita_blupsForCrossVal_72619.rds&quot;</span>))</span>
+<span id="cb10-4"><a href="#cb10-4"></a>rownamesMadd&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="st">  </span><span class="kw">rownames</span>(.)</span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#Mdom&lt;-readRDS(&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;)</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a></span>
+<span id="cb10-8"><a href="#cb10-8"></a>blups <span class="op">%&lt;&gt;%</span><span class="st"> </span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="st">  </span><span class="kw">filter</span>(Dataset<span class="op">==</span><span class="st">&quot;HistoricalDataIncluded&quot;</span>,</span>
+<span id="cb10-10"><a href="#cb10-10"></a>         Trait <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;DM&quot;</span>,<span class="st">&quot;logFYLD&quot;</span>,<span class="st">&quot;logRTNO&quot;</span>,<span class="st">&quot;MCMDS&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(Trait,blups) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">rename</span>(<span class="dt">BLUPs=</span>blups) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,</span>
+<span id="cb10-14"><a href="#cb10-14"></a>                                 GID <span class="op">%in%</span><span class="st"> </span>rownamesMadd,</span>
+<span id="cb10-15"><a href="#cb10-15"></a>                                 <span class="op">!</span><span class="kw">grepl</span>(<span class="st">&quot;TMS18F&quot;</span>,GID)))) </span>
+<span id="cb10-16"><a href="#cb10-16"></a></span>
+<span id="cb10-17"><a href="#cb10-17"></a>trainingsets&lt;-blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-18"><a href="#cb10-18"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Dataset=</span><span class="st">&quot;All&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="op">!</span><span class="kw">grepl</span>(<span class="st">&quot;2013_|TMS13F|TMS14F|TMS15F&quot;</span>,GID))),</span>
+<span id="cb10-21"><a href="#cb10-21"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;preGSgermplasm&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-22"><a href="#cb10-22"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-23"><a href="#cb10-23"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="kw">grepl</span>(<span class="st">&quot;2013_|TMS13F&quot;</span>,GID))),</span>
+<span id="cb10-24"><a href="#cb10-24"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;TMS13F&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-25"><a href="#cb10-25"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-26"><a href="#cb10-26"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="kw">grepl</span>(<span class="st">&quot;TMS14F&quot;</span>,GID))),</span>
+<span id="cb10-27"><a href="#cb10-27"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;TMS14F&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-28"><a href="#cb10-28"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-29"><a href="#cb10-29"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="kw">grepl</span>(<span class="st">&quot;TMS15F&quot;</span>,GID))),</span>
+<span id="cb10-30"><a href="#cb10-30"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;TMS15F&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-31"><a href="#cb10-31"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-32"><a href="#cb10-32"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="op">!</span><span class="kw">grepl</span>(<span class="st">&quot;TMS14F|TMS15F&quot;</span>,GID))),</span>
+<span id="cb10-33"><a href="#cb10-33"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;preGSplusTMS13&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-34"><a href="#cb10-34"></a><span class="st">  </span><span class="kw">bind_rows</span>(blups <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-35"><a href="#cb10-35"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">BLUPs=</span><span class="kw">map</span>(BLUPs,<span class="op">~</span><span class="kw">filter</span>(.,<span class="op">!</span><span class="kw">grepl</span>(<span class="st">&quot;TMS15F&quot;</span>,GID))),</span>
+<span id="cb10-36"><a href="#cb10-36"></a>                     <span class="dt">Dataset=</span><span class="st">&quot;preGSplusTMS13and14&quot;</span>))</span>
+<span id="cb10-37"><a href="#cb10-37"></a><span class="kw">rm</span>(blups); <span class="kw">gc</span>()</span></code></pre></div>
+<p>4 traits x 7 subsets = 28 training datasets</p>
+</div>
+<div id="fit-a-and-ad-models" class="section level1">
+<h1>Fit A and A+D models</h1>
+<p>Get marker effects for both <strong>additive</strong> and <strong>dominance</strong> terms.</p>
+<p>Fit models <strong>additive [model=A]</strong> and <strong>additive plus dominance [model=AD]</strong>.</p>
+<div id="bayesian-bglr" class="section level2">
+<h2>Bayesian (<code>BGLR</code>)</h2>
+<p>Use <code>BGLR</code>, models <em>BRR</em> and <em>BayesB</em>, possibly others. Must ensure convergence.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">mkdir</span> /workdir/marnin/PredictOutbredCrossVar/output</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">mkdir</span> /workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191124</span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="fu">mkdir</span> /workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126</span></code></pre></div>
+<p>4 traits x 7 training sets x 2 models x 2 bayes types = 112 analyses.</p>
+<p>The code below implements the 112 analyses using BGLR.</p>
+<p>nIter=100K burnIn=20K thin=10</p>
+<p>Use of <code>saveEffects=TRUE</code> in BGLR writes the marker effects predictions for <em>every</em> post-burnIn, thinned iteration of the Gibbs sampler. So the output is enormous at 4.1Gb per variance component.</p>
+<p>This is necessary to compute the “posterior mean variance” or PMV as in <strong>Lehermeier et al. 2017a,b</strong>.</p>
+<p>Include code to benchmark runtimes and memory usage.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">library</span>(furrr); <span class="kw">plan</span>(multiprocess);</span>
+<span id="cb12-2"><a href="#cb12-2"></a>niter&lt;-<span class="dv">100000</span>; nburn&lt;-<span class="dv">20000</span>; nthin&lt;-<span class="dv">10</span>;</span>
+<span id="cb12-3"><a href="#cb12-3"></a>fitBGLR&lt;-<span class="cf">function</span>(Trait,BLUPs,Model,Type,Dataset,...){</span>
+<span id="cb12-4"><a href="#cb12-4"></a>    <span class="kw">require</span>(BGLR)</span>
+<span id="cb12-5"><a href="#cb12-5"></a>    <span class="co"># debuggin params</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a>    <span class="co"># BLUPs&lt;-bglrEffects$BLUPs[[1]]</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>    <span class="co"># Trait&lt;-bglrEffects$Trait[[1]]</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>    <span class="co"># Model&lt;-bglrEffects$Model[[1]]</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>    <span class="co"># Type&lt;-bglrEffects$Type[[1]]</span></span>
+<span id="cb12-11"><a href="#cb12-11"></a>    <span class="co"># Dataset&lt;-bglrEffects$Dataset[[1]]</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a>    <span class="co"># rm(BLUPs,Trait,Model,Type,Dataset)</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a>    <span class="co"># rm(gcstart,timestart,Madd_tp,Mdom_tp,Z,eta,timemodelprepped,modelFit,timemodelfitted,gcend)</span></span>
+<span id="cb12-14"><a href="#cb12-14"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb12-15"><a href="#cb12-15"></a>    gcstart&lt;-<span class="kw">gc</span>(<span class="dt">reset =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb12-16"><a href="#cb12-16"></a>    timestart&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb12-17"><a href="#cb12-17"></a>    Madd_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb12-18"><a href="#cb12-18"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,]</span>
+<span id="cb12-19"><a href="#cb12-19"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb12-20"><a href="#cb12-20"></a>      Mdom_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb12-21"><a href="#cb12-21"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,] }</span>
+<span id="cb12-22"><a href="#cb12-22"></a></span>
+<span id="cb12-23"><a href="#cb12-23"></a>    BLUPs <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">GID=</span><span class="kw">factor</span>(GID,<span class="dt">levels=</span><span class="kw">rownames</span>(Madd_tp)))</span>
+<span id="cb12-24"><a href="#cb12-24"></a>    Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span>GID<span class="dv">-1</span>,<span class="dt">data=</span>BLUPs) </span>
+<span id="cb12-25"><a href="#cb12-25"></a>    eta&lt;-<span class="kw">list</span>()</span>
+<span id="cb12-26"><a href="#cb12-26"></a>    eta[[<span class="st">&quot;Ga&quot;</span>]]&lt;-<span class="kw">list</span>(<span class="dt">X =</span> Z<span class="op">%*%</span>Madd_tp, <span class="dt">model =</span> Type, <span class="dt">saveEffects=</span><span class="ot">TRUE</span>)</span>
+<span id="cb12-27"><a href="#cb12-27"></a>    <span class="kw">rm</span>(Madd_tp)</span>
+<span id="cb12-28"><a href="#cb12-28"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){</span>
+<span id="cb12-29"><a href="#cb12-29"></a>      eta[[<span class="st">&quot;Gd&quot;</span>]]&lt;-<span class="kw">list</span>(<span class="dt">X =</span> Z<span class="op">%*%</span>Mdom_tp, <span class="dt">model =</span> Type, <span class="dt">saveEffects=</span><span class="ot">TRUE</span>)</span>
+<span id="cb12-30"><a href="#cb12-30"></a>      <span class="kw">rm</span>(Mdom_tp) }</span>
+<span id="cb12-31"><a href="#cb12-31"></a>    timemodelprepped&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb12-32"><a href="#cb12-32"></a>    modelFit &lt;-<span class="st"> </span><span class="kw">BGLR</span>(<span class="dt">y=</span>BLUPs<span class="op">$</span>drgBLUP,</span>
+<span id="cb12-33"><a href="#cb12-33"></a>                     <span class="dt">weights=</span>BLUPs<span class="op">$</span>WT,</span>
+<span id="cb12-34"><a href="#cb12-34"></a>                     <span class="dt">ETA=</span>eta,</span>
+<span id="cb12-35"><a href="#cb12-35"></a>                     <span class="dt">nIter=</span>niter,<span class="dt">burnIn=</span>nburn,<span class="dt">thin=</span>nthin,</span>
+<span id="cb12-36"><a href="#cb12-36"></a>                     <span class="dt">saveAt=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb12-37"><a href="#cb12-37"></a>                                   Trait,<span class="st">&quot;_&quot;</span>,Dataset,<span class="st">&quot;_&quot;</span>,Model,<span class="st">&quot;_&quot;</span>,Type))</span>
+<span id="cb12-38"><a href="#cb12-38"></a>    timemodelfitted&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb12-39"><a href="#cb12-39"></a>    <span class="kw">rm</span>(eta,Z,BLUPs);</span>
+<span id="cb12-40"><a href="#cb12-40"></a>    gcend&lt;-<span class="kw">gc</span>()</span>
+<span id="cb12-41"><a href="#cb12-41"></a>    computeStats&lt;-<span class="kw">tibble</span>(<span class="dt">ModelPrepTimeMins=</span>(timemodelprepped<span class="op">-</span>timestart)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb12-42"><a href="#cb12-42"></a>           <span class="dt">ModelFitTimeMins=</span>(timemodelfitted<span class="op">-</span>timemodelprepped)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb12-43"><a href="#cb12-43"></a>           <span class="dt">StartMemGB=</span><span class="kw">sum</span>(gcstart[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb12-44"><a href="#cb12-44"></a>           <span class="dt">EndMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb12-45"><a href="#cb12-45"></a>           <span class="dt">MaxMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">6</span>])<span class="op">/</span><span class="dv">1000</span>)</span>
+<span id="cb12-46"><a href="#cb12-46"></a>    results&lt;-<span class="kw">list</span>(<span class="dt">computeStats=</span>computeStats,</span>
+<span id="cb12-47"><a href="#cb12-47"></a>                  <span class="dt">modelFit=</span>modelFit)</span>
+<span id="cb12-48"><a href="#cb12-48"></a>    <span class="kw">print</span>(results<span class="op">$</span>computeStats)</span>
+<span id="cb12-49"><a href="#cb12-49"></a>    <span class="kw">rm</span>(modelFit); <span class="kw">gc</span>()</span>
+<span id="cb12-50"><a href="#cb12-50"></a>    <span class="kw">return</span>(results) }</span></code></pre></div>
+<p>Out of caution, run the first 28 of 112 and distribute on 7 cores of a 512GB RAM machine.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>ncores&lt;-<span class="dv">7</span>; <span class="kw">options</span>(<span class="dt">mc.cores=</span>ncores);</span>
+<span id="cb13-2"><a href="#cb13-2"></a>bglrEffects_<span class="dv">1</span>&lt;-trainingsets <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Model=</span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Type=</span><span class="kw">c</span>(<span class="st">&quot;BRR&quot;</span>,<span class="st">&quot;BayesB&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="st">  </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">28</span>) <span class="op">%&gt;%</span><span class="st">  </span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">BGLRfit=</span><span class="kw">future_pmap</span>(.,fitBGLR))</span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="kw">saveRDS</span>(bglrEffects_<span class="dv">1</span>,</span>
+<span id="cb13-8"><a href="#cb13-8"></a>        <span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb13-9"><a href="#cb13-9"></a>                    <span class="st">&quot;markerEffects_BGLR_AandADmodels_1_20191126.rds&quot;</span>))</span>
+<span id="cb13-10"><a href="#cb13-10"></a>bglr_sessionInfo&lt;-<span class="kw">sessionInfo</span>()</span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="kw">saveRDS</span>(bglr_sessionInfo,</span>
+<span id="cb13-12"><a href="#cb13-12"></a>        <span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb13-13"><a href="#cb13-13"></a>                    <span class="st">&quot;sessionInfo_BGLR_AandADmodels_20191126.rds&quot;</span>))</span></code></pre></div>
+<p>Next 28 on a second set of 7 cores.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>ncores&lt;-<span class="dv">7</span>; <span class="kw">options</span>(<span class="dt">mc.cores=</span>ncores);</span>
+<span id="cb14-2"><a href="#cb14-2"></a>bglrEffects_<span class="dv">2</span>&lt;-trainingsets <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Model=</span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Type=</span><span class="kw">c</span>(<span class="st">&quot;BRR&quot;</span>,<span class="st">&quot;BayesB&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="st">  </span><span class="kw">slice</span>(<span class="dv">29</span><span class="op">:</span><span class="dv">56</span>) <span class="op">%&gt;%</span><span class="st">  </span></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">BGLRfit=</span><span class="kw">future_pmap</span>(.,fitBGLR))</span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="kw">saveRDS</span>(bglrEffects_<span class="dv">2</span>,</span>
+<span id="cb14-8"><a href="#cb14-8"></a>        <span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb14-9"><a href="#cb14-9"></a>                    <span class="st">&quot;markerEffects_BGLR_AandADmodels_2_20191126.rds&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>ncores&lt;-<span class="dv">14</span>; <span class="kw">options</span>(<span class="dt">mc.cores=</span>ncores);</span>
+<span id="cb15-2"><a href="#cb15-2"></a>bglrEffects_<span class="dv">3</span>&lt;-trainingsets <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Model=</span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Type=</span><span class="kw">c</span>(<span class="st">&quot;BRR&quot;</span>,<span class="st">&quot;BayesB&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="st">  </span><span class="kw">slice</span>(<span class="dv">57</span><span class="op">:</span><span class="dv">112</span>) <span class="op">%&gt;%</span><span class="st">  </span></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">BGLRfit=</span><span class="kw">future_pmap</span>(.,fitBGLR))</span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="kw">saveRDS</span>(bglrEffects_<span class="dv">3</span>,</span>
+<span id="cb15-8"><a href="#cb15-8"></a>        <span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9"></a>                    <span class="st">&quot;markerEffects_BGLR_AandADmodels_3_20191126.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="reml-sommer" class="section level2">
+<h2>REML (<code>sommer</code>)</h2>
+<p>Initial testing of directly doing RR-BLUP in <code>sommer</code> is memory intensive.</p>
+<p>Instead, I adopt an indirect appreach of backsolved SNP-effects from GBLUP.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">library</span>(furrr); <span class="kw">plan</span>(multiprocess);</span>
+<span id="cb16-2"><a href="#cb16-2"></a>remlEffects&lt;-trainingsets <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="st">  </span><span class="kw">crossing</span>(.,<span class="dt">Model=</span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Type=</span><span class="st">&quot;backsolveGBLUP&quot;</span>)</span>
+<span id="cb16-5"><a href="#cb16-5"></a></span>
+<span id="cb16-6"><a href="#cb16-6"></a>fit_sommer&lt;-<span class="cf">function</span>(Trait,BLUPs,Model,Type,Dataset,...){</span>
+<span id="cb16-7"><a href="#cb16-7"></a>    <span class="kw">require</span>(sommer)</span>
+<span id="cb16-8"><a href="#cb16-8"></a>    <span class="co"># debuggin params</span></span>
+<span id="cb16-9"><a href="#cb16-9"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a>    <span class="co"># BLUPs&lt;-remlEffects$BLUPs[[10]]</span></span>
+<span id="cb16-11"><a href="#cb16-11"></a>    <span class="co"># Trait&lt;-remlEffects$Trait[[10]]</span></span>
+<span id="cb16-12"><a href="#cb16-12"></a>    <span class="co"># Model&lt;-remlEffects$Model[[10]]</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a>    <span class="co"># Type&lt;-remlEffects$Type[[10]]</span></span>
+<span id="cb16-14"><a href="#cb16-14"></a>    <span class="co"># Dataset&lt;-remlEffects$Dataset[[10]]</span></span>
+<span id="cb16-15"><a href="#cb16-15"></a>    <span class="co"># rm(BLUPs,Trait,Model,Type,Dataset)</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a>    <span class="co"># rm(gcstart,timestart,Madd_tp,Mdom_tp,Z,eta,timemodelprepped,modelFit,timemodelfitted,gcend)</span></span>
+<span id="cb16-17"><a href="#cb16-17"></a>    <span class="co"># # ---------------------------</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a>    gcstart&lt;-<span class="kw">gc</span>(<span class="dt">reset =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb16-19"><a href="#cb16-19"></a>    timestart&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb16-20"><a href="#cb16-20"></a>    </span>
+<span id="cb16-21"><a href="#cb16-21"></a>    Kadd_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Kadd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-22"><a href="#cb16-22"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,BLUPs<span class="op">$</span>GID]</span>
+<span id="cb16-23"><a href="#cb16-23"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb16-24"><a href="#cb16-24"></a>      Kdom_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Kdom_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-25"><a href="#cb16-25"></a><span class="st">        </span>.[BLUPs<span class="op">$</span>GID,BLUPs<span class="op">$</span>GID] }</span>
+<span id="cb16-26"><a href="#cb16-26"></a>    </span>
+<span id="cb16-27"><a href="#cb16-27"></a>    BLUPs <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">Ga=</span><span class="kw">factor</span>(GID,<span class="dt">levels=</span><span class="kw">rownames</span>(Kadd_tp)))</span>
+<span id="cb16-28"><a href="#cb16-28"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb16-29"><a href="#cb16-29"></a>      BLUPs <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">Gd=</span><span class="kw">factor</span>(GID,<span class="dt">levels=</span><span class="kw">rownames</span>(Kdom_tp))) }</span>
+<span id="cb16-30"><a href="#cb16-30"></a>    eta&lt;-<span class="kw">ifelse</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>,</span>
+<span id="cb16-31"><a href="#cb16-31"></a>                <span class="st">&quot;~vs(Ga,Gu=Kadd_tp) + vs(Gd,Gu=Kdom_tp)&quot;</span>,</span>
+<span id="cb16-32"><a href="#cb16-32"></a>                <span class="st">&quot;~vs(Ga,Gu=Kadd_tp)&quot;</span>)</span>
+<span id="cb16-33"><a href="#cb16-33"></a>    timereadyforgblup&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb16-34"><a href="#cb16-34"></a>    <span class="co"># GBLUP</span></span>
+<span id="cb16-35"><a href="#cb16-35"></a>    modelFit &lt;-<span class="st"> </span><span class="kw">mmer</span>(<span class="dt">fixed =</span> drgBLUP <span class="op">~</span><span class="dv">1</span>,</span>
+<span id="cb16-36"><a href="#cb16-36"></a>                     <span class="dt">random =</span> <span class="kw">as.formula</span>(eta),</span>
+<span id="cb16-37"><a href="#cb16-37"></a>                     <span class="dt">weights =</span> WT,</span>
+<span id="cb16-38"><a href="#cb16-38"></a>                     <span class="dt">data=</span>BLUPs)</span>
+<span id="cb16-39"><a href="#cb16-39"></a>    <span class="co">## Extract varcomp and model summary stats</span></span>
+<span id="cb16-40"><a href="#cb16-40"></a>    varcomps&lt;-<span class="kw">summary</span>(modelFit)<span class="op">$</span>varcomp</span>
+<span id="cb16-41"><a href="#cb16-41"></a>    fitstats&lt;-<span class="kw">summary</span>(modelFit)<span class="op">$</span>logo</span>
+<span id="cb16-42"><a href="#cb16-42"></a>    <span class="co">## Extract G-BLUPs (GEBV)</span></span>
+<span id="cb16-43"><a href="#cb16-43"></a>    gblup_add&lt;-modelFit<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:Ga</span><span class="st">`</span><span class="op">$</span>drgBLUP</span>
+<span id="cb16-44"><a href="#cb16-44"></a>    gpreds&lt;-<span class="kw">tibble</span>(<span class="dt">GID=</span><span class="kw">names</span>(gblup_add),</span>
+<span id="cb16-45"><a href="#cb16-45"></a>                   <span class="dt">GEBV=</span><span class="kw">as.numeric</span>(gblup_add))</span>
+<span id="cb16-46"><a href="#cb16-46"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb16-47"><a href="#cb16-47"></a>      gblup_dom&lt;-modelFit<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:Gd</span><span class="st">`</span><span class="op">$</span>drgBLUP </span>
+<span id="cb16-48"><a href="#cb16-48"></a>      gpreds <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">GDDEV=</span><span class="kw">as.numeric</span>(gblup_dom)) }</span>
+<span id="cb16-49"><a href="#cb16-49"></a>    <span class="kw">rm</span>(modelFit); <span class="kw">gc</span>()</span>
+<span id="cb16-50"><a href="#cb16-50"></a>    </span>
+<span id="cb16-51"><a href="#cb16-51"></a>    timegblupfitted&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb16-52"><a href="#cb16-52"></a>    <span class="co"># Load centered dosage matrices </span></span>
+<span id="cb16-53"><a href="#cb16-53"></a>    Madd_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-54"><a href="#cb16-54"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,]</span>
+<span id="cb16-55"><a href="#cb16-55"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb16-56"><a href="#cb16-56"></a>      Mdom_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb16-57"><a href="#cb16-57"></a><span class="st">        </span>.[BLUPs<span class="op">$</span>GID,] }</span>
+<span id="cb16-58"><a href="#cb16-58"></a>    <span class="kw">gc</span>()</span>
+<span id="cb16-59"><a href="#cb16-59"></a>    </span>
+<span id="cb16-60"><a href="#cb16-60"></a>    <span class="co"># Backsolve RR-BLUP effects from GBLUP</span></span>
+<span id="cb16-61"><a href="#cb16-61"></a>    Va&lt;-varcomps[<span class="st">&quot;u:Ga.drgBLUP-drgBLUP&quot;</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb16-62"><a href="#cb16-62"></a>    snpblup_add&lt;-<span class="kw">t</span>(Madd_tp)<span class="op">%*%</span><span class="kw">solve</span>(Kadd_tp<span class="op">*</span>Va)<span class="op">%*%</span>gblup_add</span>
+<span id="cb16-63"><a href="#cb16-63"></a>    snppreds&lt;-<span class="kw">tibble</span>(<span class="dt">SNP=</span><span class="kw">rownames</span>(snpblup_add),</span>
+<span id="cb16-64"><a href="#cb16-64"></a>                     <span class="dt">AddEffects=</span>snpblup_add[,<span class="dv">1</span>])</span>
+<span id="cb16-65"><a href="#cb16-65"></a>    <span class="kw">rm</span>(Kadd_tp,Madd_tp)</span>
+<span id="cb16-66"><a href="#cb16-66"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb16-67"><a href="#cb16-67"></a>      Vd&lt;-varcomps[<span class="st">&quot;u:Gd.drgBLUP-drgBLUP&quot;</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb16-68"><a href="#cb16-68"></a>      snpblup_dom&lt;-<span class="kw">t</span>(Mdom_tp)<span class="op">%*%</span><span class="kw">solve</span>(Kdom_tp<span class="op">*</span>Vd)<span class="op">%*%</span>gblup_dom</span>
+<span id="cb16-69"><a href="#cb16-69"></a>      snppreds <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">DomEffects=</span><span class="kw">as.numeric</span>(snpblup_dom)) </span>
+<span id="cb16-70"><a href="#cb16-70"></a>      <span class="kw">rm</span>(Kdom_tp,Mdom_tp) </span>
+<span id="cb16-71"><a href="#cb16-71"></a>      }</span>
+<span id="cb16-72"><a href="#cb16-72"></a>    timebacksolved&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb16-73"><a href="#cb16-73"></a>    gcend&lt;-<span class="kw">gc</span>()</span>
+<span id="cb16-74"><a href="#cb16-74"></a>    computeStats&lt;-<span class="kw">tibble</span>(<span class="dt">PrepTimeMins=</span>(timereadyforgblup<span class="op">-</span>timestart)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb16-75"><a href="#cb16-75"></a>                         <span class="dt">GBLUPtimeMins=</span>(timegblupfitted<span class="op">-</span>timereadyforgblup)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb16-76"><a href="#cb16-76"></a>                         <span class="dt">BacksolveTimeMins=</span>(timebacksolved<span class="op">-</span>timegblupfitted)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb16-77"><a href="#cb16-77"></a>                         <span class="dt">StartMemGB=</span><span class="kw">sum</span>(gcstart[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb16-78"><a href="#cb16-78"></a>                         <span class="dt">EndMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb16-79"><a href="#cb16-79"></a>                         <span class="dt">MaxMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">6</span>])<span class="op">/</span><span class="dv">1000</span>)</span>
+<span id="cb16-80"><a href="#cb16-80"></a>    results&lt;-<span class="kw">list</span>(<span class="dt">computeStats=</span>computeStats,</span>
+<span id="cb16-81"><a href="#cb16-81"></a>                  <span class="dt">GBLUPvarcomps=</span>varcomps,</span>
+<span id="cb16-82"><a href="#cb16-82"></a>                  <span class="dt">GBLUPfitstats=</span>fitstats,</span>
+<span id="cb16-83"><a href="#cb16-83"></a>                  <span class="dt">GBLUPs=</span>gpreds,</span>
+<span id="cb16-84"><a href="#cb16-84"></a>                  <span class="dt">SNPBLUPs=</span>snppreds)</span>
+<span id="cb16-85"><a href="#cb16-85"></a>    <span class="kw">print</span>(results<span class="op">$</span>computeStats)</span>
+<span id="cb16-86"><a href="#cb16-86"></a>    <span class="kw">return</span>(results) }</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>ncores&lt;-<span class="dv">7</span>; <span class="kw">options</span>(<span class="dt">mc.cores=</span>ncores);</span>
+<span id="cb17-2"><a href="#cb17-2"></a>remlEffects <span class="op">%&lt;&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">BGLRfit=</span><span class="kw">future_pmap</span>(.,fit_sommer))</span>
+<span id="cb17-4"><a href="#cb17-4"></a>remlEffects <span class="op">%&lt;&gt;%</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">REMLfit=</span>BGLRfit) <span class="co"># whoops...</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="kw">saveRDS</span>(remlEffects,</span>
+<span id="cb17-7"><a href="#cb17-7"></a>        <span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span>,</span>
+<span id="cb17-8"><a href="#cb17-8"></a>                    <span class="st">&quot;markerEffects_sommer_AandADmodels_20191126.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div id="sanity-check" class="section level2">
+<h2>Sanity check</h2>
+<p>Converting variance estimates between GBLUP and SNP-BLUP Lehermeier M1 (standard) vs. M2 (including LD)</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr);</span>
+<span id="cb18-2"><a href="#cb18-2"></a>pathIn&lt;-<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a>remlEffects&lt;-<span class="kw">readRDS</span>(<span class="dt">file=</span><span class="kw">paste0</span>(pathIn,</span>
+<span id="cb18-4"><a href="#cb18-4"></a>                                 <span class="st">&quot;markerEffects_sommer_AandADmodels_20191126.rds&quot;</span>))</span>
+<span id="cb18-5"><a href="#cb18-5"></a>BLUPs&lt;-remlEffects<span class="op">$</span>BLUPs[[<span class="dv">9</span>]]</span>
+<span id="cb18-6"><a href="#cb18-6"></a>M&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="st">  </span>.[BLUPs<span class="op">$</span>GID,]</span>
+<span id="cb18-8"><a href="#cb18-8"></a></span>
+<span id="cb18-9"><a href="#cb18-9"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="kw">dim</span>(M)</span>
+<span id="cb18-11"><a href="#cb18-11"></a>M <span class="op">%&lt;&gt;%</span><span class="st"> </span>.[,<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(.),<span class="dv">100</span>,<span class="dt">replace =</span> F)]</span>
+<span id="cb18-12"><a href="#cb18-12"></a>BLUPs <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">GID=</span><span class="kw">factor</span>(GID,<span class="dt">levels=</span><span class="kw">rownames</span>(M)))</span>
+<span id="cb18-13"><a href="#cb18-13"></a>Z &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span>GID<span class="dv">-1</span>,<span class="dt">data=</span>BLUPs) </span>
+<span id="cb18-14"><a href="#cb18-14"></a>brrfit&lt;-<span class="kw">BGLR</span>(<span class="dt">y=</span>BLUPs<span class="op">$</span>drgBLUP,</span>
+<span id="cb18-15"><a href="#cb18-15"></a>             <span class="dt">weights=</span>BLUPs<span class="op">$</span>WT,</span>
+<span id="cb18-16"><a href="#cb18-16"></a>             <span class="dt">ETA=</span><span class="kw">list</span>(<span class="dt">Ga=</span><span class="kw">list</span>(<span class="dt">X =</span> Z<span class="op">%*%</span>M, <span class="dt">model =</span> <span class="st">&quot;BRR&quot;</span>)),</span>
+<span id="cb18-17"><a href="#cb18-17"></a>             <span class="dt">nIter=</span><span class="dv">1000</span>,<span class="dt">burnIn=</span><span class="dv">100</span>,<span class="dt">thin=</span><span class="dv">5</span>)</span>
+<span id="cb18-18"><a href="#cb18-18"></a><span class="kw">summary</span>(brrfit)</span>
+<span id="cb18-19"><a href="#cb18-19"></a> <span class="co"># Variance of phenotypes (TRN)= 20.83 </span></span>
+<span id="cb18-20"><a href="#cb18-20"></a> <span class="co"># Residual variance= 33.0908 </span></span>
+<span id="cb18-21"><a href="#cb18-21"></a>brrfit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB <span class="co"># [1] 0.2203882</span></span>
+<span id="cb18-22"><a href="#cb18-22"></a></span>
+<span id="cb18-23"><a href="#cb18-23"></a>bgblupfit&lt;-<span class="kw">BGLR</span>(<span class="dt">y=</span>BLUPs<span class="op">$</span>drgBLUP,</span>
+<span id="cb18-24"><a href="#cb18-24"></a>                <span class="dt">weights=</span>BLUPs<span class="op">$</span>WT,</span>
+<span id="cb18-25"><a href="#cb18-25"></a>                <span class="dt">ETA=</span><span class="kw">list</span>(<span class="dt">Ga=</span><span class="kw">list</span>(<span class="dt">X =</span> Z, <span class="dt">model =</span> <span class="st">&quot;RKHS&quot;</span>,<span class="dt">K=</span>)),</span>
+<span id="cb18-26"><a href="#cb18-26"></a>                <span class="dt">nIter=</span><span class="dv">1000</span>,<span class="dt">burnIn=</span><span class="dv">100</span>,<span class="dt">thin=</span><span class="dv">5</span>)</span>
+<span id="cb18-27"><a href="#cb18-27"></a><span class="kw">summary</span>(bgblupfit)</span>
+<span id="cb18-28"><a href="#cb18-28"></a> <span class="co"># Variance of phenotypes (TRN)= 20.83 </span></span>
+<span id="cb18-29"><a href="#cb18-29"></a> <span class="co"># Residual variance= 33.3928 </span></span>
+<span id="cb18-30"><a href="#cb18-30"></a>bgblupfit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varU <span class="co"># [1] 9.948042</span></span>
+<span id="cb18-31"><a href="#cb18-31"></a></span>
+<span id="cb18-32"><a href="#cb18-32"></a><span class="kw">sum</span>(<span class="kw">apply</span>(<span class="kw">scale</span>(M,<span class="dt">center =</span> T,<span class="dt">scale =</span> T),<span class="dv">2</span>,var))<span class="op">*</span>brrfit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB <span class="co"># [1] 6.515436</span></span></code></pre></div>
+</div>
+<div id="better-sanity-check" class="section level2">
+<h2>Better sanity check</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr);</span>
+<span id="cb19-2"><a href="#cb19-2"></a>snps&lt;-<span class="kw">readRDS</span>(<span class="dt">file=</span><span class="st">&quot;../data/snps_tst_20191124.rds&quot;</span>)</span>
+<span id="cb19-3"><a href="#cb19-3"></a>blups&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;../data/iita_blupsForCrossVal_72619.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="st">  </span><span class="kw">filter</span>(Dataset<span class="op">==</span><span class="st">&quot;HistoricalDataIncluded&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5"></a>         Trait<span class="op">==</span><span class="st">&quot;DM&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(Trait,blups) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb19-7"><a href="#cb19-7"></a><span class="st">  </span><span class="kw">unnest</span>(blups) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb19-8"><a href="#cb19-8"></a><span class="st">  </span><span class="kw">filter</span>(GID <span class="op">%in%</span><span class="st"> </span><span class="kw">rownames</span>(snps))</span>
+<span id="cb19-9"><a href="#cb19-9"></a>snps <span class="op">%&lt;&gt;%</span><span class="st"> </span>.[blups<span class="op">$</span>GID,]  </span>
+<span id="cb19-10"><a href="#cb19-10"></a><span class="kw">all</span>(<span class="kw">rownames</span>(snps)<span class="op">==</span>blups<span class="op">$</span>GID) <span class="co">#[1] TRUE</span></span>
+<span id="cb19-11"><a href="#cb19-11"></a></span>
+<span id="cb19-12"><a href="#cb19-12"></a>M&lt;-<span class="kw">round</span>(snps)</span>
+<span id="cb19-13"><a href="#cb19-13"></a>freq &lt;-<span class="st"> </span><span class="kw">colMeans</span>(M,<span class="dt">na.rm=</span>T)<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb19-14"><a href="#cb19-14"></a>P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(freq,<span class="kw">nrow</span>(M)),<span class="dt">byrow=</span>T,<span class="dt">ncol=</span><span class="kw">ncol</span>(M))</span>
+<span id="cb19-15"><a href="#cb19-15"></a>Z &lt;-<span class="st"> </span>M<span class="dv">-2</span><span class="op">*</span>P</span>
+<span id="cb19-16"><a href="#cb19-16"></a>varD&lt;-<span class="kw">sum</span>(<span class="dv">2</span><span class="op">*</span>freq<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>freq))</span>
+<span id="cb19-17"><a href="#cb19-17"></a>K &lt;-<span class="st"> </span><span class="kw">tcrossprod</span>(Z)<span class="op">/</span>varD</span>
+<span id="cb19-18"><a href="#cb19-18"></a></span>
+<span id="cb19-19"><a href="#cb19-19"></a>blups <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">GID=</span><span class="kw">factor</span>(GID,<span class="dt">levels=</span><span class="kw">rownames</span>(K)))</span>
+<span id="cb19-20"><a href="#cb19-20"></a></span>
+<span id="cb19-21"><a href="#cb19-21"></a><span class="kw">library</span>(sommer)</span>
+<span id="cb19-22"><a href="#cb19-22"></a>gblup &lt;-<span class="st"> </span><span class="kw">mmer</span>(<span class="dt">fixed =</span> drgBLUP <span class="op">~</span><span class="dv">1</span>,</span>
+<span id="cb19-23"><a href="#cb19-23"></a>              <span class="dt">random =</span> <span class="op">~</span><span class="kw">vs</span>(GID,<span class="dt">Gu=</span>K),</span>
+<span id="cb19-24"><a href="#cb19-24"></a>              <span class="dt">weights =</span> WT,</span>
+<span id="cb19-25"><a href="#cb19-25"></a>              <span class="dt">data=</span>blups)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>snpblup&lt;-<span class="kw">mmer</span>(<span class="dt">fixed =</span> drgBLUP <span class="op">~</span><span class="dv">1</span>,</span>
+<span id="cb20-2"><a href="#cb20-2"></a>              <span class="dt">random =</span> <span class="op">~</span><span class="kw">vs</span>(Z),</span>
+<span id="cb20-3"><a href="#cb20-3"></a>              <span class="dt">weights =</span> WT,</span>
+<span id="cb20-4"><a href="#cb20-4"></a>              <span class="dt">data=</span>blups)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw">summary</span>(snpblup)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw">summary</span>(gblup)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>varD<span class="op">*</span>snpblup<span class="op">$</span>sigma<span class="op">$</span><span class="st">`</span><span class="dt">u:Z</span><span class="st">`</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw">sum</span>(<span class="kw">apply</span>(Z,<span class="dv">2</span>,var))<span class="op">*</span>snpblup<span class="op">$</span>sigma<span class="op">$</span><span class="st">`</span><span class="dt">u:Z</span><span class="st">`</span></span></code></pre></div>
+<p>I’m thinking that’s a rounding error…</p>
+<p>Check the GEBV are the same</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>Z<span class="op">%*%</span>snpblup<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:Z</span><span class="st">`</span><span class="op">$</span>drgBLUP; Z[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]; </span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="kw">all</span>(<span class="kw">names</span>(gblup<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:GID</span><span class="st">`</span><span class="op">$</span>drgBLUP)<span class="op">==</span><span class="kw">rownames</span>(Z<span class="op">%*%</span>snpblup<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:Z</span><span class="st">`</span><span class="op">$</span>drgBLUP))</span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="kw">plot</span>(gblup<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:GID</span><span class="st">`</span><span class="op">$</span>drgBLUP,Z<span class="op">%*%</span>snpblup<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">u:Z</span><span class="st">`</span><span class="op">$</span>drgBLUP); <span class="kw">abline</span>(<span class="dt">a =</span> <span class="dv">0</span>,<span class="dt">b=</span><span class="dv">1</span>,<span class="dt">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<p>A Bayesian version</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>bsnpblup&lt;-<span class="kw">BGLR</span>(<span class="dt">y=</span>blups<span class="op">$</span>drgBLUP,</span>
+<span id="cb26-2"><a href="#cb26-2"></a>             <span class="dt">weights=</span><span class="kw">sqrt</span>(blups<span class="op">$</span>WT),</span>
+<span id="cb26-3"><a href="#cb26-3"></a>             <span class="dt">ETA=</span><span class="kw">list</span>(<span class="dt">Ga=</span><span class="kw">list</span>(<span class="dt">X =</span> <span class="kw">model.matrix</span>(<span class="op">~</span>GID<span class="dv">-1</span>,<span class="dt">data=</span>blups)<span class="op">%*%</span>Z, <span class="dt">model =</span> <span class="st">&quot;BRR&quot;</span>)),</span>
+<span id="cb26-4"><a href="#cb26-4"></a>             <span class="dt">nIter=</span><span class="dv">1000</span>,<span class="dt">burnIn=</span><span class="dv">200</span>,<span class="dt">thin=</span><span class="dv">5</span>)</span>
+<span id="cb26-5"><a href="#cb26-5"></a><span class="kw">summary</span>(bsnpblup)</span>
+<span id="cb26-6"><a href="#cb26-6"></a><span class="co"># Variance of phenotypes (TRN)= 12.7956 </span></span>
+<span id="cb26-7"><a href="#cb26-7"></a><span class="co">#  Residual variance= 35.2577 </span></span>
+<span id="cb26-8"><a href="#cb26-8"></a>bsnpblup<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB <span class="co"># [1] 0.01462234</span></span>
+<span id="cb26-9"><a href="#cb26-9"></a>varD<span class="op">*</span>bsnpblup<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB <span class="co"># [1] 4.56517</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>bgblup1&lt;-<span class="kw">BGLR</span>(<span class="dt">y=</span>blups<span class="op">$</span>drgBLUP,</span>
+<span id="cb27-2"><a href="#cb27-2"></a>             <span class="dt">weights=</span>blups<span class="op">$</span>WT,</span>
+<span id="cb27-3"><a href="#cb27-3"></a>             <span class="dt">ETA=</span><span class="kw">list</span>(<span class="dt">Ga=</span><span class="kw">list</span>(<span class="dt">X =</span> <span class="kw">model.matrix</span>(<span class="op">~</span>GID<span class="dv">-1</span>,<span class="dt">data=</span>blups), <span class="dt">model =</span> <span class="st">&quot;RKHS&quot;</span>,<span class="dt">K=</span>K)),</span>
+<span id="cb27-4"><a href="#cb27-4"></a>             <span class="dt">nIter=</span><span class="dv">100</span>,<span class="dt">burnIn=</span><span class="dv">20</span>,<span class="dt">thin=</span><span class="dv">5</span>)</span>
+<span id="cb27-5"><a href="#cb27-5"></a>bgblup&lt;-<span class="kw">BGLR</span>(<span class="dt">y=</span>blups<span class="op">$</span>drgBLUP,</span>
+<span id="cb27-6"><a href="#cb27-6"></a>             <span class="dt">weights=</span><span class="kw">sqrt</span>(blups<span class="op">$</span>WT),</span>
+<span id="cb27-7"><a href="#cb27-7"></a>             <span class="dt">ETA=</span><span class="kw">list</span>(<span class="dt">Ga=</span><span class="kw">list</span>(<span class="dt">X =</span> <span class="kw">model.matrix</span>(<span class="op">~</span>GID<span class="dv">-1</span>,<span class="dt">data=</span>blups), <span class="dt">model =</span> <span class="st">&quot;RKHS&quot;</span>,<span class="dt">K=</span>K)),</span>
+<span id="cb27-8"><a href="#cb27-8"></a>             <span class="dt">nIter=</span><span class="dv">100</span>,<span class="dt">burnIn=</span><span class="dv">20</span>,<span class="dt">thin=</span><span class="dv">5</span>)</span>
+<span id="cb27-9"><a href="#cb27-9"></a><span class="kw">summary</span>(bgblup)</span>
+<span id="cb27-10"><a href="#cb27-10"></a><span class="kw">summary</span>(bgblup1)</span>
+<span id="cb27-11"><a href="#cb27-11"></a>bgblup1<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varU</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>bgblup<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varU</span></code></pre></div>
+</div>
+<div id="disregard-bayesian-results" class="section level2">
+<h2>Disregard Bayesian results</h2>
+<p>According to the checks I just ran above, I should have supplied the <code>sqrt(WT)</code> instead of <em>WT</em> to <code>BGLR</code>. The un-squared <em>WT</em> is correct for <code>sommer</code>.</p>
+<p>For now, I’ll proceed using <em>only</em> the frequentist results.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># pathIn&lt;-&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="co"># </span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="co"># #pathIn&lt;-&quot;../output/markerEffects_20191126/&quot;</span></span>
+<span id="cb29-4"><a href="#cb29-4"></a><span class="co"># bglrEffects&lt;-readRDS(file=paste0(pathIn,</span></span>
+<span id="cb29-5"><a href="#cb29-5"></a><span class="co">#                                  &quot;markerEffects_BGLR_AandADmodels_1_20191126.rds&quot;)) %&gt;% </span></span>
+<span id="cb29-6"><a href="#cb29-6"></a><span class="co">#   bind_rows(readRDS(file=paste0(pathIn,</span></span>
+<span id="cb29-7"><a href="#cb29-7"></a><span class="co">#                                 &quot;markerEffects_BGLR_AandADmodels_2_20191126.rds&quot;))) %&gt;% </span></span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="co">#   bind_rows(readRDS(file=paste0(pathIn,</span></span>
+<span id="cb29-9"><a href="#cb29-9"></a><span class="co">#                                 &quot;markerEffects_BGLR_AandADmodels_3_20191126.rds&quot;)))</span></span>
+<span id="cb29-10"><a href="#cb29-10"></a><span class="co"># # Skip BayesB results for now, just to keep it simple.</span></span>
+<span id="cb29-11"><a href="#cb29-11"></a><span class="co"># bglrEffects %&lt;&gt;% filter(Type!=&quot;BayesB&quot;)</span></span></code></pre></div>
+</div>
+<div id="variance-components" class="section level2">
+<h2>Variance Components</h2>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr); <span class="kw">library</span>(BGLR)</span></code></pre></div>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.2.1     ✔ purrr   0.3.3
+✔ tibble  2.1.3     ✔ dplyr   0.8.3
+✔ tidyr   1.0.0     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre><code>
+Attaching package: &#39;magrittr&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:purrr&#39;:
+
+    set_names</code></pre>
+<pre><code>The following object is masked from &#39;package:tidyr&#39;:
+
+    extract</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a><span class="co">#pathIn&lt;-&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a>pathIn&lt;-<span class="st">&quot;output/markerEffects_20191126/&quot;</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a>remlEffects&lt;-<span class="kw">readRDS</span>(<span class="dt">file=</span><span class="kw">paste0</span>(pathIn,</span>
+<span id="cb37-4"><a href="#cb37-4"></a>                                 <span class="st">&quot;markerEffects_sommer_AandADmodels_20191126.rds&quot;</span>))</span></code></pre></div>
+<div id="varcomps" class="section level3">
+<h3>VarComps</h3>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>remlEffects <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(<span class="op">-</span>BLUPs,<span class="op">-</span>Type) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">REMLfit=</span><span class="kw">map</span>(REMLfit,<span class="op">~</span>.<span class="op">$</span>GBLUPvarcomps <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-4"><a href="#cb38-4"></a><span class="st">                       </span><span class="kw">rownames_to_column</span>(<span class="dt">var =</span> <span class="st">&quot;Source&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-5"><a href="#cb38-5"></a><span class="st">                       </span><span class="kw">mutate</span>(<span class="dt">Source=</span><span class="kw">ifelse</span>(<span class="kw">grepl</span>(<span class="st">&quot;Ga.drgBLUP&quot;</span>,Source),<span class="st">&quot;VarA&quot;</span>,</span>
+<span id="cb38-6"><a href="#cb38-6"></a>                                            <span class="kw">ifelse</span>(<span class="kw">grepl</span>(<span class="st">&quot;Gd.drgBLUP&quot;</span>,Source),<span class="st">&quot;VarD&quot;</span>,<span class="st">&quot;VarE&quot;</span>))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-7"><a href="#cb38-7"></a><span class="st">                       </span>dplyr<span class="op">::</span><span class="kw">select</span>(<span class="op">-</span>Constraint))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-8"><a href="#cb38-8"></a><span class="st">  </span><span class="kw">unnest</span>(REMLfit) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-9"><a href="#cb38-9"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Model,<span class="dt">y=</span>VarComp,<span class="dt">fill=</span>Source)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="op">+</span><span class="st"> </span></span>
+<span id="cb38-10"><a href="#cb38-10"></a><span class="st">  </span><span class="kw">facet_grid</span>(Trait<span class="op">~</span>Dataset,<span class="dt">scales=</span><span class="st">&#39;free_y&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<p><img src="figure/EstMarkerEffects.Rmd/unnamed-chunk-31-1.png" width="1152" style="display: block; margin: auto;" /> ### PVEs</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>remlEffects <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-2"><a href="#cb39-2"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(<span class="op">-</span>BLUPs,<span class="op">-</span>Type) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">REMLfit=</span><span class="kw">map</span>(REMLfit,<span class="op">~</span>.<span class="op">$</span>GBLUPvarcomps <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="st">                       </span><span class="kw">rownames_to_column</span>(<span class="dt">var =</span> <span class="st">&quot;Source&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-5"><a href="#cb39-5"></a><span class="st">                       </span><span class="kw">mutate</span>(<span class="dt">Source=</span><span class="kw">ifelse</span>(<span class="kw">grepl</span>(<span class="st">&quot;Ga.drgBLUP&quot;</span>,Source),<span class="st">&quot;VarA&quot;</span>,</span>
+<span id="cb39-6"><a href="#cb39-6"></a>                                            <span class="kw">ifelse</span>(<span class="kw">grepl</span>(<span class="st">&quot;Gd.drgBLUP&quot;</span>,Source),<span class="st">&quot;VarD&quot;</span>,<span class="st">&quot;VarE&quot;</span>))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-7"><a href="#cb39-7"></a><span class="st">                       </span>dplyr<span class="op">::</span><span class="kw">select</span>(<span class="op">-</span>Constraint))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-8"><a href="#cb39-8"></a><span class="st">  </span><span class="kw">unnest</span>(REMLfit) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-9"><a href="#cb39-9"></a><span class="st">  </span><span class="kw">group_by</span>(Trait,Dataset,Model) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-10"><a href="#cb39-10"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">PVE=</span>VarComp<span class="op">/</span><span class="kw">sum</span>(VarComp)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-11"><a href="#cb39-11"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-12"><a href="#cb39-12"></a><span class="st">  </span><span class="kw">filter</span>(Source<span class="op">!=</span><span class="st">&quot;VarE&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb39-13"><a href="#cb39-13"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Model,<span class="dt">y=</span>PVE,<span class="dt">fill=</span>Source)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="op">+</span><span class="st"> </span></span>
+<span id="cb39-14"><a href="#cb39-14"></a><span class="st">  </span><span class="kw">facet_grid</span>(Trait<span class="op">~</span>Dataset,<span class="dt">scales=</span><span class="st">&#39;free_y&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<p><img src="figure/EstMarkerEffects.Rmd/unnamed-chunk-32-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="gen.-var.-w-or-wo-ld-covar" class="section level2">
+<h2>Gen. var. w/ or w/o LD covar?</h2>
+<p>Based on de los Campos et al. 2015, Lehermeier et al. 2017a distinguished variance estimates which normally do not include the covariance due to LD:</p>
+<p><strong>M1</strong><br />
+<span class="math display">\[\sigma^{2}_{M1} = var(x&#39;_{i}\beta) = \sigma^2_{SNPBLUP}\sum_{j=1}^{p} Var(x_{ij}) = \sum 2p(1-p)\beta^2\]</span></p>
+<p><strong>M2</strong><br />
+<span class="math display">\[\sigma^2_{M2}= var(x&#39;_{i}\beta) = \beta&#39;\Sigma_{x}\beta\]</span> Where<br />
+$_{x} = (p x p) variance–covariance matrix of the genotype scores</p>
+<p>Will compare the estimates of M1 and M2 first at the population level.</p>
+<p>The reason being that the basis by which I predict cross variance is M2 with <span class="math inline">\(\Sigma_{x}\)</span> expected in an infinite pool of progeny (see <a href="">Predict Cross Variances</a> ).</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1"></a><span class="co"># activate multithread OpenBLAS for fast compute of SigmaM (genotypic var-covar matrix)</span></span>
+<span id="cb40-2"><a href="#cb40-2"></a><span class="bu">export</span> <span class="va">OMP_NUM_THREADS=</span>64</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(magrittr); <span class="co">#library(BGLR)</span></span>
+<span id="cb41-2"><a href="#cb41-2"></a>pathIn&lt;-<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/output/markerEffects_20191126/&quot;</span></span>
+<span id="cb41-3"><a href="#cb41-3"></a><span class="co">#pathIn&lt;-&quot;../output/markerEffects_20191126/&quot;</span></span>
+<span id="cb41-4"><a href="#cb41-4"></a>remlEffects&lt;-<span class="kw">readRDS</span>(<span class="dt">file=</span><span class="kw">paste0</span>(pathIn,</span>
+<span id="cb41-5"><a href="#cb41-5"></a>                                 <span class="st">&quot;markerEffects_sommer_AandADmodels_20191126.rds&quot;</span>))</span>
+<span id="cb41-6"><a href="#cb41-6"></a></span>
+<span id="cb41-7"><a href="#cb41-7"></a><span class="co"># debuggin params</span></span>
+<span id="cb41-8"><a href="#cb41-8"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb41-9"><a href="#cb41-9"></a>    BLUPs&lt;-remlEffects<span class="op">$</span>BLUPs[[<span class="dv">1</span>]]</span>
+<span id="cb41-10"><a href="#cb41-10"></a>    REMLfit&lt;-remlEffects<span class="op">$</span>REMLfit[[<span class="dv">1</span>]]</span>
+<span id="cb41-11"><a href="#cb41-11"></a>    Model&lt;-remlEffects<span class="op">$</span>Model[[<span class="dv">1</span>]]</span>
+<span id="cb41-12"><a href="#cb41-12"></a>    </span>
+<span id="cb41-13"><a href="#cb41-13"></a>    Madd&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb41-14"><a href="#cb41-14"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,]</span>
+<span id="cb41-15"><a href="#cb41-15"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb41-16"><a href="#cb41-16"></a>      Mdom&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb41-17"><a href="#cb41-17"></a><span class="st">        </span>.[BLUPs<span class="op">$</span>GID,] }</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>Mcentered&lt;-<span class="kw">scale</span>(Madd,<span class="dt">center =</span> T, <span class="dt">scale =</span> F)</span>
+<span id="cb42-2"><a href="#cb42-2"></a>gcstart&lt;-<span class="kw">gc</span>(<span class="dt">reset =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb42-3"><a href="#cb42-3"></a>timestart&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb42-4"><a href="#cb42-4"></a>   </span>
+<span id="cb42-5"><a href="#cb42-5"></a>SigmaM&lt;-<span class="dv">1</span><span class="op">/</span><span class="kw">ncol</span>(Mcentered)<span class="op">*</span><span class="kw">t</span>(Mcentered)<span class="op">%*%</span>Mcentered</span>
+<span id="cb42-6"><a href="#cb42-6"></a></span>
+<span id="cb42-7"><a href="#cb42-7"></a>timeend&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb42-8"><a href="#cb42-8"></a>gcend&lt;-<span class="kw">gc</span>()</span>
+<span id="cb42-9"><a href="#cb42-9"></a><span class="kw">sum</span>(gcend[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span> <span class="co"># EndMemGB 40.7835</span></span>
+<span id="cb42-10"><a href="#cb42-10"></a><span class="kw">sum</span>(gcend[,<span class="dv">6</span>])<span class="op">/</span><span class="dv">1000</span> <span class="co"># MaxMemGB 78.6976</span></span>
+<span id="cb42-11"><a href="#cb42-11"></a>timeend<span class="op">-</span>timestart</span>
+<span id="cb42-12"><a href="#cb42-12"></a><span class="co"># elapsed </span></span>
+<span id="cb42-13"><a href="#cb42-13"></a><span class="co">#  92.925</span></span>
+<span id="cb42-14"><a href="#cb42-14"></a></span>
+<span id="cb42-15"><a href="#cb42-15"></a><span class="kw">summary</span>(<span class="kw">diag</span>(SigmaM))</span>
+<span id="cb42-16"><a href="#cb42-16"></a><span class="co"># Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span></span>
+<span id="cb42-17"><a href="#cb42-17"></a><span class="co"># 0.001203 0.015495 0.025791 0.024206 0.033972 0.042275</span></span></code></pre></div>
+<p>The values in the diag of the covariance matrix seem reasonable….</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>effect&lt;-REMLfit<span class="op">$</span>SNPBLUPs<span class="op">$</span>AddEffects</span>
+<span id="cb43-2"><a href="#cb43-2"></a><span class="kw">names</span>(effect)&lt;-REMLfit<span class="op">$</span>SNPBLUPs<span class="op">$</span>SNP</span>
+<span id="cb43-3"><a href="#cb43-3"></a><span class="kw">summary</span>(effect)</span>
+<span id="cb43-4"><a href="#cb43-4"></a><span class="co"># Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span></span>
+<span id="cb43-5"><a href="#cb43-5"></a><span class="co"># -33.4563  -3.6639  -0.1584  -0.2181   3.3029  32.2490 </span></span></code></pre></div>
+<p>But the SNP effect sizes are off by at least an order of magnitude (<em>I think</em>). So my backsolving from GBLUP might actually be the problem.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>remlEffects<span class="op">$</span>REMLfit[[<span class="dv">1</span>]]<span class="op">$</span>GBLUPvarcomps</span>
+<span id="cb44-2"><a href="#cb44-2"></a><span class="co">#                         VarComp VarCompSE   Zratio Constraint</span></span>
+<span id="cb44-3"><a href="#cb44-3"></a><span class="co"># u:Ga.drgBLUP-drgBLUP   8.215071 0.5259765 15.61870   Positive</span></span>
+<span id="cb44-4"><a href="#cb44-4"></a><span class="co"># units.drgBLUP-drgBLUP 19.280023 0.4538074 42.48503   Positive</span></span></code></pre></div>
+<p>Above are the variance components from GBLUP, from which, I backsolved the SNP effects</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a><span class="kw">table</span>(REMLfit<span class="op">$</span>SNPBLUPs<span class="op">$</span>SNP<span class="op">==</span><span class="kw">rownames</span>(SigmaM))</span>
+<span id="cb45-2"><a href="#cb45-2"></a></span>
+<span id="cb45-3"><a href="#cb45-3"></a>vgM1&lt;-<span class="kw">sum</span>(<span class="kw">diag</span>(SigmaM)<span class="op">*</span>effect<span class="op">^</span><span class="dv">2</span>) <span class="co"># [1] 68539.8</span></span>
+<span id="cb45-4"><a href="#cb45-4"></a><span class="co"># That&#39;s not right...</span></span>
+<span id="cb45-5"><a href="#cb45-5"></a></span>
+<span id="cb45-6"><a href="#cb45-6"></a>effect&lt;-<span class="kw">as.matrix</span>(effect)</span>
+<span id="cb45-7"><a href="#cb45-7"></a>vgM2&lt;-<span class="kw">t</span>(effect)<span class="op">%*%</span>SigmaM<span class="op">%*%</span>effect <span class="co"># [1,] 2990954</span></span>
+<span id="cb45-8"><a href="#cb45-8"></a><span class="co"># Also definitely not right....</span></span></code></pre></div>
+<p>Stop here. Need to restart with a small example, single set of effect estimates and smaller pop.</p>
+</div>
+</div>
+<div id="unused-code" class="section level1">
+<h1>Unused code</h1>
+<div id="varcomps-from-bglr" class="section level2">
+<h2>VarComps from BGLR</h2>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>getVarComp_M1&lt;-<span class="cf">function</span>(effect,M){</span>
+<span id="cb46-2"><a href="#cb46-2"></a>  <span class="co"># M1 as in Lehermeier M1, effectively the standard ignoring LD</span></span>
+<span id="cb46-3"><a href="#cb46-3"></a>  <span class="co"># Should match GBLUP</span></span>
+<span id="cb46-4"><a href="#cb46-4"></a>  </span>
+<span id="cb46-5"><a href="#cb46-5"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a><span class="kw">library</span>(furrr); <span class="kw">plan</span>(multiprocess);</span>
+<span id="cb47-2"><a href="#cb47-2"></a></span>
+<span id="cb47-3"><a href="#cb47-3"></a>getBGLRvarG&lt;-<span class="cf">function</span>(Trait,BLUPs,Model,Type,Dataset,BGLRfit,...){</span>
+<span id="cb47-4"><a href="#cb47-4"></a>    <span class="kw">require</span>(BGLR)</span>
+<span id="cb47-5"><a href="#cb47-5"></a>    <span class="co"># debuggin params</span></span>
+<span id="cb47-6"><a href="#cb47-6"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb47-7"><a href="#cb47-7"></a>    BLUPs&lt;-remlEffects<span class="op">$</span>BLUPs[[<span class="dv">1</span>]]</span>
+<span id="cb47-8"><a href="#cb47-8"></a>    REMLfit&lt;-remlEffects<span class="op">$</span>REMLfit[[<span class="dv">1</span>]]</span>
+<span id="cb47-9"><a href="#cb47-9"></a>  </span>
+<span id="cb47-10"><a href="#cb47-10"></a>    Trait&lt;-bglrEffects<span class="op">$</span>Trait[[<span class="dv">1</span>]]</span>
+<span id="cb47-11"><a href="#cb47-11"></a>    Model&lt;-bglrEffects<span class="op">$</span>Model[[<span class="dv">1</span>]]</span>
+<span id="cb47-12"><a href="#cb47-12"></a>    Type&lt;-bglrEffects<span class="op">$</span>Type[[<span class="dv">1</span>]]</span>
+<span id="cb47-13"><a href="#cb47-13"></a>    Dataset&lt;-bglrEffects<span class="op">$</span>Dataset[[<span class="dv">1</span>]]</span>
+<span id="cb47-14"><a href="#cb47-14"></a>    BGLRfit&lt;-bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">1</span>]]</span>
+<span id="cb47-15"><a href="#cb47-15"></a>    <span class="co"># rm(BLUPs,Trait,Model,Type,Dataset,BGLRfit)</span></span>
+<span id="cb47-16"><a href="#cb47-16"></a>    <span class="co"># rm(gcstart,timestart,Madd_tp,Mdom_tp,Z,eta,timemodelprepped,modelFit,timemodelfitted,gcend)</span></span>
+<span id="cb47-17"><a href="#cb47-17"></a>    <span class="co"># ---------------------------</span></span>
+<span id="cb47-18"><a href="#cb47-18"></a>    Madd_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Madd_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb47-19"><a href="#cb47-19"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,]</span>
+<span id="cb47-20"><a href="#cb47-20"></a>    <span class="cf">if</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>){ </span>
+<span id="cb47-21"><a href="#cb47-21"></a>      Mdom_tp&lt;-<span class="kw">readRDS</span>(<span class="st">&quot;/workdir/marnin/PredictOutbredCrossVar/data/Mdom_IITA_20191124.rds&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb47-22"><a href="#cb47-22"></a><span class="st">      </span>.[BLUPs<span class="op">$</span>GID,] }</span>
+<span id="cb47-23"><a href="#cb47-23"></a></span>
+<span id="cb47-24"><a href="#cb47-24"></a>    Mtst&lt;-Madd_tp[,<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</span>
+<span id="cb47-25"><a href="#cb47-25"></a>    covMtst&lt;-<span class="kw">cov</span>(Mtst); <span class="kw">dim</span>(covMtst)</span>
+<span id="cb47-26"><a href="#cb47-26"></a>    covMtst</span>
+<span id="cb47-27"><a href="#cb47-27"></a>    cprodMtst&lt;-<span class="kw">t</span>(Mtst)<span class="op">%*%</span>Mtst; <span class="kw">dim</span>(cprodMtst); cprodMtst</span>
+<span id="cb47-28"><a href="#cb47-28"></a>    cprodMtst<span class="op">/</span><span class="kw">nrow</span>(Mtst)</span>
+<span id="cb47-29"><a href="#cb47-29"></a>    </span>
+<span id="cb47-30"><a href="#cb47-30"></a>    <span class="kw">sum</span>(<span class="kw">apply</span>(Madd_tp,<span class="dv">2</span>,var))<span class="op">*</span>BGLRfit<span class="op">$</span>modelFit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB</span>
+<span id="cb47-31"><a href="#cb47-31"></a>    </span>
+<span id="cb47-32"><a href="#cb47-32"></a>    </span>
+<span id="cb47-33"><a href="#cb47-33"></a>    timemodelfitted&lt;-<span class="kw">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb47-34"><a href="#cb47-34"></a>    <span class="kw">rm</span>(eta,Z,BLUPs);</span>
+<span id="cb47-35"><a href="#cb47-35"></a>    gcend&lt;-<span class="kw">gc</span>()</span>
+<span id="cb47-36"><a href="#cb47-36"></a>    computeStats&lt;-<span class="kw">tibble</span>(<span class="dt">ModelPrepTimeMins=</span>(timemodelprepped<span class="op">-</span>timestart)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb47-37"><a href="#cb47-37"></a>           <span class="dt">ModelFitTimeMins=</span>(timemodelfitted<span class="op">-</span>timemodelprepped)<span class="op">/</span><span class="dv">60</span>,</span>
+<span id="cb47-38"><a href="#cb47-38"></a>           <span class="dt">StartMemGB=</span><span class="kw">sum</span>(gcstart[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb47-39"><a href="#cb47-39"></a>           <span class="dt">EndMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">2</span>])<span class="op">/</span><span class="dv">1000</span>,</span>
+<span id="cb47-40"><a href="#cb47-40"></a>           <span class="dt">MaxMemGB=</span><span class="kw">sum</span>(gcend[,<span class="dv">6</span>])<span class="op">/</span><span class="dv">1000</span>)</span>
+<span id="cb47-41"><a href="#cb47-41"></a>    results&lt;-<span class="kw">list</span>(<span class="dt">computeStats=</span>computeStats,</span>
+<span id="cb47-42"><a href="#cb47-42"></a>                  <span class="dt">modelFit=</span>modelFit)</span>
+<span id="cb47-43"><a href="#cb47-43"></a>    <span class="kw">print</span>(results<span class="op">$</span>computeStats)</span>
+<span id="cb47-44"><a href="#cb47-44"></a>    <span class="kw">rm</span>(modelFit); <span class="kw">gc</span>()</span>
+<span id="cb47-45"><a href="#cb47-45"></a>    <span class="kw">return</span>(results) }</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">1</span>]]<span class="op">$</span>computeStats</span>
+<span id="cb48-2"><a href="#cb48-2"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">1</span>]]<span class="op">$</span>modelFit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB</span>
+<span id="cb48-3"><a href="#cb48-3"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">1</span>]]<span class="op">$</span>modelFit<span class="op">$</span>varE</span>
+<span id="cb48-4"><a href="#cb48-4"></a></span>
+<span id="cb48-5"><a href="#cb48-5"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">2</span>]]<span class="op">$</span>computeStats</span>
+<span id="cb48-6"><a href="#cb48-6"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">2</span>]]<span class="op">$</span>modelFit<span class="op">$</span>ETA<span class="op">$</span>Ga <span class="op">%&gt;%</span><span class="st"> </span>str</span>
+<span id="cb48-7"><a href="#cb48-7"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">2</span>]]<span class="op">$</span>modelFit<span class="op">$</span>varE</span>
+<span id="cb48-8"><a href="#cb48-8"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">2</span>]]<span class="op">$</span>modelFit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>probIn</span>
+<span id="cb48-9"><a href="#cb48-9"></a>bglrEffects<span class="op">$</span>BGLRfit[[<span class="dv">2</span>]]<span class="op">$</span>modelFit<span class="op">$</span>ETA<span class="op">$</span>Ga<span class="op">$</span>varB <span class="op">%&gt;%</span><span class="st"> </span>summary</span></code></pre></div>
+</div>
+<div id="check-convergence" class="section level2">
+<h2>Check convergence</h2>
+<div id="brr" class="section level3">
+<h3>BRR</h3>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>brrIterHist&lt;-<span class="kw">list.files</span>(<span class="st">&quot;../output/markerEffects_20191126/&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-2"><a href="#cb49-2"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;.dat&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-3"><a href="#cb49-3"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;ETA&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-4"><a href="#cb49-4"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;BRR&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-5"><a href="#cb49-5"></a><span class="st">  </span><span class="kw">grep</span>(<span class="st">&quot;varB&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-6"><a href="#cb49-6"></a><span class="st">  </span><span class="kw">tibble</span>(<span class="dt">Filenames=</span>.) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-7"><a href="#cb49-7"></a><span class="st">  </span><span class="kw">separate</span>(<span class="dt">col =</span> Filenames,</span>
+<span id="cb49-8"><a href="#cb49-8"></a>           <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;Trait&quot;</span>,<span class="st">&quot;Dataset&quot;</span>,<span class="st">&quot;Model&quot;</span>,<span class="st">&quot;Type&quot;</span>,<span class="st">&quot;VarComp&quot;</span>,<span class="st">&quot;extra&quot;</span>),</span>
+<span id="cb49-9"><a href="#cb49-9"></a>           <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>,<span class="dt">remove =</span> F) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-10"><a href="#cb49-10"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Type,<span class="op">-</span>extra) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-11"><a href="#cb49-11"></a><span class="st">  </span><span class="kw">bind_rows</span>(</span>
+<span id="cb49-12"><a href="#cb49-12"></a>    <span class="kw">list.files</span>(<span class="st">&quot;../output/markerEffects_20191126/&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-13"><a href="#cb49-13"></a><span class="st">      </span><span class="kw">grep</span>(<span class="st">&quot;.dat&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-14"><a href="#cb49-14"></a><span class="st">      </span><span class="kw">grep</span>(<span class="st">&quot;BRR&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-15"><a href="#cb49-15"></a><span class="st">      </span><span class="kw">grep</span>(<span class="st">&quot;varE&quot;</span>,.,<span class="dt">value =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-16"><a href="#cb49-16"></a><span class="st">      </span><span class="kw">tibble</span>(<span class="dt">Filenames=</span>.) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-17"><a href="#cb49-17"></a><span class="st">      </span><span class="kw">separate</span>(<span class="dt">col =</span> Filenames,</span>
+<span id="cb49-18"><a href="#cb49-18"></a>               <span class="dt">into =</span> <span class="kw">c</span>(<span class="st">&quot;Trait&quot;</span>,<span class="st">&quot;Dataset&quot;</span>,<span class="st">&quot;Model&quot;</span>,<span class="st">&quot;Type&quot;</span>),</span>
+<span id="cb49-19"><a href="#cb49-19"></a>               <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>,<span class="dt">remove =</span> F) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-20"><a href="#cb49-20"></a><span class="st">      </span><span class="kw">select</span>(<span class="op">-</span>Type) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-21"><a href="#cb49-21"></a><span class="st">      </span><span class="kw">mutate</span>(<span class="dt">VarComp=</span><span class="st">&quot;Ve&quot;</span>)) </span>
+<span id="cb49-22"><a href="#cb49-22"></a>brrIterHist <span class="op">%&lt;&gt;%</span><span class="st"> </span></span>
+<span id="cb49-23"><a href="#cb49-23"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">iterHist=</span><span class="kw">map</span>(Filenames,<span class="op">~</span><span class="kw">read.table</span>(<span class="kw">paste0</span>(<span class="st">&quot;../output/markerEffects_20191126/&quot;</span>,.),</span>
+<span id="cb49-24"><a href="#cb49-24"></a>                                            <span class="dt">header =</span> F, <span class="dt">stringsAsFactors =</span> F) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-25"><a href="#cb49-25"></a><span class="st">                        </span><span class="kw">rename</span>(<span class="dt">Value=</span>V1) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb49-26"><a href="#cb49-26"></a><span class="st">                        </span><span class="kw">mutate</span>(<span class="dt">Iteration=</span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(.))))</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>brrIterHist <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb50-2"><a href="#cb50-2"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Filenames) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb50-3"><a href="#cb50-3"></a><span class="st">  </span><span class="kw">filter</span>(Model<span class="op">==</span><span class="st">&quot;A&quot;</span>,</span>
+<span id="cb50-4"><a href="#cb50-4"></a>         VarComp<span class="op">==</span><span class="st">&quot;Ve&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb50-5"><a href="#cb50-5"></a><span class="st">  </span><span class="kw">unnest</span>(iterHist) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb50-6"><a href="#cb50-6"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Iteration,<span class="dt">y=</span>Value,<span class="dt">color=</span>Dataset)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span></span>
+<span id="cb50-7"><a href="#cb50-7"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Trait,<span class="dt">scales=</span><span class="st">&#39;free&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>brrIterHist <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb51-2"><a href="#cb51-2"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Filenames) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb51-3"><a href="#cb51-3"></a><span class="st">  </span><span class="kw">filter</span>(Model<span class="op">==</span><span class="st">&quot;A&quot;</span>,</span>
+<span id="cb51-4"><a href="#cb51-4"></a>         VarComp<span class="op">==</span><span class="st">&quot;Ga&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb51-5"><a href="#cb51-5"></a><span class="st">  </span><span class="kw">unnest</span>(iterHist) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb51-6"><a href="#cb51-6"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Iteration,<span class="dt">y=</span>Value,<span class="dt">color=</span>Dataset)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span></span>
+<span id="cb51-7"><a href="#cb51-7"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Trait,<span class="dt">scales=</span><span class="st">&#39;free&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>brrIterHist <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Filenames) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb52-3"><a href="#cb52-3"></a><span class="st">  </span><span class="kw">filter</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb52-4"><a href="#cb52-4"></a><span class="st">  </span><span class="kw">unnest</span>(iterHist) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb52-5"><a href="#cb52-5"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Iteration,<span class="dt">y=</span>Value,<span class="dt">color=</span>Dataset)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span></span>
+<span id="cb52-6"><a href="#cb52-6"></a><span class="st">  </span><span class="kw">facet_grid</span>(Trait<span class="op">~</span>VarComp,<span class="dt">scales=</span><span class="st">&#39;free&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a>brrIterHist <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb53-2"><a href="#cb53-2"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Filenames) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb53-3"><a href="#cb53-3"></a><span class="st">  </span><span class="kw">filter</span>(Model<span class="op">==</span><span class="st">&quot;AD&quot;</span>,</span>
+<span id="cb53-4"><a href="#cb53-4"></a>         VarComp<span class="op">!=</span><span class="st">&quot;Ve&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb53-5"><a href="#cb53-5"></a><span class="st">  </span><span class="kw">unnest</span>(iterHist) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb53-6"><a href="#cb53-6"></a><span class="st">  </span><span class="kw">ggplot</span>(.,<span class="kw">aes</span>(<span class="dt">x=</span>Iteration,<span class="dt">y=</span>Value,<span class="dt">color=</span>Dataset)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span></span>
+<span id="cb53-7"><a href="#cb53-7"></a><span class="st">  </span><span class="kw">facet_grid</span>(Trait<span class="op">~</span>VarComp,<span class="dt">scales=</span><span class="st">&#39;free&#39;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a><span class="kw">sessionInfo</span>()</span></code></pre></div>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.6
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] BGLR_1.0.8      magrittr_1.5    forcats_0.4.0   stringr_1.4.0  
+ [5] dplyr_0.8.3     purrr_0.3.3     readr_1.3.1     tidyr_1.0.0    
+ [9] tibble_2.1.3    ggplot2_3.2.1   tidyverse_1.2.1
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5     xfun_0.11            reshape2_1.4.3      
+ [4] haven_2.2.0          lattice_0.20-38      colorspace_1.4-1    
+ [7] vctrs_0.2.0          generics_0.0.2       htmltools_0.4.0     
+[10] yaml_2.2.0           rlang_0.4.1          later_1.0.0         
+[13] pillar_1.4.2         withr_2.1.2          glue_1.3.1          
+[16] modelr_0.1.5         readxl_1.3.1         plyr_1.8.4          
+[19] lifecycle_0.1.0      munsell_0.5.0        gtable_0.3.0        
+[22] workflowr_1.5.0.9000 cellranger_1.1.0     rvest_0.3.5         
+[25] evaluate_0.14        labeling_0.3         knitr_1.26          
+[28] httpuv_1.5.2         broom_0.5.2          Rcpp_1.0.3          
+[31] promises_1.1.0       backports_1.1.5      scales_1.1.0        
+[34] jsonlite_1.6         truncnorm_1.0-8      farver_2.0.1        
+[37] fs_1.3.1             hms_0.5.2            digest_0.6.22       
+[40] stringi_1.4.3        grid_3.6.1           rprojroot_1.3-2     
+[43] cli_1.1.0            tools_3.6.1          lazyeval_0.2.2      
+[46] crayon_1.3.4         whisker_0.4          pkgconfig_2.0.3     
+[49] zeallot_0.1.0        xml2_1.2.2           lubridate_1.7.4     
+[52] assertthat_0.2.1     rmarkdown_1.17       httr_1.4.1          
+[55] rstudioapi_0.10      R6_2.4.1             nlme_3.1-142        
+[58] git2r_0.26.1         compiler_3.6.1      </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

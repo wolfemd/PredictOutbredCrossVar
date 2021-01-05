@@ -1,0 +1,242 @@
+---
+title: "Compute population-level posterior mean variance components"
+site: workflowr::wflow_site
+date: "2020-June-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+For each of the genetic groups (GG, C1, C2, C3 , ALL):
+
+Compute the posterior mean variances and covariances from the on-disk-stored, post-burnIn, thinned posterior samples of marker effects.
+
+Models: **A**, **AD**, **DirDom**
+
+For the directional dominance (**DirDom**) marker effects set. Add inbreeding/propHom effect to vector _d_.
+
+* Compute $Var(GEBV)$ with allele sub. effects as: $\alpha = a + d(q-p)$.
+* Compute $Var(GETGV) = Var(Add) + Var(Dom)$
+
+# Models A and AD
+## Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=112
+```
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Training datasets -----------
+geneticgroups<-blups %>% 
+  filter(!grepl("TMS13|TMS14|TMS15",germplasmName)) %>% 
+  mutate(Group="GG") %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS13",germplasmName)) %>% 
+              mutate(Group="TMS13")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS14",germplasmName)) %>% 
+              mutate(Group="TMS14")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS15",germplasmName)) %>% 
+              mutate(Group="TMS15")) %>% 
+  bind_rows(blups %>% 
+              mutate(Group="All")) %>% 
+  nest(blups=-Group) %>% 
+  crossing(Model=c("A","AD")) %>% 
+  mutate(blups=map(blups,~filter(.,germplasmName %in% rownames(snps))),
+         outName=paste0("mt_",Group,"_",Model))
+
+# Parallelization specs ---------
+require(furrr); options(future.globals.maxSize=50000*1024^2)
+plan(multiprocess); options(mc.cores=10); 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# getVarComps function -----------
+## Wrapper function for getMultiTraitPMVs_A and getMultiTraitPMVs_AD
+## For a given Model / data chunk, load stored posterior marker effects
+## Compute vars/covars
+source(here::here("code","getVarComps.R"))
+```
+
+## Compute var. comps
+```{r, eval=F}
+# cbsulm12 - Done!
+geneticgroups %<>% 
+  mutate(PMV=future_pmap(.,getVarComps,snps=snps,nIter=30000, burnIn=5000,thin=5))
+saveRDS(geneticgroups,file=here::here("output","pmv_varcomps_geneticgroups.rds"))
+
+```
+
+# Model DirDom
+
+## Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=112
+```
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Training datasets -----------
+geneticgroups<-blups %>% 
+  filter(!grepl("TMS13|TMS14|TMS15",germplasmName)) %>% 
+  mutate(Group="GG") %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS13",germplasmName)) %>% 
+              mutate(Group="TMS13")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS14",germplasmName)) %>% 
+              mutate(Group="TMS14")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS15",germplasmName)) %>% 
+              mutate(Group="TMS15")) %>% 
+  bind_rows(blups %>% 
+              mutate(Group="All")) %>% 
+  nest(blups=-Group) %>% 
+  crossing(Model=c("DirDomA","DirDomAD")) %>% 
+  mutate(blups=map(blups,~filter(.,germplasmName %in% rownames(snps))),
+         outName=paste0("mt_",Group,"_DirectionalDom"))
+
+# Parallelization specs ---------
+require(furrr); options(future.globals.maxSize=50000*1024^2)
+plan(multiprocess); options(mc.cores=10); 
+
+# MCMC params ------
+nIter<-30000; burnIn<-5000; thin<-5
+
+# getDirectionalDomVarComps function -----------
+## Wrapper function for getMultiTraitPMVs_A and getMultiTraitPMVs_AD
+## For a given Model / data chunk, load stored posterior marker effects
+## Compute vars/covars
+source(here::here("code","getDirectionalDomVarComps.R"))
+```
+
+## Compute var. comps
+```{r, eval=F}
+# cbsulm12 - Done!
+geneticgroups %<>% 
+  mutate(PMV=future_pmap(.,getDirectionalDomVarComps,snps=snps,nIter=30000, burnIn=5000,thin=5))
+saveRDS(geneticgroups,file=here::here("output","pmv_DirectionalDom_varcomps_geneticgroups.rds"))
+
+```
+
+# Process results
+
+## Tidy VarComps 
+
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+geneticgroups<-readRDS(here::here("output","pmv_varcomps_geneticgroups.rds")) %>% 
+  bind_rows(readRDS(here::here("output","pmv_DirectionalDom_varcomps_geneticgroups.rds")))
+geneticgroups %<>% 
+  select(-blups) %>% 
+  unnest_wider(PMV) %>% 
+  select(-runtime) %>% 
+  unnest(pmv) %>% 
+  mutate_if(is.numeric,~round(.,6)) %>% 
+  pivot_longer(cols=c(VPM,PMV),names_to = "VarMethod",values_to = "Var")
+```
+
+## Compute SI variances
+```{r, eval=F}
+# Selection weights -----------
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+## Predicted Index Variances
+geneticgroups_SI<-geneticgroups %>% 
+  nest(varcovars=c(Trait1,Trait2,Var)) %>%
+  mutate(varcovars=map(varcovars,
+                       function(varcovars){
+                         # pairwise to square symmetric matrix
+                         gmat<-varcovars %>% 
+                           spread(Trait2,Var) %>% 
+                           column_to_rownames(var = "Trait1") %>% 
+                           as.matrix %>% 
+                           .[indices$Trait,indices$Trait]
+                         gmat[lower.tri(gmat)]<-t(gmat)[lower.tri(gmat)]
+                         return(gmat) }),
+         # compute index variances
+         stdSI=map_dbl(varcovars,~t(indices$stdSI)%*%.%*%indices$stdSI),
+         biofortSI=map_dbl(varcovars,~t(indices$biofortSI)%*%.%*%indices$biofortSI)) %>% 
+  # discard var-covar matrix
+  select(-varcovars) %>% 
+  pivot_longer(cols = c(stdSI,biofortSI),
+               names_to = "Trait1", 
+               values_to = "Var") %>% 
+  mutate(Trait2=Trait1)
+
+geneticgroups %<>% bind_rows(geneticgroups_SI)
+rm(geneticgroups_SI)
+```
+## --> Save
+```{r, eval=F}
+saveRDS(geneticgroups,file=here::here("output","pmv_varcomps_geneticgroups_tidy_includingSIvars.rds"))
+```
+
+## Tidy inbreeding effect est. from DirDom model
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(BGLR)
+geneticgroups_dd<-readRDS(here::here("output","pmv_DirectionalDom_varcomps_geneticgroups.rds")) %>% 
+  distinct(Group,outName) %>% 
+  mutate(mtbrrFit=map(outName,~readRDS(here::here("output/mtMarkerEffects",paste0(.,".rds"))))) %>% 
+  unnest_wider(mtbrrFit) %>% 
+  select(-runtime,-snpIDs,-outName) %>% 
+  mutate(Dataset="GeneticGroups")
+
+parentfolds_dd<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,trainset,testset) %>% 
+  pivot_longer(c(trainset,testset),
+               names_to = "Dataset",
+               values_to = "sampleIDs") %>% 
+  mutate(Model="DirectionalDom") %>% 
+  arrange(desc(Dataset),Repeat,Fold) %>% 
+  mutate(outName=paste0("mt_",Repeat,"_",Fold,"_",Dataset,"_",Model)) %>% 
+  mutate(mtbrrFit=map(outName,~readRDS(here::here("output/mtMarkerEffects",paste0(.,".rds"))))) %>% 
+  unnest_wider(mtbrrFit) %>% 
+  select(-runtime,-snpIDs,-sampleIDs,-outName,-Model)
+ddEffects<-bind_rows(geneticgroups_dd,parentfolds_dd) %>% 
+  mutate(inbreff=map(mtbrrFit,function(mtbrrFit){
+    traits<-colnames(mtbrrFit$yHat)
+    beta<-mtbrrFit$ETA$GmeanD$beta
+    SD.beta<-mtbrrFit$ETA$GmeanD$SD.beta
+    colnames(beta)<-colnames(SD.beta)<-traits
+    
+    inbeffs<-bind_rows(as_tibble(beta),as_tibble(SD.beta)) %>% 
+      t(.) %>% 
+      as.data.frame %>% 
+      rownames_to_column(var="Trait") %>% 
+      rename(InbreedingEffect=V1,
+             InbreedingEffectSD=V2)
+    return(inbeffs) })) %>% 
+  select(-mtbrrFit) %>% 
+  unnest(inbreff)
+saveRDS(ddEffects,file=here::here("output","ddEffects.rds"))
+```

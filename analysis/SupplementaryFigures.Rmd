@@ -1,0 +1,438 @@
+---
+title: "Supplementary Figures"
+site: workflowr::wflow_site
+date: "2020-July-29"
+output: 
+  workflowr::wflow_html:
+    code_folding: "hide"
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+```{r}
+library(tidyverse); library(magrittr);
+```
+
+# Figure S01: Genome-wide proportion homozygous
+
+Figure S01: Boxplot of the genome-wide proportion of homozygous SNPs in each of four genetic groups comprising the study pedigree.
+
+```{r figureS01}
+propHom<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS14")
+propHom %>% 
+  mutate(Group=ifelse(!grepl("TMS13|TMS14|TMS15", GID),"GG (C0)",NA),
+         Group=ifelse(grepl("TMS13", GID),"TMS13 (C1)",Group),
+         Group=ifelse(grepl("TMS14", GID),"TMS14 (C2)",Group),
+         Group=ifelse(grepl("TMS15", GID),"TMS15 (C3)",Group)) %>% 
+  ggplot(.,aes(x=Group,y=PropSNP_homozygous,fill=Group)) + geom_boxplot() + 
+  theme_bw() + 
+  scale_fill_viridis_d()
+```
+
+# Figure S02: Correlations among phenotypic BLUPs (including Selection Indices)
+
+Figure S02: Correlations among BLUPs (including Selection Indices). (A) StdSI vs. BiofortSI computed from i.i.d. BLUPs. (B) Heatmap of the correlation among BLUPs for each of four component traits and two derived selection indices.
+
+```{r}
+library(tidyverse); library(magrittr);
+# Selection weights -----------
+indices<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS01")
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(Trait,germplasmName,BLUP) %>% 
+  spread(Trait,BLUP) %>% 
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART")))
+blups %<>% 
+  select(germplasmName,all_of(indices$Trait)) %>% 
+  mutate(stdSI=blups %>% 
+           select(all_of(indices$Trait)) %>% 
+           as.data.frame(.) %>% 
+           as.matrix(.)%*%indices$stdSI,
+         biofortSI=blups %>% 
+           select(all_of(indices$Trait)) %>% 
+           as.data.frame(.) %>% 
+           as.matrix(.)%*%indices$biofortSI)
+```
+
+```{r figureS02, fig.width=10, fig.height=5}
+#```{r, fig.show="hold", out.width="50%"}
+library(patchwork)
+p1<-ggplot(blups,aes(x=stdSI,y=biofortSI)) + geom_point(size=1.25) + theme_bw()
+corMat<-cor(blups[,-1],use = 'pairwise.complete.obs')
+(p1 | ~corrplot::corrplot(corMat, type = 'lower', col = viridis::viridis(n = 10), diag = T,addCoef.col = "black")) + 
+  plot_layout(nrow=1, widths = c(0.35,0.65)) +
+  plot_annotation(tag_levels = 'A',
+                  title = 'Correlations among phenotypic BLUPs (including Selection Indices)')
+
+```
+# Figure S03: Scatterplot comparing accuracies for family means using different validation-data
+
+Figure S03: Scatterplot comparing accuracies for family means using different validation-data. 
+```{r figureS03}
+library(tidyverse); library(magrittr);
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS10")
+accMeans %>% #count(ValidationData,Model,VarComp)
+  spread(ValidationData,Accuracy) %>% 
+  ggplot(.,aes(x=iidBLUPs,y=GBLUPs,color=predOf,shape=Trait)) + 
+  geom_point() +
+  geom_abline(slope=1,color='darkred') + 
+  facet_wrap(~predOf+Model,scales = 'free') + 
+  theme_bw() + scale_color_viridis_d() + 
+  labs(title = "Scatterplot comparing accuracies for family means using different validation-data")
+```
+
+# Figure S04: Accuracies per trait-fold-rep-Model do not re-rank much from iid-to-GBLUP validation data
+
+Figure S04: Boxplots to show that Accuracies per trait-fold-rep-Model do not re-rank much whether using the iid or the GBLUPs as validation data. 
+```{r figureS04, fig.width=12}
+forplot<-accMeans %>% 
+  mutate(Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("MeanBV_A","MeanBV_DirDomBV","MeanTGV_AD","MeanTGV_DirDomAD")),
+         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         predOf=factor(predOf,levels=c("MeanBV","MeanTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Trait))
+
+forplot %>% 
+  ggplot(aes(x=ValidationData,y=Accuracy)) + 
+  geom_violin(data=forplot,aes(fill=ValidationData), alpha=0.75) + 
+  geom_boxplot(data=forplot,aes(fill=ValidationData), alpha=0.85, color='gray',width=0.2) + 
+  geom_line(data=forplot,aes(group=RepFold),color='darkred',size=0.6,alpha=0.8) +
+  geom_point(data=forplot,aes(color=ValidationData, group=RepFold),size=1.5) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_grid(Trait~Pred, scales='free_y') + 
+  labs(title = "Accuracies per trait-fold-rep-Model do not re-rank much from iid-to-GBLUP validation data")
+```
+
+# Figure S05: Accuracy predicting family means - GBLUP vs. iid-BLUPs as validation data
+
+Figure S05: Accuracy predicting family means - GBLUP vs. iid-BLUPs as validation data. Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices and for component traits (x-axis), summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the observed mean GEBV or GETGV. For each trait, accuracies for four predictions: two prediction types (family mean BV vs. TGV) times two prediction models (Classic vs. DirDom). Validation data (GBLUPs vs. iidBLUPs) are shown in two horizontal panels.
+
+```{r figureS05, fig.width=10}
+accMeans %>% 
+  mutate(Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("MeanBV_A","MeanBV_DirDomBV","MeanTGV_AD","MeanTGV_DirDomAD")),
+         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         predOf=factor(predOf,levels=c("MeanBV","MeanTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD"))) %>% 
+  ggplot(.,aes(x=Trait,y=Accuracy,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+    facet_grid(.~ValidationData) + 
+  labs(title = "Accuracy predicting family means",
+       subtitle = "GBLUP vs. iid-BLUPs as validation data")
+```
+
+# Figure S06: The difference between PMV and VPM for variance and covariance predictions 
+
+Figure S06: The difference between PMV and VPM for variance and covariance predictions. Each boxplot shows the posterior mean variance (PMV) minus the variance of posterior means (VPM) based prediction of cross variances and covariances. Each panel is a variance or covariance. Each boxplot shows either an additive or dominance variance from one of the genetic models (x-axis).
+
+```{r figureS06, fig.width=10}
+## Table S7: Predicted cross variances
+predVars<-read.csv(here::here("manuscript","SupplementaryTable07.csv"),stringsAsFactors = F)
+predVars %>% 
+  mutate(VarCovar=paste0(Trait1,"_",Trait2),
+         Pred=paste0(Model,"_",VarComp),
+         diffPredVar=PMV-VPM) %>% 
+  ggplot(.,aes(x=Pred,y=diffPredVar,fill=Pred,linetype=VarComp)) + 
+  geom_boxplot() + facet_wrap(~VarCovar,scales='free',nrow=2) + 
+  geom_hline(yintercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle=90)) + 
+  scale_fill_viridis_d() + 
+  labs(title="The difference between PMV and VPM for variance and covariance predictions",
+       y="diffPredVar = PMV minus VPM ")
+```
+
+# Figure S07: The difference between PMV and VPM in terms of prediction accuracy
+
+Figure S07: The difference between PMV and VPM in terms of prediction accuracy. Each boxplot shows the posterior mean variance (PMV) minus the variance of posterior means (VPM) based estimate of prediction accuracy for cross variances and covariances. Each panel is a variance or covariance. Each boxplot shows either an additive or dominance variance from one of the genetic models (x-axis).
+
+
+```{r figureS07, fig.width=10}
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
+accVars %>% 
+  select(-AccuracyCor) %>% 
+  spread(VarMethod,AccuracyWtCor) %>% 
+  mutate(VarCovar=paste0(Trait1,"_",Trait2),
+         Pred=paste0(Model,"_",predOf),
+         diffAcc=PMV-VPM) %>% 
+  ggplot(.,aes(x=Pred,y=diffAcc,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + facet_wrap(~VarCovar,scales='free',nrow=2) + 
+  geom_hline(yintercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle=90)) + 
+  scale_fill_viridis_d() + 
+  labs(title="The difference between PMV and VPM in terms of prediction accuracy",
+       y="diffPredAcc = predAccPMV minus predAccVPM",x=NULL)
+```
+
+# Figure S08: Scatterplot comparing accuracies for family (co)variances using different validation-data
+
+Figure S08: Scatterplot comparing accuracies for family variance and covariance prediction using different validation-data.  
+
+```{r figureS08}
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
+
+accVars %>%
+  filter(VarMethod=="PMV") %>% 
+  select(-AccuracyCor) %>% 
+  spread(ValidationData,AccuracyWtCor) %>% 
+  mutate(Component=paste0(Trait1,"_",Trait2)) %>% 
+  ggplot(.,aes(x=iidBLUPs,y=GBLUPs,shape=predOf,color=Component)) + 
+  geom_point() +
+  geom_abline(slope=1,color='darkred') + 
+  facet_wrap(~predOf+Model,scales = 'free') + 
+  theme_bw() + scale_color_viridis_d(option = "B") +
+  labs(title = "Scatterplot comparing accuracies for different validation-data",
+       subtitle = "Family (co)variances")
+```
+
+# Figure S09: Plot of variance-prediction accuracy: Re-ranking according choice of validation?
+
+Figure S09: Plot of variance-prediction accuracy to show whether re-ranking occurrs according to the choice of validation data (x-axis), GBLUPs vs. i.i.d. BLUPs.
+
+```{r figureS09, fig.width=12}
+forplot<-accVars %>% 
+  filter(VarMethod=="PMV") %>% 
+  filter(Trait1==Trait2,grepl("SI",Trait1)) %>% 
+  mutate(Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("VarBV_A","VarBV_DirDomBV","VarTGV_AD","VarTGV_DirDomAD")),
+         Trait1=factor(Trait1,levels=c("stdSI","biofortSI")),#,"DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI")),#,"DM","logFYLD","MCMDS","TCHART")),
+         Component=paste0(Trait1,"_",Trait2),
+         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Component))
+
+forplot %>% 
+  ggplot(aes(x=ValidationData,y=AccuracyWtCor)) + 
+  geom_violin(data=forplot,aes(fill=ValidationData), alpha=0.75) + 
+  geom_boxplot(data=forplot,aes(fill=ValidationData), alpha=0.85, color='gray',width=0.2) + 
+  geom_line(data=forplot,aes(group=RepFold),color='darkred',size=0.6,alpha=0.8) +
+  geom_point(data=forplot,aes(color=ValidationData, group=RepFold),size=1.5) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_grid(Component~Pred, scales='free_y') + 
+  labs(title="Plot of variance-prediction accuracy: Re-ranking according choice of validation?")
+```
+
+# Figure S10: Accuracy predicting family variances - GBLUP vs. iid-BLUPs as validation data 
+
+Figure S10: Accuracy predicting family variances - GBLUP vs. iid-BLUPs as validation data. Fivefold parent-wise cross-validation estimates of the accuracy predicting (A) genetic variances and (B) covariances. Selection indices and component trait variances are shown on the x-axis. Accuracy (y-axis) was measured as the weighted correlation between the predicted and the observed (co)variance of GEBV or GETGV. For each trait (panel), accuracies for four predictions: two prediction types (VarBV vs. VarTGV) times two prediction models (Classic vs. DirDom). Validation data (GBLUPs vs. iidBLUPs) are shown in horizontal panels.
+
+```{r}
+forplot<-accVars %>% 
+  filter(VarMethod=="PMV") %>% 
+  mutate(Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("VarBV_A","VarTGV_AD","VarBV_DirDomBV","VarTGV_DirDomAD")),
+         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Component=paste0(Trait1,"_",Trait2),
+         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Component))
+
+p_vars<-forplot %>% 
+  filter(Trait1==Trait2) %>% 
+  ggplot(.,aes(x=Component,y=AccuracyWtCor,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=8, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_wrap(~ValidationData,scales='free') +
+  ggtitle(expression(paste("Plot of ", underline(variance), "-prediction accuracy"))) 
+p_covars<-forplot %>% 
+  filter(VarMethod=="PMV") %>% 
+  filter(Trait1!=Trait2) %>% 
+  ggplot(.,aes(x=Component,y=AccuracyWtCor,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=8, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_wrap(~ValidationData,scales='free') +
+  ggtitle(expression(paste("Plot of ", underline(co), "variance-prediction accuracy")))
+#  labs(subtitle="GBLUPs vs. iidBLUPs as validation-data")
+require(patchwork)
+
+```
+```{r figureS10, fig.width=9, fig.height=10}
+(p_vars / p_covars) + 
+  plot_layout(nrow=2,guides = 'collect') +
+  plot_annotation(tag_levels = 'A',
+                  title = 'Accuracy predicting family (co)variances - GBLUP vs. iid-BLUPs as validation data')
+```
+
+# Figure S11: Accuracy predicting family (co)variances - Weighted vs. Unweighted Correlation
+
+Figure S11: Accuracy predicting family (co)variances - Weighted vs. Unweighted Correlation. Fivefold parent-wise cross-validation estimates of the accuracy predicting (A) genetic variances and (B) covariances. Selection indices and component trait variances are shown on the x-axis. Accuracy (y-axis) was measured as the (weighted or unweighted) correlation between the predicted and the observed (co)variance of GEBV or GETGV. For each trait (panel), accuracies for four predictions: two prediction types (VarBV vs. VarTGV) times two prediction models (Classic vs. DirDom). Weighted vs. Unweighted Correlations as accuracy estimates are shown in horizontal panels.
+
+
+```{r, fig.width=12}
+forplot<-accVars %>% 
+  filter(VarMethod=="PMV",ValidationData=="GBLUPs") %>% 
+  pivot_longer(cols=contains("Cor"),names_to = "WT_or_NoWT", values_to = "Accuracy") %>% 
+   mutate(Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("VarBV_A","VarTGV_AD","VarBV_DirDomBV","VarTGV_DirDomAD")),
+         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Component=paste0(Trait1,"_",Trait2),
+         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Component))
+
+
+p_vars<-forplot %>% 
+  filter(Trait1==Trait2) %>% 
+  ggplot(.,aes(x=Component,y=Accuracy,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=9, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_wrap(~WT_or_NoWT,scales='free') +
+  ggtitle(expression(paste("Plot of ", underline(variance), "-prediction accuracy")))
+p_covars<-forplot %>% 
+  filter(Trait1!=Trait2) %>% 
+  ggplot(.,aes(x=Component,y=Accuracy,fill=Pred,linetype=predOf)) + 
+  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
+  theme(axis.text.x = element_text(face='bold', size=9, angle=90),
+        axis.text.y = element_text(face='bold', size=10)) + 
+  facet_wrap(~WT_or_NoWT,scales='free') +
+  ggtitle(expression(paste("Plot of ", underline(co), "variance-prediction accuracy")))
+```
+```{r figureS11, fig.width=12, fig.height=11}
+(p_vars / p_covars) + 
+  plot_layout(nrow=2,guides = 'collect') +
+  plot_annotation(tag_levels = 'A',
+                  title = 'Accuracy predicting family (co)variances - Weighted vs. Unweighted Correlation',
+                  subtitle = "GBLUPs as validation-data")
+```
+
+# Figure S12: Realized selection intensities: measuring post-cross selection
+
+Figure S12: Realized selection intensities: measuring post-cross selection. Boxplots showing (A) the proportion of each family selected and (B) the standardized selection intensity for each stage of the breeding pipeline, in each genetic group.
+
+```{r figureS12, fig.width=10, fig.height=5}
+library(patchwork)
+## Table S13: Realized within-cross selection metrics
+crossmetrics<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS13")
+propPast<-crossmetrics %>% 
+  mutate(Cycle=ifelse(!grepl("TMS13|TMS14|TMS15",sireID) & !grepl("TMS13|TMS14|TMS15",damID),"C0",
+                      ifelse(grepl("TMS13",sireID) | grepl("TMS13",damID),"C1",
+                             ifelse(grepl("TMS14",sireID) | grepl("TMS14",damID),"C2",
+                                    ifelse(grepl("TMS15",sireID) | grepl("TMS15",damID),"C3","mixed"))))) %>% 
+  select(Cycle,starts_with("prop")) %>% 
+  pivot_longer(cols = contains("prop"),values_to = "PropPast",names_to = "StagePast",names_prefix = "propPast|prop") %>% 
+  rename(DescendentsOfCycle=Cycle) %>% 
+  mutate(StagePast=gsub("UsedAs","",StagePast),
+         StagePast=factor(StagePast,levels=c("Parent","Phenotyped","CET","PYT","AYT"))) %>% 
+  ggplot(.,aes(x=StagePast,y=PropPast,fill=DescendentsOfCycle)) + 
+  geom_boxplot(position = 'dodge2',color='black') + 
+  theme_bw() + scale_fill_viridis_d()  + labs(y="Proportion of Family Selected") +
+  theme(legend.position = 'none')
+realIntensity<-crossmetrics %>% 
+  mutate(Cycle=ifelse(!grepl("TMS13|TMS14|TMS15",sireID) & !grepl("TMS13|TMS14|TMS15",damID),"C0",
+                      ifelse(grepl("TMS13",sireID) | grepl("TMS13",damID),"C1",
+                             ifelse(grepl("TMS14",sireID) | grepl("TMS14",damID),"C2",
+                                    ifelse(grepl("TMS15",sireID) | grepl("TMS15",damID),"C3","mixed"))))) %>% 
+  select(Cycle,sireID,damID,contains("realIntensity")) %>% 
+  pivot_longer(cols = contains("realIntensity"),names_to = "Stage", values_to = "Intensity",names_prefix = "realIntensity") %>% 
+  rename(DescendentsOfCycle=Cycle) %>% 
+  distinct %>% ungroup() %>% 
+  mutate(Stage=factor(Stage,levels=c("Parent","CET","PYT","AYT","UYT"))) %>% 
+  ggplot(.,aes(x=Stage,y=Intensity,fill=DescendentsOfCycle)) + 
+  geom_boxplot(position = 'dodge2',color='black') + 
+  theme_bw() + scale_fill_viridis_d()  + labs(y="Stadardized Selection Intensity")
+propPast + realIntensity +  
+  plot_annotation(tag_levels = 'A',
+                  title = 'Realized selection intensities: measuring post-cross selection') & 
+  theme(plot.title = element_text(size = 14, face='bold'),
+        plot.tag = element_text(size = 13, face='bold'),
+        strip.text.x = element_text(size=11, face='bold'))
+```
+
+# Figure S13: Accuracy Predicting Usefulness Criteria - All comparisons
+
+Figure S13: Accuracy Predicting Usefulness Criteria - All comparisons. Accuracy predicting the usefulness (the expected mean of future selected offspring) of previously untested crosses. Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (x-axes) is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and observed usefulness of crosses for each breeding pipeline stage as well as at a constant selection intensity (x-axis). For each UC (panels), accuracies for four predictions: two selection indices (StdSI and BiofortSI) times two prediction models (Classic vs. DirDom).
+
+
+```{r figureS13, fig.width=7}
+library(tidyverse); library(magrittr);
+## Table S12: Accuracies predicting the usefulness criteria
+accUC<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS12")
+accUC %>% 
+  filter(VarMethod=="PMV") %>% 
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI")),
+         Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),#gsub("ClassicAD","Classic",Model),
+         Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("BV_Classic","TGV_Classic","BV_DirDom","TGV_DirDom")),
+         Model=factor(Model,levels=c("Classic","DirDom")),
+         predOf=factor(predOf,levels=c("BV","TGV")),
+         Stage=factor(Stage,levels = c("ConstIntensity","Parent","CET","PYT","AYT","UYT"))) %>% 
+  ggplot(.,aes(x=Stage,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black') + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  facet_grid(.~Trait, scales='free_y') + 
+  labs(y = "Accuracy",
+       title = "Accuracy Predicting Usefulness Criteria - All Stages") + 
+  theme(axis.text = element_text(colour = 'black'),
+        axis.text.x = element_text(face='bold',size=20,angle=45, hjust=1),
+        axis.title.x = element_blank(),#text(face='bold',size=13),
+        axis.text.y = element_text(face='bold', size=20),
+        axis.title.y = element_text(face='bold', size=22),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold', size=26),
+        plot.title = element_text(size = 14, face='bold'),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=22)) + 
+  labs(y = "Accuracy")
+```
+
+# Figure S14: Correlation matrix for predictions on the StdSI
+
+Figure S14: Correlation matrix for predictions on the StdSI. Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV, for both the classic and directional dominance model. Predictions were made for 47,083 possible pairwise crosses of 306 parents.
+```{r}
+library(tidyverse); library(magrittr); 
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
+forCorrMat<-predUntestedCrosses %>% 
+  mutate(Family=paste0(sireID,"x",damID),
+         PredOf=paste0(Trait,"_",PredOf,"_",Component,"_",ifelse(Model=="ClassicAD","classic","dirdom"))) %>%
+  select(Family,PredOf,Pred) %>%
+  spread(PredOf,Pred)
+```
+
+```{r, fig.width=10, fig.height=7}
+corMat_std<-cor(forCorrMat[,grepl("stdSI",colnames(forCorrMat))],use = 'pairwise.complete.obs')
+corrplot::corrplot(corMat_std, type = 'lower', col = viridis::viridis(n = 10), diag = F,addCoef.col = "black", 
+                   tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
+```
+
+# Figure S15: Correlation matrix for predictions on the BiofortSI
+
+Figure S15: Correlation matrix for predictions on the BiofortSI. Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV, for both the classic and directional dominance model. Predictions were made for 47,083 possible pairwise crosses of 306 parents.
+
+```{r, fig.width=10, fig.height=7}
+corMat_bio<-cor(forCorrMat[,grepl("biofortSI",colnames(forCorrMat))],use = 'pairwise.complete.obs')
+corrplot::corrplot(corMat_bio, type = 'lower', col = viridis::viridis(n = 10), diag = F,addCoef.col = "black", 
+                   tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
+```

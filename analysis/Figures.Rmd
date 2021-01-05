@@ -1,0 +1,453 @@
+---
+title: "Figures"
+site: workflowr::wflow_site
+date: "2020-July-30"
+output: 
+  workflowr::wflow_html:
+    code_folding: "hide"
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# Figure 1: Accuracy predicting family means
+
+```{r}
+library(tidyverse); library(magrittr); library(patchwork)
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS10")
+forplot<-accMeans %>% 
+  filter(ValidationData=="GBLUPs") %>% 
+  mutate(Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+         Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("MeanBV_Classic","MeanBV_DirDom","MeanTGV_Classic","MeanTGV_DirDom")),
+         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         predOf=factor(predOf,levels=c("MeanBV","MeanTGV")),
+         Model=factor(Model,levels=c("Classic","DirDom")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Trait))
+p1<-forplot %>% 
+  filter(grepl("SI",Trait)) %>% 
+#  ggplot(.,aes(x=Pred,y=Accuracy,fill=Pred,linetype=VarComp)) + 
+  ggplot(.,aes(x=Pred,y=Accuracy,fill=Pred)) + 
+#  geom_boxplot(position = position_dodge2(padding=0.35), size=1.05,color='grey40') + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold', size = 18),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold'),
+        legend.position = 'none') + 
+  facet_grid(.~Trait)
+p2<-forplot %>% 
+  filter(!grepl("SI",Trait)) %>% 
+  ggplot(.,aes(x=Pred,y=Accuracy,fill=Pred)) + 
+#  geom_boxplot(position = position_dodge2(padding=0.35), size=1.05,color='grey40') + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_blank(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold'),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=22)) + 
+  facet_grid(.~Trait)
+```
+```{r figure1, fig.width=13.5, fig.height=6, warning=F}
+p1 + p2 + plot_layout(widths = c(1, 2)) + 
+  plot_annotation(tag_levels = 'A') & 
+  theme(plot.title = element_text(size = 16, face='bold'),
+        plot.tag = element_text(size = 24, face='bold'),
+        strip.text.x = element_text(size = 23, face='bold'),
+        axis.text.y = element_text(size = 20, face = 'bold'))
+```
+**Figure 1. Accuracy predicting the family mean of previously untested crosses.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the observed mean GEBV or GETGV. For each trait, accuracies for four predictions: two prediction types (family mean BV vs. TGV) times two prediction models (Classic vs. DirDom). 
+
+# Figure 2: Accuracy predicting family variances and covariances
+
+```{r}
+## Table S11: Accuracies predicting the variances
+library(tidyverse); library(magrittr); library(patchwork)
+accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
+forplot<-accVars %>% 
+  filter(VarMethod=="PMV",ValidationData=="GBLUPs") %>% 
+  mutate(Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),
+         Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("VarBV_Classic","VarBV_DirDom","VarTGV_Classic","VarTGV_DirDom")),
+         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Component=paste0(Trait1,"_",Trait2),
+         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
+         Model=factor(Model,levels=c("A","AD","DirDom")),
+         RepFold=paste0(Repeat,"_",Fold,"_",Component))
+p1<-forplot %>% 
+  filter(Trait1==Trait2,grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Pred,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_blank(),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=20),
+        strip.text.x = element_text(face='bold')) + 
+  facet_grid(.~Trait1)
+p2<-forplot %>% 
+  filter(Trait1==Trait2,!grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Pred,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=20),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold')) + 
+  facet_grid(.~Trait1)
+p3<-forplot %>% 
+  filter(Trait1!=Trait2,!grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Pred,y=AccuracyWtCor,fill=Pred)) + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_blank(),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',margin = margin(t = 1, r = 0, b = 1, l = 0, unit = "pt")),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=20),
+        panel.spacing.x = unit(0.5, "lines")) + 
+  facet_grid(.~Trait1+Trait2)
+```
+
+```{r figure2, fig.width=15, fig.height=7.5, warning=F}
+((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
+  plot_layout(guides = 'collect',nrow=2) +
+  plot_annotation(tag_levels = 'A') & 
+  theme(plot.title = element_text(size = 20, face='bold'),
+        plot.tag = element_text(size = 24, face='bold'),
+        strip.text.x = element_text(size=26, face='bold'),
+        axis.text.y = element_text(size = 22, face = 'bold'),
+        legend.position = 'bottom', legend.text = element_text(face='bold',size=24))
+```
+
+**Figure 2. Accuracy predicting the genetic (co)variances of previously untested crosses.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the genetic variance of crosses on selection indices (A) and for component trait variances (B) and covariances (C). Accuracy (y-axis) was measured as the correlation between the predicted and the observed (co)variance of GEBV or GETGV. For each trait (panel), accuracies for four predictions: two prediction types (VarBV vs. VarTGV) times two prediction models (Classic vs. DirDom). 
+
+
+# Figure 3: Accuracy Predicting Usefulness Criteria
+```{r figure3, fig.width=9, fig.height=6}
+library(tidyverse); library(magrittr);
+## Table S12: Accuracies predicting the variances
+accUC<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS12")
+
+accUC %>% 
+  filter(VarMethod=="PMV",Stage %in% c("Parent","AYT")) %>% #count(predOf,Model)
+  mutate(Trait=factor(Trait,levels=c("stdSI","biofortSI")),
+         Model=ifelse(Model %in% c("A","AD"),"Classic","DirDom"),#gsub("ClassicAD","Classic",Model),
+         Pred=paste0(predOf,"_",Model), 
+         Pred=factor(Pred,levels=c("BV_Classic","TGV_Classic","BV_DirDom","TGV_DirDom")),
+         Model=factor(Model,levels=c("Classic","DirDom")),
+         predOf=factor(predOf,levels=c("BV","TGV")),
+         Stage=recode_factor(Stage, `Parent` = "bold(UC[parent])", `AYT`= "bold(UC[clone]^{AYT})")) %>% 
+  ggplot(.,aes(x=Stage,y=AccuracyWtCor,fill=Pred)) + 
+  scale_x_discrete(labels = scales::parse_format()) + 
+  geom_boxplot(position = position_dodge2(padding=0.35), size=1,color='black',outlier.color = 'grey40', notch = TRUE) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d() + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  facet_grid(.~Trait) +
+  theme(axis.text = element_text(colour = 'black'),
+        axis.text.x = element_text(face='bold',size=22),
+        axis.title.x = element_blank(),#text(face='bold',size=13),
+        axis.text.y = element_text(face='bold', size=20),
+        axis.title.y = element_text(face='bold', size=22),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold', size=26),
+        plot.title = element_text(size = 14, face='bold'),
+        legend.title = element_blank(),
+        legend.text = element_text(face='bold',size=22)) + 
+  labs(y = "Accuracy")
+```
+
+**Figure 3. Accuracy predicting the usefulness (the expected mean of future selected offspring) of previously untested crosses.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (x-axes) is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and observed usefulness of crosses for breeding parents () or clones (). For each UC (panels), accuracies for four predictions: two selection indices (StdSI and BiofortSI) times two prediction models (Classic vs. DirDom).
+
+
+# Figure 4: Importance of non-additive effects (variance components) 
+
+```{r, fig.width=12, fig.height=5}
+library(tidyverse); library(magrittr); library(patchwork)
+## Table S15: Variance estimates for genetic groups
+varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
+forplot<-varcomps %>% 
+  filter(VarMethod=="PMV", Method=="M2",Model %in% c("AD","DirDomAD")) %>% 
+  select(-VarMethod,-Method) %>% 
+  mutate(Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
+         Model=factor(Model,levels=c("AD","DirDomAD")))
+p1<-forplot %>% 
+  filter(Trait1==Trait2,grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Group,y=propDom,fill=Model)) + 
+  geom_bar(stat = 'identity', position="dodge2", color='grey40') + 
+  facet_grid(.~Trait1, scales='free_y') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold', angle=60,color='black',size=12, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold'),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14),
+        legend.position = 'none') +
+  labs(y = "Prop. Dominance")
+p2<-forplot %>% 
+  filter(Trait1==Trait2,!grepl("SI",Trait1)) %>% 
+  ggplot(.,aes(x=Group,y=propDom,fill=Model)) + 
+  geom_bar(stat = 'identity', position="dodge2", color='grey40') + 
+  facet_grid(.~Trait1, scales='free_y') + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d(option = "A") + 
+  scale_color_viridis_d() + 
+  theme(axis.text.x = element_text(face='bold', angle=60,color='black',size=12, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold'),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14)) + 
+  labs(y = "Prop. Dominance")
+p3<-forplot %>% 
+  filter(Trait1!=Trait2,!grepl("SI",Trait1)) %>% 
+  select(-propDom) %>% 
+  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "Var") %>% 
+  ggplot(.,aes(x=Group,y=Var,fill=VarComp, linetype=Model, group=Model, color=Model)) + 
+  geom_bar(stat = 'identity', position = 'dodge', size=1.25) + #, color='grey40' 
+  facet_wrap(~Trait1+Trait2, scales='free_y',nrow = 1) + 
+  geom_hline(yintercept = 0, color='darkred', size=1) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  scale_color_viridis_d(option="B",direction = -1) + 
+  theme(axis.text.x = element_text(face='bold', angle=60,color='black',size=12, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold'),
+        title = element_text(),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14)) + 
+  labs(y = "Covariance Estimates")
+```
+
+```{r figure4, fig.width=15, fig.height=7.5}
+(p1 + p2 + plot_layout(widths = c(1, 2))) / p3 + 
+  plot_annotation(tag_levels = 'A') & 
+  theme(plot.title = element_text(size = 14, face='bold'),
+        plot.tag = element_text(size = 24, face='bold'),
+        strip.text.x = element_text(size=22, face='bold'),
+        legend.text = element_text(size=20, face='bold'),
+        axis.text.x = element_text(size=20,face='bold'),
+        axis.text.y = element_text(size=22,face='bold'),
+        axis.title.y = element_text(size=22,face='bold'))
+```
+
+**Figure 4. Population-level measures of the importance of dominance genetic effects.** The genetic variance estimates from the models fitted to the overall population (“All”) and also to its four genetic groups (x-axis) are presented in these barplots. Each panel contains results for a trait variance or covariance. For selection indices (A) and component traits (B) the proportion of genetic variance accounted for by dominance is shown on the y-axis. For covariances between component traits (C) the estimates themselves are plotted. For A and B, color distinguishes prediction models (ClassicAD vs. DirDom), whereas for C, color indicates variance component (additive vs. dominance) and models are distinguished by linetype as shown in the legend. 
+
+
+# Figure 5: Inbreeding Effect Estimates
+```{r figure5, fig.width=10, fig.height=5}
+library(tidyverse); library(magrittr);
+## Table S16: Directional dominance effects estimates
+ddEffects<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS16")
+forplot<-ddEffects %>% 
+  mutate(Group=factor(Group,levels=c("ParentwiseCV","All","GG","TMS13","TMS14","TMS15")))
+ggplot(forplot,aes(x=Group,y=InbreedingEffect,fill=Group)) + 
+  geom_bar(data=forplot %>% 
+             mutate(InbreedingEffect=ifelse(Group=="ParentwiseCV",NA,InbreedingEffect)),
+           stat='identity',color='grey40') + 
+  geom_errorbar(data=forplot %>% 
+                  filter(Group!="ParentwiseCV"), 
+                aes(ymin=InbreedingEffect-InbreedingEffectSD,
+                    ymax=InbreedingEffect+InbreedingEffectSD),
+                width=0.2,color='grey40') + 
+  geom_boxplot(data=ddEffects %>% filter(Group=="ParentwiseCV"), color='grey30',size=1.1) +
+  facet_wrap(~Trait,nrow=1, scales='free') + 
+  geom_hline(yintercept = 0, color='darkred', size=1.25) + 
+  theme_bw() + 
+  scale_fill_viridis_d() + 
+  theme(axis.text.x = element_text(angle=60,face='bold', color='black',size=12, hjust = 1),
+        axis.title.x = element_text(face='bold',size=12),
+        axis.text.y = element_text(face='bold'),
+        axis.title.y = element_text(face='bold',size=14),
+        title = element_text(face='bold'),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(face='bold',size=14)) + 
+  labs(
+    #title = "Population-level Estimates of Inbreeding Effect",
+     #  subtitle = "Fixed-effect estimate of prop(Homozygous) effect, from the Directional Dominance Models",
+       y = "Inbreeding Effect", x = NULL)
+```
+**Figure 5. Estimates of the genome-wide effect of inbreeding.** For each trait (panels), the fixed-effect for genome-wide proportion of homozygous sites is shown on the y-axis, as estimated by a directional dominance model. For the overall population (“All”) and four genetic groups (“TMS13”, “TMS14”, “TMS15”), the posterior mean estimate and its standard deviation (bars) are shown on the x-axis. For comparison a boxplot showing the distribution of estimates from models fit to parent-wise cross-validation training and validation sets (“ParentwiseCV”) is also shown. 
+
+# Figure 6: Exploring Untested Crosses
+
+```{r}
+library(tidyverse); library(magrittr); library(patchwork);
+library(ggforce); library(concaveman); library(V8)
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
+preds_std<-predUntestedCrosses %>% filter(Trait=="stdSI")
+top50crosses_std<-preds_std %>% 
+  filter(PredOf!="Sd") %>%
+  group_by(Trait,Model,PredOf,Component) %>% 
+  slice_max(order_by = Pred,n=50) %>% ungroup()
+forplot_std<-preds_std %>% 
+  spread(PredOf,Pred) %>% 
+  mutate(CrossType=ifelse(IsSelf==TRUE,"SelfCross","Outcross")) %>% 
+  left_join(top50crosses_std %>% 
+              distinct(sireID,damID) %>% 
+              mutate(Group="NewCrosses")) %>% 
+  mutate(Group=ifelse(CrossPrevMade=="Yes","PreviousCrosses",Group))
+```
+
+```{r}
+meanVSvar<-forplot_std %>% 
+  ggplot(.,aes(x=Mean,y=Sd,shape=CrossType)) + 
+  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  geom_mark_ellipse(data=forplot_std %>% 
+                      filter(Group=="NewCrosses") %>% 
+                      mutate(desc=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
+                    aes(fill=Group,label=desc), expand = unit(2.5, "mm"), label.buffer = unit(15, 'mm')) + 
+  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==FALSE),
+             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F) + 
+  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==TRUE),
+             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F) + 
+  scale_color_viridis_d() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid2")) + 
+  facet_grid(Component~Model, scales='free') + 
+  theme_bw() + 
+  theme(axis.title = element_text(face='bold', color='black',size=24),
+        axis.text = element_text(face='bold', color='black', size=20),
+        strip.background = element_blank(),
+        strip.text = element_text(face='bold', size=26),
+        strip.text.y = element_text(angle=0),
+        legend.text = element_text(size = 24, face='bold'),legend.position = 'none',
+        legend.title = element_text(size = 24, face='bold'),
+        plot.tag = element_text(size = 24, face='bold')) + 
+  labs(x = "Predicted Cross Mean", y = "Predicted Cross SD")
+
+forplot_std_bvVStgv<-forplot_std %>% 
+  select(-Mean,-Sd) %>% 
+  spread(Component,UC)
+bvVStgv<-forplot_std_bvVStgv %>% 
+  ggplot(.,aes(x=BV,y=TGV,shape=CrossType)) + 
+  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  geom_abline(slope=1, color='darkred') +
+  geom_mark_ellipse(data=forplot_std_bvVStgv %>% 
+                      filter(Group=="NewCrosses") %>% 
+                      mutate(lab=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
+                    aes(fill=Group,label=lab), expand = unit(2.5, "mm")) + 
+  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==FALSE),
+             aes(x=BV,y=TGV,fill=Group), shape=21, color='black',inherit.aes = F) + 
+  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==TRUE),
+             aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F) + 
+  scale_color_viridis_d() + 
+  scale_fill_manual(values = c("goldenrod2","darkorchid2")) + 
+  facet_grid(.~Model, scales='free') + 
+  theme_bw() + 
+  theme(axis.title = element_text(face='bold', color='black', size=24),
+        axis.text = element_text(face='bold', color='black', size=20),
+        strip.background = element_blank(),
+        strip.text = element_text(face='bold', size=26),
+        strip.text.x = element_blank(),legend.position = 'none',
+        legend.text = element_text(size = 24, face='bold'),
+        legend.title = element_text(size = 24, face='bold')) + 
+  labs(x = expression(bold("UC"["parent"]~" (BV)")), y=expression(bold("UC"["variety"]~" (TGV)")))
+
+```
+
+
+```{r figure6, fig.width=11, fig.height=13.5}
+library(patchwork)
+(meanVSvar / bvVStgv) + 
+  plot_layout(ncol=1,guides = 'collect',heights = c(0.6,0.4)) + 
+  theme(plot.tag = element_text(size = 24, face='bold')) +
+  plot_annotation(tag_levels = 'A')
+
+```
+
+**Figure 6. Genomic mate selection criteria for the StdSI predicted for previously untested crosses.** We predicted 47,083 crosses among 306 parents. We made eight predictions in total encompassing the 2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]. Selfs are shown as triangles, outcrosses as circles. For each of the predictions, we took the top 50 ranked crosses and then selected the union of crosses selected by at least one metric for n= 190 “New Crosses”. In each panel, the 190 new crosses are highlighted in yellow and distinguished according to their status as self- vs. outcrosses. The 462 crosses previously made are shown in purple to highlight the opportunity for improvement. The predicted cross genetic mean is plotted against the predicted family genetic standard deviation (Sd, ) for breeding value [BV] and total genetic value [TGV] (panel rows) (A). The  is also plotted against the  with a red one-to-one line in B. Results are shown for the ClassicAD model (left column) and the DirDomAD model (right column) of A and B.  
+
+# Figure 7: Network plot of selected parents and matings
+
+```{r}
+library(ggraph); library(tidygraph)
+#set_graph_style(plot_margin = margin(0.5,0.5,0.5,0.5))
+graph_classic<-as_tbl_graph(top50crosses_std %>% filter(Model=="ClassicAD"),directed = F) %>% 
+  mutate(degree = centrality_degree()) %>% 
+  ggraph(., layout = 'nicely') +
+  geom_edge_fan(aes(colour = Component, linetype = PredOf),strength = 3) +
+  geom_edge_loop(aes(colour = Component, linetype = PredOf),strength = 3) + 
+  geom_node_point(aes(size = degree),show.legend = F) + 
+  scale_edge_color_manual(values = c("goldenrod2","darkorchid4")) + 
+  theme_bw() + 
+  theme(strip.text.x = element_text(face='bold',size=24),strip.background.x = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        plot.title = element_text(face='bold',size=24),
+        plot.tag = element_text(size = 24, face='bold')) + 
+  labs(title="ClassicAD Model")
+#top50crosses_std %>% count(Model)
+graph_dirdom<-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),directed = F) %>% 
+  mutate(degree = centrality_degree()) %>% 
+  ggraph(., layout = 'nicely') +
+  geom_edge_fan(aes(colour = Component, linetype = PredOf),strength = 3) +
+  geom_edge_loop(aes(colour = Component, linetype = PredOf),strength = 3) + 
+  geom_node_point(aes(size = degree),show.legend = F) + 
+  scale_edge_color_manual(values = c("goldenrod2","darkorchid4")) + 
+  theme_bw() + 
+  theme(strip.text.x = element_text(face='bold',size=24),strip.background.x = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        plot.title = element_text(face='bold',size=24),
+        plot.tag = element_text(size = 24, face='bold')) + 
+  labs(title="DirDomAD Model")
+```
+```{r figure7, fig.width=10, fig.height=5}
+library(patchwork)
+(graph_classic | graph_dirdom) +
+  plot_layout(guides = 'collect') +
+  plot_annotation(tag_levels = 'A') + # ,title = "Network of parents and crosses selected for the StdSI"
+  theme(plot.tag = element_text(size = 24, face='bold'))
+```
+
+**Figure 7. Network plot of selected parents and matings for the StdSI.** There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels.

@@ -1,0 +1,429 @@
+---
+title: "Supplementary Dataset"
+site: workflowr::wflow_site
+date: "2020-July-29"
+output: 
+  workflowr::wflow_html:
+    code_folding: "hide"
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# SI Dataset
+
+## Initiate
+
+```{r}
+library(writexl)
+suptables<-list()
+```
+
+## Table S1: Selection indices
+
+Table S1: Selection indices. For each trait, the standard deviation of BLUPs, which were divided by "unscaled" index weights for the StdSI and BiofortSI indices to get StdSI and BiofortSI weights used throughout the study.
+
+```{r}
+library(tidyverse); library(magrittr); 
+indices<-readRDS(file=here::here("data","selection_index_weights_4traits.rds"))
+suptables[["TableS01"]]<-indices
+indices %>% rmarkdown::paged_table()
+```
+
+## Table S2: Summary of cross-validation scheme
+
+Table S2: Summary of cross-validation scheme. For each fold of each Rep, the number of parents in the test-set (Ntestparents) is given along with the number of clones in the corresponding training (Ntraintset) and testing (Ntestset) datasets and the number of crosses to predict (NcrossesToPredict).
+
+```{r}
+library(tidyverse); library(magrittr)
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds"))
+ped<-readRDS(here::here("data","ped_awc.rds")) %>%
+  distinct(sireID,damID)
+parentfolds %<>% 
+  mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .)))
+```
+
+```{r}
+parentfold_summary<-parentfolds %>% 
+  rename(Rep=id,Fold=id2) %>% 
+  mutate(Ntestparents=map_dbl(testparents,length),
+         Ntrainset=map_dbl(trainset,length),
+         Ntestset=map_dbl(testset,length),
+         NcrossesToPredict=map_dbl(CrossesToPredict,nrow)) %>% 
+  select(Rep,Fold,starts_with("N"))
+suptables[["TableS02"]]<-parentfold_summary
+parentfold_summary %>% rmarkdown::paged_table()
+```
+
+## Table S3: Test-parents
+
+Table S3: Test-parents. For each fold of each cross-validation repeat, the set of parents whose crosses are to be predicted is listed.
+
+```{r}
+testparents<-parentfolds %>% 
+  rename(Rep=id,Fold=id2) %>% 
+  select(Rep,Fold,testparents) %>% 
+  unnest(testparents)
+suptables[["TableS03"]]<-testparents
+testparents %>% head %>% rmarkdown::paged_table()
+```
+
+## Table S4: Training-Testing partitions of germplasm
+
+Table S4: Training-Testing partitions of germplasm. For each fold of each repeat, the genotype ID (germplasmName) of all clones in the "trainset" and "testset" are given.
+
+```{r}
+train_test_germplasmNames<-parentfolds %>% 
+  rename(Rep=id,Fold=id2) %>% 
+  select(Rep,Fold,trainset,testset) %>% 
+  pivot_longer(cols = c(trainset,testset), names_to = "Set", values_to = "germplasmName") %>% 
+  unnest(germplasmName)
+suptables[["TableS04"]]<-train_test_germplasmNames
+train_test_germplasmNames %>% head %>% rmarkdown::paged_table()
+```
+
+## Table S5: Crosses to predict each fold
+
+Table S5: Crosses to predict each fold. For each fold of each repeat, the sireID and damID are given for each cross-to-be-predicted.
+
+```{r}
+CrossesToPredict<-parentfolds %>% 
+  rename(Rep=id,Fold=id2) %>% 
+  select(Rep,Fold,CrossesToPredict) %>% 
+  unnest(CrossesToPredict)
+suptables[["TableS05"]]<-CrossesToPredict
+CrossesToPredict %>% head %>% rmarkdown::paged_table()
+```
+
+## Table S6: Predicted and observed cross means
+
+Table S6: Predicted and observed cross means. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predMean) and observations (obsMean) are shown.  
+
+```{r}
+obsVSpredMeans<-readRDS(here::here("output","obsVSpredMeans.rds"))
+write.csv(obsVSpredMeans,file = here::here("manuscript", "SupplementaryTable06.csv"), row.names = F)
+# suptables[["TableS06"]]<-obsVSpredMeans
+obsVSpredMeans %>% str
+```
+
+```{r}
+obsVSpredMeans %>% count(Model,predOf,ValidationData) %>% spread(predOf,n) %>% rmarkdown::paged_table()
+```
+
+## Table S7: Predicted cross variances
+
+Table S7: Predicted cross variances. All predictions of cross-variance from the cross-validation scheme are detailed. For each fold of each repeat and each unique cross (sireID-damID). Both variances (Trait1==Trait2) and co-variances (Trait1!=Trait2) are given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), the variance component being predict (VarA or VarD), along with the number of segregating SNPs in the family (Nsegsnps) and the time taken in seconds for computation, per family (totcomputetime) are given. The predictions based on the variance of posterior means (VPM) and the posterior mean variances (PMV) are both shown. 
+
+```{r}
+library(tidyverse); library(magrittr); library(predCrossVar)
+# Tidy predicted Vars for Models A and AD
+predictedCrossVars<-list.files(here::here("output/crossPredictions")) %>% 
+  grep("predictedCrossVars_chunk",.,value = T) %>% 
+  map_df(.,~readRDS(here::here("output/crossPredictions",.))) %>% 
+  select(Repeat,Fold,Model,crossVars) %>% 
+  mutate(crossVars=map(crossVars,
+                       function(crossVars){
+                         out<-crossVars$predictedCrossVars$varcovars %>% 
+                           mutate(varcomps=map(varcomps,~.$predictedfamvars)) %>% 
+                           unnest(varcomps) %>% 
+                           unnest(predVars)
+                         return(out)})) %>% 
+  unnest(crossVars)
+
+predictedDirDomCrossVars<-bind_rows(list.files(here::here("output/crossPredictions")) %>% 
+                      grep("predictedDirectionalDomCrossVarBVs_chunk",.,value = T) %>% 
+                      grep("_15Dec2020.rds",.,value = T) %>% 
+                      map_df(.,~readRDS(here::here("output/crossPredictions",.))) %>% 
+                      select(Repeat,Fold,crossVars) %>% 
+                      mutate(Model="DirDomBV"),
+                    list.files(here::here("output/crossPredictions")) %>% 
+                      grep("predictedDirectionalDomCrossVarTGVs_chunk",.,value = T) %>% 
+                      grep("_15Dec2020.rds",.,value = T) %>% 
+                      map_df(.,~readRDS(here::here("output/crossPredictions",.))) %>% 
+                      select(Repeat,Fold,crossVars) %>% 
+                      mutate(Model="DirDomAD")) %>% 
+  mutate(crossVars=map(crossVars,
+                       function(crossVars){
+                         out<-crossVars$predictedCrossVars$varcovars %>% 
+                           mutate(varcomps=map(varcomps,~.$predictedfamvars)) %>% 
+                           unnest(varcomps) %>% 
+                           unnest(predVars)
+                         return(out)})) %>% 
+  unnest(crossVars)
+# ### Combine all predicted vars into table
+predictedCrossVars<-bind_rows(predictedCrossVars,
+                              predictedDirDomCrossVars)
+rm(predictedDirDomCrossVars); gc()
+saveRDS(predictedCrossVars,file=here::here("output/crossPredictions","TableS7_predictedCrossVars.rds"))
+
+predictedCrossVars<-readRDS(file=here::here("output/crossPredictions","TableS7_predictedCrossVars.rds"))
+write.csv(predictedCrossVars,file = here::here("manuscript", "SupplementaryTable07.csv"), row.names = F)
+```
+
+
+```{r}
+#suptables[["TableS07"]]<-predictedCrossVars
+predictedCrossVars %>% str
+```
+
+```{r}
+predictedCrossVars %>% count(Model,VarComp) %>% rmarkdown::paged_table()
+```
+
+## Table S8: Predicted and observed cross variances
+
+Table S8: Predicted and observed cross variances. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predVar) and observations (obsVar) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). The family size (number of genotyped offspring, FamSize) or number of offspring with direct phenotypes (Nobs) are used (CorrWeight) to weight the correlation between observed and predicted family variances.
+
+```{r}
+obsVSpredVars<-readRDS(here::here("output","obsVSpredVars.rds"))
+write.csv(obsVSpredVars,file = here::here("manuscript", "SupplementaryTable08.csv"), row.names = F)
+#suptables[["TableS08"]]<-obsVSpredVars
+obsVSpredVars %>% str
+```
+
+```{r}
+obsVSpredVars %>% count(Model,predOf,VarMethod,ValidationData) %>% spread(ValidationData,n) %>% rmarkdown::paged_table()
+```
+
+## Table S9: Predicted and observed UC
+
+Table S9: Predicted and observed UC.  For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The predicted usefulness criterion (predUC) was computed as the predMean + realIntensity*predSD, where predMean is the predicted family mean and predSD is the predicted genetic standard deviation. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI) and corresponding prediction (predUC) and observations (obsUC) are shown. The family size (number of genotyped offspring, FamSize) is shown along with the realized selection intensity (realIntensity) for each selection stage in the breeding pipeline (Parent, CET, PYT, AYT, UYT) and also a constant intensity value (Stage=ConstIntensity). 
+
+```{r}
+obsVSpredUC<-readRDS(here::here("output","obsVSpredUC.rds"))
+write.csv(obsVSpredUC,file = here::here("manuscript", "SupplementaryTable09.csv"), row.names = F)
+#suptables[["TableS09"]]<-obsVSpredUC
+obsVSpredUC %>% str
+```
+
+```{r}
+obsVSpredUC %>% count(Model,predOf,VarMethod,Stage) %>% spread(VarMethod,n) %>% rmarkdown::paged_table()
+```
+
+## Table S10: Accuracies predicting the mean
+
+Table S10: Accuracies predicting the mean. For each fold of each repeat, the accuracy predicting family means (Accuracy) is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown.  
+
+
+```{r}
+accMeans<-readRDS(here::here("output","accuraciesMeans.rds"))
+suptables[["TableS10"]]<-accMeans
+accMeans %>% count(Model,predOf,ValidationData,Trait) %>% spread(Trait,n) %>% rmarkdown::paged_table()
+```
+
+## Table S11: Accuracies predicting the variances
+
+Table S11: Accuracy of predicting the variances. For each fold of each repeat the estimated accuracy of predicting family variances is given. Accuracy was computed the correlation between predicted and observed variance, either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). 
+
+```{r}
+accVars<-readRDS(here::here("output","accuraciesVars.rds"))
+suptables[["TableS11"]]<-accVars
+accVars %>% str
+```
+
+```{r, cols.print=16}
+accVars %>% #mutate(Trait1_Trait2=paste0(Trait1,"_",Trait2)) %>% 
+  count(Model,predOf,VarMethod,ValidationData) %>% rmarkdown::paged_table()
+```
+
+## Table S12: Accuracies predicting the usefulness criteria
+
+Table S12: Accuracy predicting the usefulness criteria. For each fold of each repeat the estimated accuracy of predicting family usefulness criteria is given. Accuracy was computed as the correlation between predicted UC and observed UC (mean of selected offspring), either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of UC in breeding value (predOf=VarBV) or UC in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. 
+
+```{r}
+accUC<-readRDS(here::here("output","accuraciesUC.rds"))
+suptables[["TableS12"]]<-accUC
+accUC %>% str
+```
+
+```{r, cols.print=16}
+accUC %>%
+  count(Model,predOf,VarMethod,Stage,Trait) %>% spread(Trait,n) %>% rmarkdown::paged_table()
+```
+
+## Table S13: Realized within-cross selection metrics
+
+Table S13: Realized within-cross selection metrics. Table summarizing measurements made of selection within each cross (unique sireID-damID). Summaries included: family size (FamSize), number and proportion of members used as parents, mean GEBV and GETGV of top 1% of each family, for each selection index (BiofortSI, StdSI), proportion of each family that has been phenotyped and past each stage of the breeding pipeline (past CET, PYT, AYT) and finally the corresponding realized intensity of selection for each stage.
+
+```{r, cols.print=28}
+realizedcrossmetrics<-readRDS(file=here::here("output/crossRealizations","realizedCrossMetrics.rds"))
+realizedcrossmetrics %<>% 
+  select(-Repeat,-Fold,-Model,-contains("realizedUC")) %>% 
+  ungroup() %>% 
+  distinct %>% 
+  arrange(desc(FamSize))
+suptables[["TableS13"]]<-realizedcrossmetrics
+realizedcrossmetrics %>% str
+```
+
+## Table S14: Proportion homozygous per clone
+
+Table S14: Proportion homozygous per clone. Genome-wide proportion of SNPs that are homozygous, for each clone in the study.
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(rsample); library(predCrossVar)
+ped<-readRDS(here::here("data","ped_awc.rds"))
+snps<-readRDS(here::here("data","dosages_awc.rds"))
+snps %<>% 
+  .[rownames(snps) %in% ped$FullSampleName,] %>% 
+  remove_invariant(.); dim(snps) # [1]  3199 33370
+f<-getPropHom(snps)
+propHom<-tibble(GID=names(f), PropSNP_homozygous=as.numeric(f))
+saveRDS(propHom,file=here::here("output","propHomozygous.rds"))
+```
+
+```{r}
+propHom<-readRDS(file=here::here("output","propHomozygous.rds"))
+suptables[["TableS14"]]<-propHom
+head(propHom) %>% rmarkdown::paged_table()
+```
+
+## Table S15: Variance estimates for genetic groups
+
+Table S15: Variance estimates for genetic groups. Summary of the population-level genetic variance estimates in each genetic group (GG, TMS13, TMS14, TMS15), for each genetic model (A, AD, DirDomA, DirDomAD), each variance (Trait1==Trait2) and covariance (Trait1!=Trait2). The estimates are computed both based on the variance of posterior means (VarMethod=VPM) and the posterior mean variances (VarMethod=PMV). The "Method" refers to whether linkage disequilibrium is accounted for (M2) or not (M1). 
+
+```{r}
+varcomps_geneticgroups<-readRDS(here::here("output","pmv_varcomps_geneticgroups_tidy_includingSIvars.rds"))
+varcomps_geneticgroups %<>% 
+  spread(VarComp,Var) %>% 
+  mutate_if(is.numeric,~round(.,6)) %>% 
+  mutate(propDom=ifelse(!is.na(VarD),round(VarD/(VarA+VarD),2),0)) %>% 
+  select(-outName) %>%
+  arrange(VarMethod,desc(Method))
+suptables[["TableS15"]]<-varcomps_geneticgroups
+varcomps_geneticgroups %>% rmarkdown::paged_table()
+```
+
+```{r}
+varcomps_geneticgroups %>% count(Method,VarMethod) %>% rmarkdown::paged_table()
+```
+
+```{r}
+varcomps_geneticgroups %>% count(Group,Model) %>% spread(Model,n) %>% rmarkdown::paged_table()
+```
+
+## Table S16: Directional dominance effects estimates
+
+Table S16: Directional dominance effects estimates. For each trait in each genetic group and each fold of each cross-validation repeat of the directional dominance model, the posterior mean and standard deviation of the effect of genome-wide homozygosity is given. 
+
+```{r}
+ddEffects<-readRDS(file=here::here("output","ddEffects.rds"))
+ddEffects %<>% 
+  mutate(Group=ifelse(is.na(Group),"ParentwiseCV",Group))
+suptables[["TableS16"]]<-ddEffects
+ddEffects %>% rmarkdown::paged_table()
+```
+
+```{r}
+ddEffects %>% count(Group,Dataset,Trait) %>% spread(Trait,n) %>% arrange(Dataset)
+```
+
+
+## Table S17: Predictions of untested crosses
+
+Table S17: Predictions of untested crosses. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.
+
+```{r}
+library(tidyverse); library(magrittr);
+predUntestedCrossMeans<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossMeans_SelIndices.rds"))
+#predUntestedCrossMeans %>% count(Model)
+predUntestedCrossVars<-readRDS(here::here("output/crossPredictions","predictedUntestedCrossVars_SelIndices.rds"))
+#predUntestedCrossVars %>% count(Model,predOf)
+predUntestedCrosses<-predUntestedCrossMeans %>% 
+  left_join(predUntestedCrossVars %>% 
+              rename(Trait=Trait1) %>% select(-Trait2) %>% 
+              mutate(Model=ifelse(Model %in% c("A","AD"),"ClassicAD","DirDom")) %>% 
+              spread(predOf,predVar))
+#
+predUntestedCrosses %<>% 
+  mutate(VarTGV=VarA+VarD,
+         predSdBV=sqrt(VarBV),
+         predSdTGV=sqrt(VarTGV)) %>% 
+  select(-VarBV,-VarTGV,-VarA,-VarD) %>% 
+# Mean prop. selected is 2% for "parents" and 5% for "varieties" (AYT stage). 
+# Since in general, we want to use fewer crosses with more progeny, let's use 1% (std. sel. intensity = 2.67) for predicting UC.
+# predCrossVar::intensity(0.01) %>% round(.,2) # [1] 2.67
+  mutate(predUCparent=predMeanBV+(2.67*predSdBV),
+         predUCvariety=predMeanGV+(2.67*predSdTGV))
+ped<-readRDS(here::here("data","ped_awc.rds"))
+predUntestedCrosses %<>% 
+  left_join(ped %>% distinct(sireID,damID) %>% mutate(CrossPrevMade="Yes")) %>% 
+  mutate(CrossPrevMade=ifelse(is.na(CrossPrevMade),"No",CrossPrevMade),
+         IsSelf=ifelse(sireID==damID,TRUE,FALSE))
+rm(ped)
+
+predUntestedCrosses %>% str
+```
+
+```{r}
+write.csv(predUntestedCrosses,file = here::here("manuscript", "SupplementaryTable17.csv"), row.names = F)
+#suptables[["TableS17"]]<-predUntestedCrosses
+```
+
+## Table S18: Long-form table of predictions about untested crosses
+
+Table S18: Long-form table of predictions about untested crosses. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.
+
+```{r}
+predBVs<-predUntestedCrosses %>%
+  select(sireID,damID,IsSelf,CrossPrevMade,Model,Trait,predMeanBV,predSdBV,predUCparent) %>% 
+  rename(predMean=predMeanBV,
+         predSd=predSdBV,
+         predUC=predUCparent) %>% 
+  pivot_longer(cols = c(predMean,predSd,predUC), names_to = "PredOf", values_to = "Pred",names_prefix = "pred")
+
+predTGVs<-predUntestedCrosses %>%
+  select(sireID,damID,IsSelf,CrossPrevMade,Model,Trait,predMeanGV,predSdTGV,predUCvariety) %>% 
+  rename(predMean=predMeanGV,
+         predSd=predSdTGV,
+         predUC=predUCvariety) %>% 
+  pivot_longer(cols = c(predMean,predSd,predUC), names_to = "PredOf", values_to = "Pred",names_prefix = "pred")
+
+predUntestedCrosses_long<-bind_rows(predBVs %>% mutate(Component="BV"),
+                                    predTGVs %>% mutate(Component="TGV"))
+# predUntestedCrosses_long %<>% 
+#   left_join(predUntestedCrosses_long %>% 
+#               group_by(Trait,Model,PredOf,Component) %>%  
+#               summarise(top1pct = quantile(Pred, 0.99)) %>% 
+#               ungroup()) %>% 
+#   mutate(Selected=ifelse(Pred>=top1pct,"Selected","NotSelected")) %>% 
+#   mutate_all(~`attributes<-`(.,NULL))
+predUntestedCrosses_long %>% str
+```
+
+```{r}
+predUntestedCrosses_long %>% 
+  count(Trait,Model,PredOf,Component) %>% spread(Trait,n) %>% rmarkdown::paged_table()
+```
+
+```{r}
+write.csv(predUntestedCrosses_long,file = here::here("manuscript", "SupplementaryTable18.csv"), row.names = F)
+#suptables[["TableS18"]]<-predUntestedCrosses_long
+```
+
+```{r}
+rm(list=grep("suptables",ls(),invert = T, value = T)); gc()
+```
+
+## Table S19: Top 50 crosses selected by each criterion
+
+Table S19: Top 50 crosses selected by each criterion. For each of the 16 predictions of 47,083 crosses, select the top 50 ranked crosses.
+
+```{r}
+library(tidyverse); library(magrittr); library(ggforce)
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
+top50crosses<-predUntestedCrosses %>% 
+  filter(PredOf!="Sd") %>%
+  group_by(Trait,Model,PredOf,Component) %>% 
+  slice_max(order_by = Pred,n=50) %>% ungroup()
+suptables[["TableS19"]]<-top50crosses
+```
+
+# Write SupplementaryTables.xlsx
+
+```{r}
+writexl::write_xlsx(suptables,path = here::here("manuscript","SupplementaryTables.xlsx"),format_headers =FALSE)
+```

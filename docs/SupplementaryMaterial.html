@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Supplementary Material for ‘Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices’</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">PredictOutbredCrossVar</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="PreprocessDataFiles.html">Preprocess Data</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Fit MtBRRs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="fitMtBRRs.html">Run mixed models</a>
+    </li>
+    <li>
+      <a href="getPMVarComps.html">Get VarComps</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Cross-validation study
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="predictCrossVars.html">Predict cross means and (co)variances</a>
+    </li>
+    <li>
+      <a href="observedCrossVars.html">Observed means and (co)variances</a>
+    </li>
+    <li>
+      <a href="predictionAccuracy.html">Prediction accuracy</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Exploratory analyses
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="predictUntestedCrosses.html">Predict untested crosses</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Manuscript
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Results.html">Results</a>
+    </li>
+    <li>
+      <a href="Figures.html">Figures</a>
+    </li>
+    <li>
+      <a href="SupplementaryTables.html">Supplementary Tables</a>
+    </li>
+    <li>
+      <a href="SupplementaryFigures.html">Supplementary Figures</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Other
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="about.html">About</a>
+    </li>
+    <li>
+      <a href="license.html">License</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Supplementary Material for ‘Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices’</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-01-02
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>PredictOutbredCrossVar/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20191123code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20191123)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20191123code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20191123)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0398517"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0398517 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong0398517" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 0398517. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    manuscript/.DS_Store
+    Ignored:    output/.DS_Store
+    Ignored:    output/crossPredictions/.DS_Store
+    Ignored:    output/crossPredictions/.gitignore
+    Ignored:    output/crossPredictions/Icon
+    Ignored:    output/crossPredictions/July2020/
+    Ignored:    output/crossPredictions/defunctDirectionalDomResults/
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/otherRetiredEarlyResults/
+    Ignored:    output/crossPredictions/predUntestedCrossBVs_ReDoSelfs_A_predVarAndCovarBVs.rds
+    Ignored:    output/crossPredictions/predUntestedCrossTGVs_ReDoSelfs_AD_predVarsAndCovars.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedCrossVars_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_15Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_2Dec2020.rds
+    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk5_2Dec2020.rds
+    Ignored:    output/crossPredictions/retired_ReDoSelfs/
+    Ignored:    output/crossRealizations/.DS_Store
+    Ignored:    output/mtMarkerEffects/Icon
+
+Untracked files:
+    Untracked:  Abstract_EdingburghCompGenomicsTalk_2020June02.gdoc
+    Untracked:  Icon
+    Untracked:  ScratchSlidesAndNotes.gslides
+    Untracked:  analysis/ICQG6.Rmd
+    Untracked:  analysis/Icon
+    Untracked:  archive/
+    Untracked:  code/Icon
+    Untracked:  data/Icon
+    Untracked:  manuscript/CoverLetter_GENETICS.gdoc
+    Untracked:  manuscript/Figures.gslides
+    Untracked:  manuscript/SupplementaryTable06.csv
+    Untracked:  manuscript/SupplementaryTable07.csv
+    Untracked:  manuscript/SupplementaryTable08.csv
+    Untracked:  manuscript/SupplementaryTable09.csv
+    Untracked:  manuscript/SupplementaryTable17.csv
+    Untracked:  manuscript/SupplementaryTable18.csv
+    Untracked:  output/Figures/
+    Untracked:  output/Icon
+    Untracked:  output/Tables/
+    Untracked:  output/crossRealizations/Icon
+    Untracked:  predCrossVar/
+    Untracked:  rsyncs.R
+    Untracked:  rsyncs2.R
+    Untracked:  setupOnServer.R
+
+Unstaged changes:
+    Modified:   analysis/NGCleadersCall.Rmd
+    Modified:   analysis/Results.Rmd
+    Modified:   analysis/SupplementaryFigures.Rmd
+    Modified:   analysis/SupplementaryMaterial.Rmd
+    Modified:   analysis/SupplementaryTables.Rmd
+    Modified:   analysis/fitMtBRRs.Rmd
+    Modified:   analysis/getPMVarComps.Rmd
+    Modified:   analysis/predictUntestedCrosses.Rmd
+    Modified:   analysis/predictionAccuracy.Rmd
+    Modified:   code/getDirectionalDomMtCrossVarTGVpreds.R
+    Modified:   data/Madd_awc.rds
+    Modified:   data/Mdom_awc.rds
+    Modified:   data/blups_forawcdata.rds
+    Modified:   data/dosages_awc.rds
+    Modified:   data/genmap_awc_May2020.rds
+    Modified:   data/haps_awc.rds
+    Modified:   data/iita_blupsForCrossVal_72619.rds
+    Modified:   data/parentwise_crossVal_folds.rds
+    Modified:   data/ped_awc.rds
+    Modified:   data/recombFreqMat_1minus2c_awcmap_May2020.rds
+    Modified:   manuscript/SupplementaryTables.xlsx
+    Modified:   output/accuraciesMeans.rds
+    Modified:   output/accuraciesUC.rds
+    Modified:   output/accuraciesVars.rds
+    Modified:   output/crossPredictions/TableS7_predictedCrossVars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_A_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk5_A_predVarAndCovarBVs.rds
+    Deleted:    output/crossPredictions/predUntestedCrossBVs_chunk5_DirDom_predVarAndCovarBVs.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_AD_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_DirDom_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrossTGVs_chunk5_DirDom_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_A_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_AD_predVarsAndCovars.rds
+    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_A_predVarsAndCovars.rds
+    Modified:   output/crossPredictions/predictedCrossMeans.rds
+    Modified:   output/crossPredictions/predictedCrossMeans_DirectionalDom_tidy_withSelIndices.rds
+    Deleted:    output/crossPredictions/predictedCrossMeans_GCA_SCA.rds
+    Modified:   output/crossPredictions/predictedCrossMeans_tidy_withSelIndices.rds
+    Modified:   output/crossPredictions/predictedCrossVars_DirectionalDom_tidy_withSelIndices.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_GCA_SCA.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk1.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk2.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk3.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk4.rds
+    Deleted:    output/crossPredictions/predictedCrossVars_chunk5.rds
+    Modified:   output/crossPredictions/predictedCrossVars_tidy_withSelIndices.rds
+    Modified:   output/crossPredictions/predictedDirectionalDomCrossMeans.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk1.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk2.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk3.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk4.rds
+    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk5.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansBV.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansDirDom.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeansTGV.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeans_SelIndices.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossMeans_tidy_traits.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossVars_SelIndices.rds
+    Modified:   output/crossPredictions/predictedUntestedCrossVars_tidy_traits.rds
+    Modified:   output/crossRealizations/realizedCrossMeans.rds
+    Modified:   output/crossRealizations/realizedCrossMeans_BLUPs.rds
+    Modified:   output/crossRealizations/realizedCrossMetrics.rds
+    Modified:   output/crossRealizations/realizedCrossVars.rds
+    Modified:   output/crossRealizations/realizedCrossVars_BLUPs.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_covs_traits.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_vars_selindices.rds
+    Modified:   output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
+    Modified:   output/gblups_geneticgroups.rds
+    Modified:   output/gblups_parentwise_crossVal_folds.rds
+    Modified:   output/gebvs_ModelA_GroupAll_stdSI.rds
+    Modified:   output/mtMarkerEffects/mt_All_A.rds
+    Modified:   output/mtMarkerEffects/mt_All_AD.rds
+    Modified:   output/mtMarkerEffects/mt_All_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_GG_A.rds
+    Modified:   output/mtMarkerEffects/mt_GG_AD.rds
+    Modified:   output/mtMarkerEffects/mt_GG_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_A.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_AD.rds
+    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS13_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS14_DirectionalDom.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_A.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_AD.rds
+    Modified:   output/mtMarkerEffects/mt_TMS15_DirectionalDom.rds
+    Modified:   output/obsVSpredMeans.rds
+    Modified:   output/obsVSpredUC.rds
+    Modified:   output/obsVSpredVars.rds
+    Modified:   output/pmv_DirectionalDom_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups_tidy_includingSIvars.rds
+    Modified:   workflowr_log.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/SupplementaryMaterial.Rmd</code>) and HTML (<code>docs/SupplementaryMaterial.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0398517
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-01-02
+</td>
+<td>
+Output to PDF a single document with Supplementary Figures AND Tables.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="marnin-wolfe-ariel-chan-peter-kulakow-ismail-rabbi-and-jean-luc-jannink." class="section level2">
+<h2>Marnin Wolfe, Ariel Chan, Peter Kulakow, Ismail Rabbi and Jean-Luc Jannink.</h2>
+</div>
+<div id="supplementary-tables" class="section level1">
+<h1>Supplementary Tables</h1>
+<p>Most Supplementary Tables are included as worksheets in the file <strong>SupplementaryTables.xlsx</strong>. Very large ones are included as separate CSV files.</p>
+<p><strong>Table S1: Selection indices</strong>. For each trait, the standard deviation of BLUPs, which were divided by “unscaled” index weights for the StdSI and BiofortSI indices to get StdSI and BiofortSI weights used throughout the study.</p>
+<p><strong>Table S2: Summary of cross-validation scheme</strong>. For each fold of each Rep, the number of parents in the test-set (Ntestparents) is given along with the number of clones in the corresponding training (Ntraintset) and testing (Ntestset) datasets and the number of crosses to predict (NcrossesToPredict).</p>
+<p><strong>Table S3: Test-parents</strong>. For each fold of each cross-validation repeat, the set of parents whose crosses are to be predicted is listed.</p>
+<p><strong>Table S4: Training-Testing partitions of germplasm</strong>. For each fold of each repeat, the genotype ID (germplasmName) of all clones in the “trainset” and “testset” are given.</p>
+<p><strong>Table S5: Crosses to predict each fold.</strong> For each fold of each repeat, the sireID and damID are given for each cross-to-be-predicted.</p>
+<p>Table S6: Predicted and observed cross means. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predMean) and observations (obsMean) are shown.</p>
+<p><strong>Table S7: Predicted cross variances.</strong> All predictions of cross-variance from the cross-validation scheme are detailed. For each fold of each repeat and each unique cross (sireID-damID). Both variances (Trait1==Trait2) and co-variances (Trait1!=Trait2) are given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), the variance component being predict (VarA or VarD), along with the number of segregating SNPs in the family (Nsegsnps) and the time taken in seconds for computation, per family (totcomputetime) are given. The predictions based on the variance of posterior means (VPM) and the posterior mean variances (PMV) are both shown.</p>
+<p><strong>Table S8: Predicted and observed cross variances</strong>. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predVar) and observations (obsVar) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). The family size (number of genotyped offspring, FamSize) or number of offspring with direct phenotypes (Nobs) are used (CorrWeight) to weight the correlation between observed and predicted family variances.</p>
+<p><strong>Table S9: Predicted and observed UC</strong>. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The predicted usefulness criterion (predUC) was computed as the predMean + realIntensity*predSD, where predMean is the predicted family mean and predSD is the predicted genetic standard deviation. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI) and corresponding prediction (predUC) and observations (obsUC) are shown. The family size (number of genotyped offspring, FamSize) is shown along with the realized selection intensity (realIntensity) for each selection stage in the breeding pipeline (Parent, CET, PYT, AYT, UYT) and also a constant intensity value (Stage=ConstIntensity).</p>
+<p><strong>Table S10: Accuracy of predicting the mean</strong>. For each fold of each repeat, the accuracy predicting family means (Accuracy) is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown.</p>
+<p><strong>Table S11: Accuracy of predicting the variances</strong>. For each fold of each repeat the estimated accuracy of predicting family variances is given. Accuracy was computed the correlation between predicted and observed variance, either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV).</p>
+<p><strong>Table S12: Accuracy predicting the usefulness criteria</strong>. For each fold of each repeat the estimated accuracy of predicting family usefulness criteria is given. Accuracy was computed as the correlation between predicted UC and observed UC (mean of selected offspring), either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of UC in breeding value (predOf=VarBV) or UC in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown.</p>
+<p><strong>Table S13: Realized within-cross selection metrics</strong>. Table summarizing measurements made of selection within each cross (unique sireID-damID). Summaries included: family size (FamSize), number and proportion of members used as parents, mean GEBV and GETGV of top 1% of each family, for each selection index (BiofortSI, StdSI), proportion of each family that has been phenotyped and past each stage of the breeding pipeline (past CET, PYT, AYT) and finally the corresponding realized intensity of selection for each stage.</p>
+<p><strong>Table S14: Proportion homozygous per clone</strong>. Genome-wide proportion of SNPs that are homozygous, for each clone in the study.</p>
+<p><strong>Table S15: Variance estimates for genetic groups</strong>. Summary of the population-level genetic variance estimates in each genetic group (GG, TMS13, TMS14, TMS15), for each genetic model (A, AD, DirDomA, DirDomAD), each variance (Trait1==Trait2) and covariance (Trait1!=Trait2). The estimates are computed both based on the variance of posterior means (VarMethod=VPM) and the posterior mean variances (VarMethod=PMV). The “Method” refers to whether linkage disequilibrium is accounted for (M2) or not (M1).</p>
+<p><strong>Table S16: Directional dominance effects estimates</strong>. For each trait in each genetic group and each fold of each cross-validation repeat of the directional dominance model, the posterior mean and standard deviation of the effect of genome-wide homozygosity is given.</p>
+<p><strong>Table S17: Predictions of untested crosses</strong>. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.</p>
+<p><strong>Table S18: Long-form table of predictions about untested crosses</strong>. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.</p>
+<p><strong>Table S19: Top 50 crosses selected by each criterion</strong>. For each of the 16 predictions of 47,083 crosses, select the top 50 ranked crosses.</p>
+</div>
+<div id="supplementary-figures" class="section level1">
+<h1>Supplementary Figures</h1>
+<div id="figure-s01-genome-wide-proportion-homozygous" class="section level2">
+<h2>Figure S01: Genome-wide proportion homozygous</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS01-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S01</strong>: Boxplot of the genome-wide proportion of homozygous SNPs in each of four genetic groups comprising the study pedigree.</p>
+</div>
+<div id="figure-s02-correlations-among-phenotypic-blups-including-selection-indices" class="section level2">
+<h2>Figure S02: Correlations among phenotypic BLUPs (including Selection Indices)</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS02-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S02: Correlations among BLUPs (including Selection Indices)</strong>. (A) StdSI vs. BiofortSI computed from i.i.d. BLUPs. (B) Heatmap of the correlation among BLUPs for each of four component traits and two derived selection indices.</p>
+</div>
+<div id="figure-s03-scatterplot-comparing-accuracies-for-family-means-using-different-validation-data" class="section level2">
+<h2>Figure S03: Scatterplot comparing accuracies for family means using different validation-data</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS03-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Figure S03: Scatterplot comparing accuracies for family means using different validation-data.</p>
+</div>
+<div id="figure-s04-accuracies-per-trait-fold-rep-model-do-not-re-rank-much-from-iid-to-gblup-validation-data" class="section level2">
+<h2>Figure S04: Accuracies per trait-fold-rep-Model do not re-rank much from iid-to-GBLUP validation data</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS04-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S04</strong>: Boxplots to show that Accuracies per trait-fold-rep-Model do not re-rank much whether using the iid or the GBLUPs as validation data.</p>
+</div>
+<div id="figure-s05-accuracy-predicting-family-means---gblup-vs.-iid-blups-as-validation-data" class="section level2">
+<h2>Figure S05: Accuracy predicting family means - GBLUP vs. iid-BLUPs as validation data</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS05-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S05: Accuracy predicting family means - GBLUP vs. iid-BLUPs as validation data</strong>. Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices and for component traits (x-axis), summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the observed mean GEBV or GETGV. For each trait, accuracies for four predictions: two prediction types (family mean BV vs. TGV) times two prediction models (Classic vs. DirDom). Validation data (GBLUPs vs. iidBLUPs) are shown in two horizontal panels.</p>
+</div>
+<div id="figure-s06-the-difference-between-pmv-and-vpm-for-variance-and-covariance-predictions" class="section level2">
+<h2>Figure S06: The difference between PMV and VPM for variance and covariance predictions</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS06-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S06: The difference between PMV and VPM for variance and covariance predictions</strong>. Each boxplot shows the posterior mean variance (PMV) minus the variance of posterior means (VPM) based prediction of cross variances and covariances. Each panel is a variance or covariance. Each boxplot shows either an additive or dominance variance from one of the genetic models (x-axis).</p>
+</div>
+<div id="figure-s07-the-difference-between-pmv-and-vpm-in-terms-of-prediction-accuracy" class="section level2">
+<h2>Figure S07: The difference between PMV and VPM in terms of prediction accuracy</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS07-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S07: The difference between PMV and VPM in terms of prediction accuracy</strong>. Each boxplot shows the posterior mean variance (PMV) minus the variance of posterior means (VPM) based estimate of prediction accuracy for cross variances and covariances. Each panel is a variance or covariance. Each boxplot shows either an additive or dominance variance from one of the genetic models (x-axis).</p>
+</div>
+<div id="figure-s08-scatterplot-comparing-accuracies-for-family-covariances-using-different-validation-data" class="section level2">
+<h2>Figure S08: Scatterplot comparing accuracies for family (co)variances using different validation-data</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS08-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S08</strong>: Scatterplot comparing accuracies for family variance and covariance prediction using different validation-data.</p>
+</div>
+<div id="figure-s09-plot-of-variance-prediction-accuracy-re-ranking-according-choice-of-validation" class="section level2">
+<h2>Figure S09: Plot of variance-prediction accuracy: Re-ranking according choice of validation?</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS09-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S09</strong>: Plot of variance-prediction accuracy to show whether re-ranking occurrs according to the choice of validation data (x-axis), GBLUPs vs. i.i.d. BLUPs.</p>
+</div>
+<div id="figure-s10-accuracy-predicting-family-variances---gblup-vs.-iid-blups-as-validation-data" class="section level2">
+<h2>Figure S10: Accuracy predicting family variances - GBLUP vs. iid-BLUPs as validation data</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS10-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S10: Accuracy predicting family variances - GBLUP vs. iid-BLUPs as validation data</strong>. Fivefold parent-wise cross-validation estimates of the accuracy predicting (A) genetic variances and (B) covariances. Selection indices and component trait variances are shown on the x-axis. Accuracy (y-axis) was measured as the weighted correlation between the predicted and the observed (co)variance of GEBV or GETGV. For each trait (panel), accuracies for four predictions: two prediction types (VarBV vs. VarTGV) times two prediction models (Classic vs. DirDom). Validation data (GBLUPs vs. iidBLUPs) are shown in horizontal panels.</p>
+</div>
+<div id="figure-s11-accuracy-predicting-family-covariances---weighted-vs.-unweighted-correlation" class="section level2">
+<h2>Figure S11: Accuracy predicting family (co)variances - Weighted vs. Unweighted Correlation</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS11-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S11: Accuracy predicting family (co)variances - Weighted vs. Unweighted Correlation.</strong> Fivefold parent-wise cross-validation estimates of the accuracy predicting (A) genetic variances and (B) covariances. Selection indices and component trait variances are shown on the x-axis. Accuracy (y-axis) was measured as the (weighted or unweighted) correlation between the predicted and the observed (co)variance of GEBV or GETGV. For each trait (panel), accuracies for four predictions: two prediction types (VarBV vs. VarTGV) times two prediction models (Classic vs. DirDom). Weighted vs. Unweighted Correlations as accuracy estimates are shown in horizontal panels.</p>
+</div>
+<div id="figure-s12-realized-selection-intensities-measuring-post-cross-selection" class="section level2">
+<h2>Figure S12: Realized selection intensities: measuring post-cross selection</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS12-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S12: Realized selection intensities: measuring post-cross selection</strong>. Boxplots showing (A) the proportion of each family selected and (B) the standardized selection intensity for each stage of the breeding pipeline, in each genetic group.</p>
+</div>
+<div id="figure-s13-accuracy-predicting-usefulness-criteria---all-comparisons" class="section level2">
+<h2>Figure S13: Accuracy Predicting Usefulness Criteria - All comparisons</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/figureS13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S13: Accuracy Predicting Usefulness Criteria - All comparisons.</strong> Accuracy predicting the usefulness (the expected mean of future selected offspring) of previously untested crosses. Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (x-axes) is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and observed usefulness of crosses for each breeding pipeline stage as well as at a constant selection intensity (x-axis). For each UC (panels), accuracies for four predictions: two selection indices (StdSI and BiofortSI) times two prediction models (Classic vs. DirDom).</p>
+</div>
+<div id="figure-s14-correlation-matrix-for-predictions-on-the-stdsi" class="section level2">
+<h2>Figure S14: Correlation matrix for predictions on the StdSI</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S14: Correlation matrix for predictions on the StdSI</strong>. Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV, for both the classic and directional dominance model. Predictions were made for 47,083 possible pairwise crosses of 306 parents.</p>
+</div>
+<div id="figure-s15-correlation-matrix-for-predictions-on-the-biofortsi" class="section level2">
+<h2>Figure S15: Correlation matrix for predictions on the BiofortSI</h2>
+<p><img src="figure/SupplementaryMaterial.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Figure S15: Correlation matrix for predictions on the BiofortSI.</strong> Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV, for both the classic and directional dominance model. Predictions were made for 47,083 possible pairwise crosses of 306 parents.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] patchwork_1.1.0 magrittr_2.0.1  forcats_0.5.0   stringr_1.4.0  
+ [5] dplyr_1.0.2     purrr_0.3.4     readr_1.4.0     tidyr_1.1.2    
+ [9] tibble_3.0.4    ggplot2_3.3.2   tidyverse_1.3.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.5         lubridate_1.7.9.2  here_1.0.1         assertthat_0.2.1  
+ [5] rprojroot_2.0.2    digest_0.6.27      R6_2.5.0           cellranger_1.1.0  
+ [9] backports_1.2.1    reprex_0.3.0       evaluate_0.14      httr_1.4.2        
+[13] pillar_1.4.7       rlang_0.4.9        readxl_1.3.1       rstudioapi_0.13   
+[17] whisker_0.4        rmarkdown_2.6      textshaping_0.2.1  labeling_0.4.2    
+[21] munsell_0.5.0      broom_0.7.2        compiler_4.0.2     httpuv_1.5.4      
+[25] modelr_0.1.8       xfun_0.19          systemfonts_0.3.2  pkgconfig_2.0.3   
+[29] gridGraphics_0.5-1 htmltools_0.5.0    tidyselect_1.1.0   gridExtra_2.3     
+[33] workflowr_1.6.2    fansi_0.4.1        viridisLite_0.3.0  crayon_1.3.4      
+[37] dbplyr_2.0.0       withr_2.3.0        later_1.1.0.1      grid_4.0.2        
+[41] jsonlite_1.7.2     gtable_0.3.0       lifecycle_0.2.0    DBI_1.1.0         
+[45] git2r_0.27.1       scales_1.1.1       cli_2.2.0          stringi_1.5.3     
+[49] farver_2.0.3       viridis_0.5.1      fs_1.5.0           promises_1.1.1    
+[53] xml2_1.3.2         ellipsis_0.3.1     ragg_0.4.0         generics_0.1.0    
+[57] vctrs_0.3.5        tools_4.0.2        glue_1.4.2         hms_0.5.3         
+[61] yaml_2.2.1         colorspace_2.0-0   corrplot_0.84      rvest_0.3.6       
+[65] knitr_1.30         haven_2.3.1       </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

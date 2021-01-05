@@ -1,0 +1,496 @@
+---
+title: "Fit multi-trait Bayesian Ridge Regressions"
+site: workflowr::wflow_site
+date: "2020-June-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+# Parent-wise cross-validation {#mtBRRs_parentwise}
+
+## Define parent-wise cross-validation folds {#define_cvfolds}
+
+Goal is to assess the accuracy of predicting _untested_ crosses of outbred parents.
+
+5-folds times 5-replications of parent-wise cross-validation, defined as follows:
+
+- 209 parents in IITA pedigree
+- Divide set of parents into k-folds
+- For each k
+  * Training data: Test parents + all non-test parent descendants. 
+    + That is, remove all offspring, grandchildren, greatgrandchildren, etc. of test parents
+    + Predict each cross test parents were involved in
+  * Validation data: The inverse of the training set, including all offspring and descendants of the test parents (but not the test parents themselves or the other training samples).
+  * Use genomic-model on validation set to get at observed mean and variance in BV / TGV in families
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(rsample)
+ped<-readRDS(here::here("data","ped_awc.rds"))
+set.seed(42)
+parentfolds<-vfold_cv(tibble(Parents=union(ped$sireID,ped$damID)),v = 5,repeats = 5) %>% 
+  dplyr::mutate(folds=map(splits,function(splits){
+    #splits<-parentfolds$splits[[1]]
+    testparents<-testing(splits)$Parents
+    trainparents<-training(splits)$Parents
+    offspring<-ped %>% 
+      filter(sireID %in% testparents | damID %in% testparents) %$% 
+      unique(FullSampleName)
+    grandkids<-ped %>% 
+      filter(sireID %in% offspring | damID %in% offspring) %$% 
+      unique(FullSampleName)
+    greatgrandkids<-ped %>% 
+      filter(sireID %in% grandkids | damID %in% grandkids) %$% 
+      unique(FullSampleName)
+    testset<-unique(c(offspring,grandkids,greatgrandkids)) %>% .[!. %in% c(testparents,trainparents)]
+    nontestdescendents<-ped %>% 
+      filter(!FullSampleName %in% testset) %$% 
+      unique(FullSampleName)
+    trainset<-union(testparents,trainparents) %>% 
+      union(.,nontestdescendents)
+    out<-tibble(testparents=list(testparents),
+                trainset=list(trainset),
+                testset=list(testset))
+    return(out) })) %>% 
+  unnest(folds)
+# table(parentfolds$trainset[[1]] %in% parentfolds$testparents[[1]])
+# table(parentfolds$testset[[1]] %in% parentfolds$testparents[[1]])
+# table(parentfolds$testset[[1]] %in% parentfolds$trainset[[1]])
+saveRDS(parentfolds,file = here::here("data","parentwise_crossVal_folds.rds"))
+```
+
+## Fit A and AD models
+
+### Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88
+```
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# Training datasets -----------
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,trainset,testset) %>% 
+  pivot_longer(c(trainset,testset),
+               names_to = "Dataset",
+               values_to = "sampleIDs") %>% 
+  crossing(Model=c("A","AD")) %>% 
+  arrange(desc(Dataset),Repeat,Fold) %>% 
+  mutate(blups=map(sampleIDs,~filter(blups,germplasmName %in% .)),
+         outName=paste0("mt_",Repeat,"_",Fold,"_",Dataset,"_",Model))
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# fitMtBRR function -------------
+## Wrapper function for BGLR::Multitrait()
+## For a given set of training blups+snps for either model "A" or "AD"
+source(here::here("code","fitMtBRR.R"))
+
+# Parallelization specs ---------
+require(furrr); options(mc.cores=10); plan(multiprocess)
+options(future.globals.maxSize= 10000*1024^2)
+```
+
+### Run MtBRRs
+
+```{r, eval=F}
+# cbsulm19 - Jun 17, 07:09am - 
+parentfolds %>% 
+  slice(1:10) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm21 - Jun 17, 07:10pm - 
+parentfolds %>% 
+  slice(11:20) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm22 - Jun 17, 07:10pm - 
+parentfolds %>% 
+  slice(21:30) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm26 - Jun 17, 07:10pm - 
+parentfolds %>% 
+  slice(31:40) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm27 - Jun 17, 07:10pm - 
+parentfolds %>% 
+  slice(41:50) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm19 - Jun 17, 11:51am - 
+parentfolds %>% 
+  slice(51:60) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm26 - Jun 17, 12:25pm - 
+parentfolds %>% 
+  slice(61:70) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm21 - Jun 17, 01:04pm - 
+parentfolds %>% 
+  slice(71:80) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm22 - Jun 17, 01:04pm - 
+parentfolds %>% 
+  slice(81:90) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+
+# cbsulm27 - Jun 17, 01:04pm - 
+parentfolds %>% 
+  slice(91:100) %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+```
+
+## Fit DirDom model
+
+### Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88
+```
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# Training datasets -----------
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,trainset,testset) %>% 
+  pivot_longer(c(trainset,testset),
+               names_to = "Dataset",
+               values_to = "sampleIDs") %>% 
+  mutate(Model="DirectionalDom") %>% 
+  arrange(desc(Dataset),Repeat,Fold) %>% 
+  mutate(blups=map(sampleIDs,~filter(blups,germplasmName %in% .)),
+         outName=paste0("mt_",Repeat,"_",Fold,"_",Dataset,"_",Model))
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# fitDirectionalDomMtBRR function -------------
+## Wrapper function for BGLR::Multitrait()
+## For a given set of training blups+snps, fit a directional dominance model as in Xiang et al. 2016.
+## using "biologically" partitioned additive and dominance effects + a mean effect for overall proportion homozygous (inbreeding).
+source(here::here("code","fitDirectionalDomMtBRR.R"))
+
+# Parallelization specs ---------
+require(furrr); options(mc.cores=10); plan(multiprocess)
+options(future.globals.maxSize= 10000*1024^2)
+
+# Divide parentfolds into chunks for each server ------------
+nchunks<-5
+parentfolds %<>% 
+  mutate(Chunk=rep(1:nchunks, each=ceiling(nrow(.)/nchunks), length.out=nrow(.))) %>% 
+  nest(data=c(-Chunk))
+```
+
+### Run Mt BRRs
+```{r, eval=F}
+# cbsulm19
+chunk<-1;
+# cbsulm21
+chunk<-2;
+# cbsulm22
+chunk<-3;
+# cbsulm26
+chunk<-4;
+# cbsulm27
+chunk<-5;
+# Start run on each server / chunk: Jun 29, 5:20pm
+parentfolds$data[[chunk]] %>% 
+  future_pmap(.,fitDirectionalDomMtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5)
+```
+
+# Genetic groups {#mtBRRs_geneticgroups}
+
+- GG, GG+C1, GG+C1+C2, GG+C1+C2+C3
+
+## Fit A and AD models
+
+### Set-up
+
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88
+```
+
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Training datasets -----------
+geneticgroups<-blups %>% 
+  filter(!grepl("TMS13|TMS14|TMS15",germplasmName)) %>% 
+  mutate(Group="GG") %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS13",germplasmName)) %>% 
+              mutate(Group="TMS13")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS14",germplasmName)) %>% 
+              mutate(Group="TMS14")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS15",germplasmName)) %>% 
+              mutate(Group="TMS15")) %>% 
+  bind_rows(blups %>% 
+              mutate(Group="All")) %>% 
+  nest(blups=-Group) %>% 
+  crossing(Model=c("A","AD")) %>% 
+  mutate(blups=map(blups,~filter(.,germplasmName %in% rownames(snps))),
+         outName=paste0("mt_",Group,"_",Model))
+
+# fitMtBRR function -------------
+## Wrapper function for BGLR::Multitrait()
+## For a given set of training blups+snps for either model "A" or "AD"
+source(here::here("code","fitMtBRR.R"))
+
+# Parallelization specs ---------
+require(furrr); options(mc.cores=10); plan(multiprocess)
+options(future.globals.maxSize= 10000*1024^2)
+```
+
+### Run Mt BRRs
+```{r, eval=F}
+geneticgroups %>% 
+  mutate(mtbrrFit=future_pmap(.,fitmtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5))
+```
+
+## Fit DirDom model
+
+### Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88
+```
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Training datasets -----------
+geneticgroups<-blups %>% 
+  filter(!grepl("TMS13|TMS14|TMS15",germplasmName)) %>% 
+  mutate(Group="GG") %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS13",germplasmName)) %>% 
+              mutate(Group="TMS13")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS14",germplasmName)) %>% 
+              mutate(Group="TMS14")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS15",germplasmName)) %>% 
+              mutate(Group="TMS15")) %>% 
+  bind_rows(blups %>% 
+              mutate(Group="All")) %>% 
+  nest(blups=-Group) %>% 
+  mutate(Model="DirectionalDom") %>% 
+  mutate(blups=map(blups,~filter(.,germplasmName %in% rownames(snps))),
+         outName=paste0("mt_",Group,"_",Model))
+
+# fitDirectionalDomMtBRR function -------------
+## Wrapper function for BGLR::Multitrait()
+## For a given set of training blups+snps, fit a directional dominance model as in Xiang et al. 2016.
+## using "biologically" partitioned additive and dominance effects + a mean effect for overall proportion homozygous (inbreeding).
+source(here::here("code","fitDirectionalDomMtBRR.R"))
+
+# Parallelization specs ---------
+require(furrr); options(mc.cores=5); plan(multiprocess)
+options(future.globals.maxSize= 20000*1024^2)
+```
+
+### Run Mt BRRs
+```{r, eval=F}
+# Start run on cbsulm15: July 29, 11:15pm - 
+geneticgroups %>% 
+  future_pmap(.,fitDirectionalDomMtBRR,snps=snps,outPath="output/mtMarkerEffects", nIter=30000, burnIn=5000,thin=5)
+```
+
+
+# Get Genomic BLUPs {#getGBLUPs}
+
+## Fit A and AD models
+
+### Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=88
+```
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# Training datasets -----------
+## Parent-wise CV folds
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,trainset,testset) %>% 
+  pivot_longer(c(trainset,testset),
+               names_to = "Dataset",
+               values_to = "sampleIDs") %>% 
+  crossing(Model=c("A","AD")) %>% 
+  arrange(desc(Dataset),Repeat,Fold) %>% 
+  mutate(blups=map(sampleIDs,~filter(blups,germplasmName %in% .)),
+         outName=paste0("mt_",Repeat,"_",Fold,"_",Dataset,"_",Model)) %>% 
+  select(Repeat,Fold,Dataset,Model,outName)
+## Genetic groups
+geneticgroups<-blups %>% 
+  filter(!grepl("TMS13|TMS14|TMS15",germplasmName)) %>% 
+  mutate(Group="GG") %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS13",germplasmName)) %>% 
+              mutate(Group="TMS13")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS14",germplasmName)) %>% 
+              mutate(Group="TMS14")) %>% 
+  bind_rows(blups %>% 
+              filter(grepl("TMS15",germplasmName)) %>% 
+              mutate(Group="TMS15")) %>% 
+  bind_rows(blups %>% 
+              mutate(Group="All")) %>% 
+  nest(blups=-Group) %>% 
+  crossing(Model=c("A","AD")) %>% 
+  mutate(blups=map(blups,~filter(.,germplasmName %in% rownames(snps))),
+         outName=paste0("mt_",Group,"_",Model))
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Parallelization specs ---------
+require(furrr); options(future.globals.maxSize=10000*1024^2)
+plan(multiprocess); options(mc.cores=25); 
+
+# getGenomicBLUPs function -----------------
+## Wrapper function for either Model=="A" or "AD"
+## For a given set of multi-trait posterior mean marker effects
+## and a given set of SNPs, load the effects and compute GEBV and GETGV
+source(here::here("code","getGenomicBLUPs.R"))
+```
+
+### Compute GEBV and GETGV
+
+#### Parent-wise CV folds
+```{r, eval=F}
+parentfolds %<>% 
+  mutate(GBLUPs=future_pmap(.,getGenomicBLUPs,snps=snps))
+saveRDS(parentfolds,here::here("output","gblups_parentwise_crossVal_folds.rds"))
+```
+#### Genetic groups
+```{r, eval=F}
+geneticgroups %<>% 
+ mutate(GBLUPs=future_pmap(.,getGenomicBLUPs,snps=snps))
+saveRDS(geneticgroups,here::here("output","gblups_geneticgroups.rds"))
+```
+
+
+## Fit DirDom model
+
+### Set-up
+```{bash, eval=F}
+# activate multithread OpenBLAS
+export OMP_NUM_THREADS=112
+```
+```{r, eval=F}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+# BLUPs -----------
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP) %>%  # choosing de-regressed BLUPs as responses despite unweighted analysis
+  select(germplasmName,all_of(c("DM","logFYLD","MCMDS","TCHART"))) # precaution to ensure consistent column order
+
+# Training datasets -----------
+## Parent-wise CV folds
+parentfolds<-readRDS(file = here::here("data","parentwise_crossVal_folds.rds")) %>% 
+  rename(Repeat=id,Fold=id2) %>% 
+  select(Repeat,Fold,trainset,testset) %>% 
+  pivot_longer(c(trainset,testset),
+               names_to = "Dataset",
+               values_to = "sampleIDs") %>% 
+  mutate(Model="DirectionalDom") %>% 
+  arrange(desc(Dataset),Repeat,Fold) %>% 
+  mutate(blups=map(sampleIDs,~filter(blups,germplasmName %in% .)),
+         outName=paste0("mt_",Repeat,"_",Fold,"_",Dataset,"_",Model))
+
+# SNP data ------------
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); dim(snps) # [1] 5591 38093
+
+# Parallelization specs ---------
+require(furrr); options(future.globals.maxSize=10000*1024^2)
+plan(multiprocess); options(mc.cores=25); 
+
+# getGenomicBLUPs function -----------------
+## Similar to "getGenomicBLUPs.R"
+## For a given set of multi-trait posterior mean marker effects
+## and a given set of SNPs, load the effects and compute GEBV and GETGV
+# 1. inbreeding effect for each trait is extracted from the BGLR output,
+### divided by N snps and added to the vector of SNP effects
+# 2. Allele substitution effects are computed as a+d(q-p) and used to predict GEBV
+# 3. GETGV = sum(X_a*a + X_d*d)
+source(here::here("code","getDirectionalDomGenomicBLUPs.R"))
+```
+
+### Compute GEBV and GETGV
+```{r, eval=F}
+parentfolds %<>% 
+  mutate(GBLUPs=future_pmap(.,getDirectionalDomGenomicBLUPs,snps=snps))
+saveRDS(parentfolds,here::here("output","gblups_DirectionalDom_parentwise_crossVal_folds.rds"))
+```
+
+

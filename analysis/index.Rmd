@@ -1,0 +1,59 @@
+---
+title: "Reproducible documentation: Wolfe et al. Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices"
+site: workflowr::wflow_site
+author: "Marnin Wolfe, Ariel Chan, Peter Kulakow, Ismail Rabbi, Jean-Luc Jannink"
+output:
+  workflowr::wflow_html:
+    toc: false
+editor_options:
+  chunk_output_type: inline
+---
+
+This repository and website documents all analyses, summary, tables and figures associated with a project with the current working title: 
+
+**Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices**
+
+# Abstract
+
+Diverse crops are both outbred and clonally propagated. Breeders typically use truncation selection of parents and invest significant time, land and money evaluating the progeny of crosses to find exceptional genotypes. We developed and tested genomic mate selection criteria suitable for organisms of arbitrary homozygosity level where the full-sibling progeny are of direct interest as future parents and/or cultivars. We extended cross variance and covariance variance prediction to include dominance effects and predicted the multivariate selection index genetic variance of crosses based on haplotypes of proposed parents, marker effects and recombination frequencies. We combined the predicted mean and variance into usefulness criteria for parent and variety development. We present an empirical study of cassava (Manihot esculenta), a staple tropical root crop. We assessed the potential to predict the multivariate genetic distribution (means, variances and trait covariances) of 462 cassava families in terms of additive and total value using cross-validation. We were able to predict all genetic variances and most covariances with non-zero accuracy. We also tested a directional dominance model and found significant inbreeding depression for most traits and a boost in total merit accuracy for root yield. We predicted 47,083 possible crosses of 306 parents and contrasted them to those previously tested to show how mate selection can reveal new potential within the germplasm. We enable breeders to consider the potential of crosses to produce future parents (progeny with excellent breeding values) and varieties (progeny with top performance).
+
+# Manuscript
+
+1. [Supplementary Tables](SupplementaryTables.html)
+2. [Results](Results.html) to make numeric summaries for the text, based on e.g. the [Sup. Tables](SupplementaryTables.html). Most supplementary figures appear here first.
+3. [Figures](Figures.html)
+4. [Supplementary Figures](SupplementaryFigures.html)
+
+See also drop-down navigation menu "Manuscript".
+
+# Data availability and reproducibility
+
+The R package **workflowr** was used to document this study reproducibly. 
+
+Much of the supporting data _and_ output from the analyses documented here are too large for GitHub. 
+
+The repository will be mirrored, here:  [ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020](ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020)
+
+or until publication [here](ftp://ftp.cassavabase.org/marnin_datasets/).
+
+# Analyses
+
+1. [Preprocess data files](PreprocessDataFiles.html): Initial processing and subsetting of all input files.
+2. [Fit multi-trait Bayesian ridge regressions (MtBRRs)](fitMtBRRs.html): We fit the following MtBRR models: (1) additive-only (**A**), (2) additive plus dominance (**AD** or **ClassicAD**) and (3) additive plus directional dominance (**DirDom** or **DirDomAD**). First, we [define parent-wise cross-validation folds](fitMtBRRs.html#define_cvfolds). Next, we fit **MtBRRs** for both the [parent-wise cross-validation](#mtBRRs_parentwise) and each of the [genetic groups](fitMtBRRs.html#mtBRRs_geneticgroups) in the pedigree. Finally, using **MtBRR** marker-effects, we [compute genomic BLUPs](fitMtBRRs.html#getGBLUPs) (i.e. GEBV and GETGV) for later use.
+3. [Predict cross means, variances and co-variances](predictCrossVars.html): Using training-set marker effects obtained in the previous step, we predict [(co)variances](predictCrossVars.html#predictCrossVariances) and [means](predictCrossVars.html#predictCrossMeans) for each cross according to the cross-validation scheme. 
+4. [Compute observed cross means, variances and covariances](observedCrossVars.html): This step is to create validation data to which predictions of cross means and (co)variances will be correlated. We compute the empirical means and variances for each validation-family in two ways. First, we use [GEBV and GETGV of actual offspring](observedCrossVars.html#observedCrossVarsGBLUPs) based on test-set marker effeects. Second, and for comparison only, we use [phenotypic BLUPs](observedCrossVars.html#observedCrossVarsiidBLUPs) of the offspring, where available. Lastly, we [measure the realized selection intensity for each cross](observedCrossVars.html#realIntensity) and compute the mean GEBV / GETGV of selected family-members as validation data for predicted cross "usefulness criteria".
+5. [Compute prediction accuracy](predictionAccuracy.html): Format predicted and observed values for each cross specified by the cross-validation scheme.
+6. [Exploratory analysis: predict the means and variances of previously untested crosses](predictUntestedCrosses.html): Using marker-effects obtained from fitting **All** data, predict all possible crosses between (1) the 100 clones with top rank on the "StdSI" and (2) the 209 clones already used as parents. 
+7. [Compute posterior mean (co)variance parameters from MtBRRs](getPMVarComps.html): For comparison and context, compute genetic variances and covariances accounting for LD (Lehermeier M2) for each of the genetic groups ("All","GG","TMS13","TMS14","TMS15"). 
+
+# Supporting R package `predCrossVar`
+
+In addition, we combined many of the core (and useful) support functions for predicting crosses into an R package **predCrossVar**, which is available on GitHub and can be installed with, e.g.: 
+```{r, eval=F}
+devtools::install_github("wolfemd/predCrossVar", ref = 'master') 
+```
+The functions in **predCrossVar** are used throughout.
+
+# Supporting functions `code/`
+
+The analyses in the **html** / **Rmd** files referenced above often source R scripts in the `code/` sub-folder. These are wrapper functions around the packaged core functions in **predCrossVar**, to do the specific analyses for this paper.

@@ -1,0 +1,209 @@
+---
+title: "Preprocess Data Files"
+site: workflowr::wflow_site
+date: "2020-June-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# Chan et al. 2019 data
+
+https://www.biorxiv.org/content/10.1101/794339v1.full
+
+ftp://ftp.cassavabase.org/manuscripts/Chan_et_al_2019/
+
+## Haps
+
+The directory has since been compressed for storage to jj332_cas/ac2278/
+
+Eventually the data will be here:  
+ftp://ftp.cassavabase.org/manuscripts/Chan_et_al_2019/shapeit2duohmm_mlhaplotypes/
+
+and also: ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020
+
+For now, they need files are at /jj332_cas/marnin/shapeit2duohmm_mlhaplotypes/
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(furrr); library(data.table)
+library(furrr); options(mc.cores=18); plan(multiprocess)
+path2haps<-"/workdir/marnin/shapeit2duohmm_mlhaplotypes"
+haps<-tibble(Chr=1:18) %>% 
+      dplyr::mutate(Haps=future_map(Chr,~fread(paste0(path2haps,"/chr",
+                                                      stringr::str_pad(.,width = 3,side = 'left',pad = 0),
+                                                      "_0.30.haps"),
+                                               stringsAsFactors = F,header = F,sep = " ") %>% 
+                                      as.data.frame))
+sampleids<-tibble(Chr=1:18) %>% 
+      dplyr::mutate(Samples=future_map(Chr,# read in SAMPLE file
+                                       ~fread(paste0(path2haps,"/chr",
+                                                      stringr::str_pad(.,width = 3,side = 'left',pad = 0),
+                                                      "_0.30.sample"), 
+                                                  stringsAsFactors = F,header = T,sep = " ") %>% 
+                                      slice(-1))) # ignore the first (non-header) row of the SAMPLE file.
+
+SampleIDs<-sampleids$Samples[[1]]$ID_2 %>% 
+  tibble(ID=.,SampleIndex=1:length(.), Haplo="_HapA") %>% 
+  bind_rows(.,dplyr::mutate(.,Haplo="_HapB")) %>% 
+  arrange(SampleIndex) %>% 
+  dplyr::mutate(SampleID=paste0(ID,Haplo)) %$% SampleID
+options(future.globals.maxSize= 15000*1024^2)
+haps %<>%
+      dplyr::mutate(Haps=future_map(Haps,function(Haps){
+            #Haps<-haps$Haps[[1]]
+            colnames(Haps)<-c("Chr","HAP_ID","Pos","REF","ALT",SampleIDs)
+            Haps %<>% 
+                  dplyr::mutate(HAP_ID=paste0(HAP_ID,"_",REF,"_",ALT)) %>% 
+                  column_to_rownames(var = "HAP_ID") %>% 
+                  select(-Chr,-Pos,-REF,-ALT)
+            Haps %<>% t(.) %>% as.matrix(.)
+            return(Haps)}))
+
+haps<-reduce(haps$Haps,cbind)
+saveRDS(haps,file=here::here("data","haps_awc.rds"))
+
+sampleids$Samples[[1]]$ID_2 %>% 
+  grep("TMS13|TMS14|TMS15|2013_",.,value=T,invert=T) %>% 
+  length # 168 parents from the GeneticGain / C0 population 
+```
+
+## Make dosages from haps
+
+To ensure consistency in allele counting, create dosage from haps.
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); 
+haps<-readRDS(file=here::here("data","haps_awc.rds"))
+dosages<-haps %>%
+  as.data.frame(.) %>% 
+  rownames_to_column(var = "GID") %>% 
+  separate(GID,c("SampleID","Haplo"),"_Hap",remove = T) %>% 
+  select(-Haplo) %>% 
+  group_by(SampleID) %>% 
+  summarise_all(~sum(.)) %>% 
+  ungroup() %>% 
+  column_to_rownames(var = "SampleID") %>% 
+  as.matrix
+saveRDS(dosages,file=here::here("data","dosages_awc.rds"))
+```
+
+
+## Pedigree
+
+ftp://ftp.cassavabase.org/manuscripts/Chan_et_al_2019/alphapeel.vped
+
+/PredictOutbredCrossVar/data/
+
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+awcped<-read.table(here::here("data","alphapeel.vped"),stringsAsFactors = F, header = F) %>% 
+  rename(FullSampleName=V1,
+         sireID=V2,
+         damID=V3) %>% 
+  # Remove families with one or both parents unknown
+  filter(sireID!=0,damID!=0)
+awcped %>% 
+  count(sireID,damID) %$% summary(n)
+  #  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  # 1.000   2.000   4.000   6.924  10.000  72.000
+awcped %>% 
+  count(sireID,damID) %>% dim # 462 families
+saveRDS(awcped,file=here::here("data","ped_awc.rds"))
+
+```
+
+
+## BLUPs
+
+Select traits and data to be analyzed.
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+blups<-readRDS(url("https://raw.github.com/wolfemd/IITA_2019GS/master/data/iita_blupsForCrossVal_72619.rds"))
+trials<-readRDS(url("https://raw.github.com/wolfemd/IITA_2019GS/master/data/IITA_ExptDesignsDetected_72619.rds"))
+haps<-readRDS(here::here("data","haps_awc.rds"))
+
+germnames<-trials %>% 
+  unnest_legacy(TrialData) %>% 
+  select(FullSampleName,germplasmName) %>% 
+  distinct %>% 
+  mutate(GID=ifelse(is.na(FullSampleName),germplasmName,FullSampleName))
+#blups %>% select(Trait,Dataset,blups) %>% spread(Dataset,blups)
+blups %<>% 
+  filter(Dataset=="2013toPresent",
+         Trait %in% c("DM","logFYLD","MCMDS","TCHART"))
+blups %<>% 
+  select(Trait,blups,varcomp) %>% 
+  mutate(blups=map(blups,~inner_join(.,germnames) %>% 
+                     filter(germplasmName %in% gsub("_HapA|_HapB","",rownames(haps)))))
+saveRDS(blups,file=here::here("data","blups_forawcdata.rds"))
+```
+
+## Index weights
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar); library(BGLR);
+blups<-readRDS(here::here("data","blups_forawcdata.rds")) %>% 
+  select(Trait,blups) %>% # BLUPs long-->wide for multivar analysis
+  unnest(blups) %>% 
+  select(Trait,germplasmName,drgBLUP) %>% 
+  spread(Trait,drgBLUP)
+
+indices<-blups %>% 
+  summarize_if(is.numeric,sd, na.rm=T) %>% 
+  pivot_longer(cols = everything(), names_to = "Trait", values_to = "blupSD") %>% 
+  left_join(tibble(Trait=c("DM","logFYLD","MCMDS","TCHART"), 
+                   stdSI_unscaled=c(5, 10, -10, -5),
+                   biofortSI_unscaled=c(10, 5, -5,10))) %>% 
+  mutate(stdSI=stdSI_unscaled/blupSD,
+         biofortSI=biofortSI_unscaled/blupSD)
+indices %>% mutate_if(is.numeric,~round(.,2))
+saveRDS(indices,file=here::here("data","selection_index_weights_4traits.rds"))
+```
+
+## Genetic Map
+
+https://www.biorxiv.org/content/10.1101/794339v1.full
+
+ftp://ftp.cassavabase.org/manuscripts/Chan_et_al_2019/
+
+```{bash, eval=F}
+# activate multithread OpenBLAS for fast matrix algebra
+export OMP_NUM_THREADS=56
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); library(predCrossVar)
+genmap<-tibble(Chr=1:18) %>% 
+  dplyr::mutate(geneticMap=map(Chr,~readRDS(paste0("/workdir/marnin/ac2278_shapeit2_maxna/chr",
+                                                   stringr::str_pad(.,width = 3,side = 'left',pad = 0),
+                                                   "_AWC.rds"))))
+snps<-readRDS(here::here("data","dosages_awc.rds")) %>% 
+  remove_invariant(.); 
+dim(snps)
+
+genmap %<>% 
+  dplyr::mutate(geneticMap=map(geneticMap,as.data.frame)) %>% 
+  unnest(geneticMap) %>% 
+  dplyr::mutate(SNP_ID=paste0(Chr,"_",pos)) %>% 
+  rename(cM=V2) %>% 
+  filter(SNP_ID %in% gsub("_C|_G|_T|_A","",colnames(snps))) %>% 
+  left_join(tibble(SNP_ID=gsub("_C|_G|_T|_A","",colnames(snps)),
+                   IDwithREF=colnames(snps)))
+saveRDS(genmap,file=here::here("data","genmap_awc_May2020.rds"))
+```
+
+## Recomb. freq. matrix
+
+Construct a matrix of recombination frequencies at loci for all study loci. Pre-compute 1-2c to save time predicting cross variance.
+```{r, eval=F}
+m<-genmap$cM;
+names(m)<-genmap$IDwithREF
+library(predCrossVar)
+recombFreqMat<-1-(2*genmap2recombfreq(m,nChr = 18))
+saveRDS(recombFreqMat,file=here::here("data","recombFreqMat_1minus2c_awcmap_May2020.rds")
+```
+
+

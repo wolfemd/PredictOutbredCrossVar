@@ -1,0 +1,53 @@
+name: PredictOutbredCrossVar
+output_dir: ../docs
+navbar:
+  title: PredictOutbredCrossVar
+  left:
+  - text: Home
+    href: index.html
+  - text: Preprocess Data
+    href: PreprocessDataFiles.html
+  - text: Fit MtBRRs
+    menu:
+    - text: Run mixed models
+      href: fitMtBRRs.html
+    - text: Get VarComps
+      href: getPMVarComps.html
+  - text: Cross-validation study
+    menu:
+    - text: Predict cross means and (co)variances
+      href: predictCrossVars.html
+    - text: Observed means and (co)variances
+      href: observedCrossVars.html
+    - text: Prediction accuracy
+      href: predictionAccuracy.html
+  - text: Exploratory analyses
+    menu:
+    - text: Predict untested crosses
+      href: predictUntestedCrosses.html
+  - text: Manuscript
+    menu:
+    - text: Results
+      href: Results.html
+    - text: Figures
+      href: Figures.html
+    - text: Supplementary Tables
+      href: SupplementaryTables.html
+    - text: Supplementary Figures
+      href: SupplementaryFigures.html
+  - text: Other
+    menu:
+    - text: About
+      href: about.html
+    - text: License
+      href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/wolfemd/PredictOutbredCrossVar
+output:
+  workflowr::wflow_html:
+    toc: yes
+    toc_float: yes
+    theme: yeti
+    highlight: tango
