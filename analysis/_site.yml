@@ -42,7 +42,7 @@ navbar:
     - text: License
       href: license.html
   right:
-  - icon: fa-github
+  - icon: fab fa-github
     text: Source code
     href: https://github.com/wolfemd/PredictOutbredCrossVar
 output:
