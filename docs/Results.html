@@ -76,42 +76,46 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
+    background-color: #232629;
+    color: #7a7c7d;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
 div.sourceCode
-  {  background-color: #f8f8f8; }
+  { color: #cfcfc2; background-color: #232629; }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ef2929; } /* Alert */
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #c4a000; } /* Attribute */
-code span.bn { color: #0000cf; } /* BaseN */
-code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4e9a06; } /* Char */
-code span.cn { color: #000000; } /* Constant */
-code span.co { color: #8f5902; font-style: italic; } /* Comment */
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
-code span.dt { color: #204a87; } /* DataType */
-code span.dv { color: #0000cf; } /* DecVal */
-code span.er { color: #a40000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #0000cf; } /* Float */
-code span.fu { color: #000000; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
-code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
-code span.ot { color: #8f5902; } /* Other */
-code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
-code span.sc { color: #000000; } /* SpecialChar */
-code span.ss { color: #4e9a06; } /* SpecialString */
-code span.st { color: #4e9a06; } /* String */
-code span.va { color: #000000; } /* Variable */
-code span.vs { color: #4e9a06; } /* VerbatimString */
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code span { color: #cfcfc2; } /* Normal */
+code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+code span.an { color: #3f8058; } /* Annotation */
+code span.at { color: #2980b9; } /* Attribute */
+code span.bn { color: #f67400; } /* BaseN */
+code span.bu { color: #7f8c8d; } /* BuiltIn */
+code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #3daee9; } /* Char */
+code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+code span.co { color: #7a7c7d; } /* Comment */
+code span.cv { color: #7f8c8d; } /* CommentVar */
+code span.do { color: #a43340; } /* Documentation */
+code span.dt { color: #2980b9; } /* DataType */
+code span.dv { color: #f67400; } /* DecVal */
+code span.er { color: #da4453; text-decoration: underline; } /* Error */
+code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+code span.fl { color: #f67400; } /* Float */
+code span.fu { color: #8e44ad; } /* Function */
+code span.im { color: #27ae60; } /* Import */
+code span.in { color: #c45b00; } /* Information */
+code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+code span.op { color: #cfcfc2; } /* Operator */
+code span.ot { color: #27ae60; } /* Other */
+code span.pp { color: #27ae60; } /* Preprocessor */
+code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #da4453; } /* SpecialString */
+code span.st { color: #f44f4f; } /* String */
+code span.va { color: #27aeae; } /* Variable */
+code span.vs { color: #da4453; } /* VerbatimString */
+code span.wa { color: #da4453; } /* Warning */
 
 </style>
 <script>
@@ -577,7 +581,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-01-03
+<strong>Last updated:</strong> 2021-02-01
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -668,16 +672,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreee7306d330fdafca30d4eaecb99825ee733aa4857targetblanke7306d3a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/e7306d330fdafca30d4eaecb99825ee733aa4857" target="_blank">e7306d3</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree883b1d4d2dae0efefd64e4c238477ce34df13895targetblank883b1d4a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/883b1d4d2dae0efefd64e4c238477ce34df13895" target="_blank">883b1d4</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreee7306d330fdafca30d4eaecb99825ee733aa4857targetblanke7306d3a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree883b1d4d2dae0efefd64e4c238477ce34df13895targetblank883b1d4a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/e7306d330fdafca30d4eaecb99825ee733aa4857" target="_blank">e7306d3</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/883b1d4d2dae0efefd64e4c238477ce34df13895" target="_blank">883b1d4</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -690,463 +694,18 @@ Ignored files:
     Ignored:    analysis/.DS_Store
     Ignored:    code/.DS_Store
     Ignored:    data/.DS_Store
-    Ignored:    manuscript/.DS_Store
     Ignored:    output/.DS_Store
-    Ignored:    output/crossPredictions/.DS_Store
-    Ignored:    output/crossPredictions/.gitignore
-    Ignored:    output/crossPredictions/Icon
-    Ignored:    output/crossPredictions/July2020/
-    Ignored:    output/crossPredictions/defunctDirectionalDomResults/
-    Ignored:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/otherRetiredEarlyResults/
-    Ignored:    output/crossPredictions/predUntestedCrossBVs_ReDoSelfs_A_predVarAndCovarBVs.rds
-    Ignored:    output/crossPredictions/predUntestedCrossTGVs_ReDoSelfs_AD_predVarsAndCovars.rds
-    Ignored:    output/crossPredictions/predictedCrossVars_chunk1_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedCrossVars_chunk2_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedCrossVars_chunk3_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedCrossVars_chunk4_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedCrossVars_chunk5_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk1_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk2_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk3_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_15Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk4_2Dec2020.rds
-    Ignored:    output/crossPredictions/predictedDirectionalDomCrossVarTGVs_chunk5_2Dec2020.rds
-    Ignored:    output/crossPredictions/retired_ReDoSelfs/
     Ignored:    output/crossRealizations/.DS_Store
-    Ignored:    output/mtMarkerEffects/Icon
 
 Untracked files:
-    Untracked:  Abstract_EdingburghCompGenomicsTalk_2020June02.gdoc
+    Untracked:  .gitignore
     Untracked:  Icon
-    Untracked:  ScratchSlidesAndNotes.gslides
-    Untracked:  analysis/ICQG6.Rmd
-    Untracked:  analysis/Icon
-    Untracked:  archive/
-    Untracked:  code/Icon
-    Untracked:  data/Icon
-    Untracked:  manuscript/Figures.gslides
-    Untracked:  manuscript/SupplementaryTable06.csv
-    Untracked:  manuscript/SupplementaryTable07.csv
-    Untracked:  manuscript/SupplementaryTable08.csv
-    Untracked:  manuscript/SupplementaryTable09.csv
-    Untracked:  manuscript/SupplementaryTable17.csv
-    Untracked:  manuscript/SupplementaryTable18.csv
-    Untracked:  output/Figures/
-    Untracked:  output/Icon
-    Untracked:  output/Tables/
-    Untracked:  output/crossRealizations/Icon
-    Untracked:  predCrossVar/
-    Untracked:  rsyncs.R
-    Untracked:  rsyncs2.R
-    Untracked:  setupOnServer.R
-
-Unstaged changes:
-    Modified:   analysis/NGCleadersCall.Rmd
-    Modified:   data/Madd_awc.rds
-    Modified:   data/Mdom_awc.rds
-    Modified:   data/blups_forawcdata.rds
-    Modified:   data/dosages_awc.rds
-    Modified:   data/genmap_awc_May2020.rds
-    Modified:   data/haps_awc.rds
-    Modified:   data/iita_blupsForCrossVal_72619.rds
-    Modified:   data/parentwise_crossVal_folds.rds
-    Modified:   data/ped_awc.rds
-    Modified:   data/recombFreqMat_1minus2c_awcmap_May2020.rds
-    Modified:   manuscript/SupplementaryTables.xlsx
-    Modified:   output/accuraciesMeans.rds
-    Modified:   output/accuraciesUC.rds
-    Modified:   output/accuraciesVars.rds
-    Modified:   output/crossPredictions/TableS7_predictedCrossVars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat1_Fold1_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat1_Fold2_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat1_Fold3_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat1_Fold4_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat1_Fold5_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat1_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat2_Fold1_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat2_Fold2_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat2_Fold3_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat2_Fold4_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat2_Fold5_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat2_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat3_Fold1_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat3_Fold2_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat3_Fold3_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat3_Fold4_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat3_Fold5_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat3_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat4_Fold1_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat4_Fold2_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat4_Fold3_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat4_Fold4_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat4_Fold5_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat4_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat5_Fold1_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold1_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat5_Fold2_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold2_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat5_Fold3_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold3_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat5_Fold4_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold4_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/mt_Repeat5_Fold5_trainset_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/mt_Repeat5_Fold5_trainset_DirectionalDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_A_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk1_DirDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_A_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk2_DirDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_A_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk3_DirDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_A_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk4_DirDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossBVs_chunk5_A_predVarAndCovarBVs.rds
-    Deleted:    output/crossPredictions/predUntestedCrossBVs_chunk5_DirDom_predVarAndCovarBVs.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_AD_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk1_DirDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_AD_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk2_DirDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_AD_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk3_DirDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_AD_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk4_DirDom_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predUntestedCrossTGVs_chunk5_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrossTGVs_chunk5_DirDom_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk1_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk2_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk3_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk4_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_209parents_chunk5_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk1_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk2_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk3_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk4_A_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_AD_predVarsAndCovars.rds
-    Deleted:    output/crossPredictions/predUntestedCrosses_top100stdSI_chunk5_A_predVarsAndCovars.rds
-    Modified:   output/crossPredictions/predictedCrossMeans.rds
-    Modified:   output/crossPredictions/predictedCrossMeans_DirectionalDom_tidy_withSelIndices.rds
-    Deleted:    output/crossPredictions/predictedCrossMeans_GCA_SCA.rds
-    Modified:   output/crossPredictions/predictedCrossMeans_tidy_withSelIndices.rds
-    Modified:   output/crossPredictions/predictedCrossVars_DirectionalDom_tidy_withSelIndices.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_GCA_SCA.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_chunk1.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_chunk2.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_chunk3.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_chunk4.rds
-    Deleted:    output/crossPredictions/predictedCrossVars_chunk5.rds
-    Modified:   output/crossPredictions/predictedCrossVars_tidy_withSelIndices.rds
-    Modified:   output/crossPredictions/predictedDirectionalDomCrossMeans.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk1.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk2.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk3.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk4.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVarBVs_chunk5.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk1.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk2.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk3.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk4.rds
-    Deleted:    output/crossPredictions/predictedDirectionalDomCrossVars_chunk5.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossMeansBV.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossMeansDirDom.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossMeansTGV.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossMeans_SelIndices.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossMeans_tidy_traits.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossVars_SelIndices.rds
-    Modified:   output/crossPredictions/predictedUntestedCrossVars_tidy_traits.rds
-    Modified:   output/crossRealizations/realizedCrossMeans.rds
-    Modified:   output/crossRealizations/realizedCrossMeans_BLUPs.rds
-    Modified:   output/crossRealizations/realizedCrossMetrics.rds
-    Modified:   output/crossRealizations/realizedCrossVars.rds
-    Modified:   output/crossRealizations/realizedCrossVars_BLUPs.rds
-    Modified:   output/crossRealizations/realized_cross_means_and_covs_traits.rds
-    Modified:   output/crossRealizations/realized_cross_means_and_vars_selindices.rds
-    Modified:   output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
-    Modified:   output/gblups_geneticgroups.rds
-    Modified:   output/gblups_parentwise_crossVal_folds.rds
-    Modified:   output/gebvs_ModelA_GroupAll_stdSI.rds
-    Modified:   output/mtMarkerEffects/mt_All_A.rds
-    Modified:   output/mtMarkerEffects/mt_All_AD.rds
-    Modified:   output/mtMarkerEffects/mt_All_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_GG_A.rds
-    Modified:   output/mtMarkerEffects/mt_GG_AD.rds
-    Modified:   output/mtMarkerEffects/mt_GG_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold1_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold2_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold3_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold4_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat1_Fold5_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold1_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold2_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold3_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold4_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat2_Fold5_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold1_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold2_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold3_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold4_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat3_Fold5_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold1_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold2_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold3_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold4_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat4_Fold5_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold1_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold2_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold3_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold4_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_testset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_A.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_AD.rds
-    Modified:   output/mtMarkerEffects/mt_Repeat5_Fold5_trainset_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_TMS13_A.rds
-    Modified:   output/mtMarkerEffects/mt_TMS13_AD.rds
-    Modified:   output/mtMarkerEffects/mt_TMS13_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_TMS14_A.rds
-    Modified:   output/mtMarkerEffects/mt_TMS14_AD.rds
-    Modified:   output/mtMarkerEffects/mt_TMS14_DirectionalDom.rds
-    Modified:   output/mtMarkerEffects/mt_TMS15_A.rds
-    Modified:   output/mtMarkerEffects/mt_TMS15_AD.rds
-    Modified:   output/mtMarkerEffects/mt_TMS15_DirectionalDom.rds
-    Modified:   output/obsVSpredMeans.rds
-    Modified:   output/obsVSpredUC.rds
-    Modified:   output/obsVSpredVars.rds
-    Modified:   output/pmv_DirectionalDom_varcomps_geneticgroups.rds
-    Modified:   output/pmv_varcomps_geneticgroups.rds
-    Modified:   output/pmv_varcomps_geneticgroups_tidy_includingSIvars.rds
-    Modified:   workflowr_log.R
+    Untracked:  PredictOutbredCrossVar.Rproj
+    Untracked:  manuscript/
+    Untracked:  output/crossPredictions/
+    Untracked:  output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
+    Untracked:  output/gblups_geneticgroups.rds
+    Untracked:  output/gblups_parentwise_crossVal_folds.rds
 
 </code></pre>
 <p>
@@ -1187,19 +746,19 @@ Message
 <tbody>
 <tr>
 <td>
-html
+Rmd
 </td>
 <td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/Results.html" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/883b1d4d2dae0efefd64e4c238477ce34df13895/analysis/Results.Rmd" target="_blank">883b1d4</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-02-01
 </td>
 <td>
-Build site.
+Update the syntax highlighting and code-block formatting throughout for
 </td>
 </tr>
 <tr>
@@ -1207,33 +766,16 @@ Build site.
 Rmd
 </td>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/ef3f7b378c1459e981f8b282fb5d0678f095944c/analysis/Results.Rmd" target="_blank">ef3f7b3</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/analysis/Results.Rmd" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-02
+2021-01-04
 </td>
 <td>
-Compile submission version of all Rmds with outstanding, uncommitted
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/2228d20631274890a8b9514ff84a8d36c7670f44/analysis/Results.Rmd" target="_blank">2228d20</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-12-15
-</td>
-<td>
-Work in progress. Finished re-doing predictions with both self-cross handling <em>and</em> PMV VarD bugs fixed. Discovered NEW bug in DirDom results.
+Submission and GitHub ready version.
 </td>
 </tr>
 <tr>
@@ -1241,169 +783,16 @@ Work in progress. Finished re-doing predictions with both self-cross handling <e
 html
 </td>
 <td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/Results.html" target="_blank">34c84f3</a>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/6a10c30fbe489268566e4b7568be67a4395c2080/docs/Results.html" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2020-10-27
+2021-01-04
 </td>
 <td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/57325b7228d373158a5d909c48e101b93111e41c/analysis/Results.Rmd" target="_blank">57325b7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-<td>
-Figures and results for second COMPLETE draft. Publish final changes
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b4edd2ca13ee9b9f62788870270c15420f130db5/analysis/Results.Rmd" target="_blank">b4edd2c</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/7cb77efccc357dad9e62997a23574ff295a72f0e/analysis/Results.Rmd" target="_blank">7cb77ef</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-<td>
-Revised and improved the “exploration of untested crosses”. Includes a network analysis of parents and matings selected. Returns the selfs to all analyses and actually highlights them now.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/Results.html" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-<td>
-Site built for first COMPLETE draft, shared with co-authors.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/9714c3478427fd2b975e247ed596e9748a055206/docs/Results.html" target="_blank">9714c34</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-09-05
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/c2fd60b4327b5247f5adad8e4bd247372f8bdafe/analysis/Results.Rmd" target="_blank">c2fd60b</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-09-05
-</td>
-<td>
-Supress warnings and messages. Add (some) Figure legends.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/Results.html" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/849d7c1df9e401ef8fdb050f62be74ae2fd43f51/analysis/Results.Rmd" target="_blank">849d7c1</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
-</td>
-<td>
-Track manuscript draft, figures and sup. tables. All results drafted with references to sup. figures and tables in order committed here.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/d4f0da1bb3999e7bd7acc2401a0a2082b44e39a5/analysis/Results.Rmd" target="_blank">d4f0da1</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-27
-</td>
-<td>
-Old version of Sup. Figures (just misc old code for plots), commmiting for posterity before assembling proper draft from figures in Results.Rmd.
+Submission and GitHub ready version.
 </td>
 </tr>
 </tbody>
@@ -1445,7 +834,7 @@ Old version of Sup. Figures (just misc old code for plots), commmiting for poste
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">meanPropHom=</span><span class="fu">round</span>(<span class="fu">mean</span>(PropSNP_homozygous),<span class="dv">3</span>))</span></code></pre></div>
 <pre><code># A tibble: 4 x 2
   Group      meanPropHom
-  &lt;chr&gt;            &lt;dbl&gt;
+* &lt;chr&gt;            &lt;dbl&gt;
 1 GG (C0)          0.826
 2 TMS13 (C1)       0.835
 3 TMS14 (C2)       0.838
@@ -1483,46 +872,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS01-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS01-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS01-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS01-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS01-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -1609,46 +965,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-9-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-9-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-9-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-9-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-9-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -1699,46 +1022,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-11-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-11-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-11-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-11-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-11-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -1797,46 +1087,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-13-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-13-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-13-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-13-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-13-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -1886,46 +1143,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-14-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-14-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-14-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-14-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-14-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2078,46 +1302,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS06-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS06-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS06-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS06-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS06-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2173,46 +1364,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS07-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS07-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS07-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS07-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS07-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2258,46 +1416,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS08-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS08-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS08-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS08-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS08-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2363,13 +1488,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-24-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-24-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2422,46 +1547,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS10a-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS10a-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS10a-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS10a-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS10a-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2504,46 +1596,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/figureS10b-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/figureS10b-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/figureS10b-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/figureS10b-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/figureS10b-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2668,13 +1727,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-30-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-30-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2716,46 +1775,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-31-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-31-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-31-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-31-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-31-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -2779,7 +1805,7 @@ wolfemd
 <span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">sdAcc=</span><span class="fu">round</span>(<span class="fu">sd</span>(AccuracyWtCor),<span class="dv">3</span>))</span></code></pre></div>
 <pre><code># A tibble: 2 x 3
   Component  meanAcc sdAcc
-  &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;
+* &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;
 1 Covariance   0.085 0.135
 2 Variance     0.143 0.119</code></pre>
 <p>Most variance prediction accuracy estimates were positive, with a mean weighted correlation of 0.14. Mean accuracy for covariance prediction was less (0.09).</p>
@@ -2996,13 +2022,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-42-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-42-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -3095,7 +2121,7 @@ wolfemd
 <span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div>
 <pre><code># A tibble: 2 x 2
   Trait     meanAcc
-  &lt;chr&gt;       &lt;dbl&gt;
+* &lt;chr&gt;       &lt;dbl&gt;
 1 biofortSI    0.55
 2 stdSI        0.42</code></pre>
 <p>Perhaps indicating that the cross-mean dominates the prediction of UC, and in contrast to predictions of cross variances, the mean UC for the biofortSI was higher (0.55) compared to the stdSI (0.42).</p>
@@ -3183,7 +2209,7 @@ wolfemd
 <span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">maxPropDom=</span><span class="fu">max</span>(propDom))</span></code></pre></div>
 <pre><code># A tibble: 2 x 4
   Model    minPropDom meanPropDom maxPropDom
-  &lt;chr&gt;         &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
+* &lt;chr&gt;         &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
 1 AD             0.07       0.341       0.68
 2 DirDomAD       0.06       0.236       0.53</code></pre>
 <div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>varcomps <span class="sc">%&gt;%</span> </span>
@@ -3292,7 +2318,7 @@ wolfemd
 <span id="cb113-6"><a href="#cb113-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">meanCorSIs=</span><span class="fu">mean</span>(corSelIndices))</span></code></pre></div>
 <pre><code># A tibble: 3 x 2
   PredOf meanCorSIs
-  &lt;chr&gt;       &lt;dbl&gt;
+* &lt;chr&gt;       &lt;dbl&gt;
 1 Mean        0.185
 2 Sd          0.913
 3 UC          0.116</code></pre>
@@ -3318,7 +2344,7 @@ wolfemd
 <span id="cb116-6"><a href="#cb116-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">meanCorModels=</span><span class="fu">mean</span>(corModels))</span></code></pre></div>
 <pre><code># A tibble: 3 x 2
   PredOf meanCorModels
-  &lt;chr&gt;          &lt;dbl&gt;
+* &lt;chr&gt;          &lt;dbl&gt;
 1 Mean           0.97 
 2 Sd             0.965
 3 UC             0.97 </code></pre>
@@ -3343,7 +2369,7 @@ wolfemd
 <span id="cb119-6"><a href="#cb119-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">meanCorBV_TGV=</span><span class="fu">mean</span>(corComponents))</span></code></pre></div>
 <pre><code># A tibble: 3 x 2
   PredOf meanCorBV_TGV
-  &lt;chr&gt;          &lt;dbl&gt;
+* &lt;chr&gt;          &lt;dbl&gt;
 1 Mean           0.912
 2 Sd             0.938
 3 UC             0.9  </code></pre>
@@ -3412,13 +2438,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-71-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-71-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -3454,13 +2480,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-72-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-72-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -3486,7 +2512,7 @@ wolfemd
 <span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Trait)</span></code></pre></div>
 <pre><code># A tibble: 2 x 2
   Trait         n
-  &lt;chr&gt;     &lt;int&gt;
+* &lt;chr&gt;     &lt;int&gt;
 1 biofortSI   120
 2 stdSI       190</code></pre>
 <p>Number of Self vs. Outcross selected by Trait</p>
@@ -3514,7 +2540,7 @@ wolfemd
 <span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(CrossPrevMade)</span></code></pre></div>
 <pre><code># A tibble: 1 x 2
   CrossPrevMade     n
-  &lt;chr&gt;         &lt;int&gt;
+* &lt;chr&gt;         &lt;int&gt;
 1 No              310</code></pre>
 <p>None of the selected crosses have previously been tested.</p>
 <p><strong>Table:</strong> Summarize, by trait, the number of and relative contributions (number of matings) proposed for each parent selected in the group of top crosses.</p>
@@ -3528,7 +2554,7 @@ wolfemd
 <span id="cb141-8"><a href="#cb141-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">minProg=</span><span class="fu">min</span>(n),<span class="at">maxProg=</span><span class="fu">max</span>(n),<span class="at">medianProg=</span><span class="fu">median</span>(n))</span></code></pre></div>
 <pre><code># A tibble: 2 x 5
   Trait     Nparents minProg maxProg medianProg
-  &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;   &lt;int&gt;      &lt;dbl&gt;
+* &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;   &lt;int&gt;      &lt;dbl&gt;
 1 biofortSI       42       1     149          5
 2 stdSI           87       1     169          3</code></pre>
 <div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a>top50crosses <span class="sc">%&gt;%</span> </span>
@@ -3715,13 +2741,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-89-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-89-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -3779,46 +2805,13 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/22e6c87158d43f7ca8c30a8248270a79104b8760/docs/figure/Results.Rmd/unnamed-chunk-90-1.png" target="_blank">22e6c87</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/docs/figure/Results.Rmd/unnamed-chunk-90-1.png" target="_blank">6a10c30</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-01-03
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/34c84f31a196f1a2f351ed7e478cbe514bd86915/docs/figure/Results.Rmd/unnamed-chunk-90-1.png" target="_blank">34c84f3</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-27
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/3dbb1e867b6aa0a706ba648409429bac2528f68e/docs/figure/Results.Rmd/unnamed-chunk-90-1.png" target="_blank">3dbb1e8</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-10-08
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/b06eee72ef74e7d1845ebae5c68b3d439544eb44/docs/figure/Results.Rmd/unnamed-chunk-90-1.png" target="_blank">b06eee7</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2020-08-31
+2021-01-04
 </td>
 </tr>
 </tbody>
@@ -3854,31 +2847,32 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] V8_3.4.0           concaveman_1.1.0   ggforce_0.3.2.9000 patchwork_1.1.0   
- [5] magrittr_2.0.1     forcats_0.5.0      stringr_1.4.0      dplyr_1.0.2       
- [9] purrr_0.3.4        readr_1.4.0        tidyr_1.1.2        tibble_3.0.4      
-[13] ggplot2_3.3.2      tidyverse_1.3.0    workflowr_1.6.2   
+ [1] V8_3.4.0           concaveman_1.1.0   ggforce_0.3.2.9000 patchwork_1.1.1   
+ [5] magrittr_2.0.1     forcats_0.5.1      stringr_1.4.0      dplyr_1.0.3       
+ [9] purrr_0.3.4        readr_1.4.0        tidyr_1.1.2        tibble_3.0.6      
+[13] ggplot2_3.3.3      tidyverse_1.3.0   
 
 loaded via a namespace (and not attached):
  [1] nlme_3.1-151       fs_1.5.0           lubridate_1.7.9.2  httr_1.4.2        
  [5] rprojroot_2.0.2    tools_4.0.2        backports_1.2.1    utf8_1.1.4        
- [9] R6_2.5.0           DBI_1.1.0          colorspace_2.0-0   withr_2.3.0       
+ [9] R6_2.5.0           DBI_1.1.1          colorspace_2.0-0   withr_2.4.1       
 [13] tidyselect_1.1.0   gridExtra_2.3      mnormt_2.0.2       curl_4.3          
-[17] compiler_4.0.2     git2r_0.27.1       textshaping_0.2.1  cli_2.2.0         
+[17] compiler_4.0.2     git2r_0.28.0       textshaping_0.2.1  cli_2.3.0         
 [21] rvest_0.3.6        xml2_1.3.2         labeling_0.4.2     scales_1.1.1      
-[25] psych_2.0.9        systemfonts_0.3.2  digest_0.6.27      rmarkdown_2.6     
-[29] pkgconfig_2.0.3    htmltools_0.5.0    dbplyr_2.0.0       rlang_0.4.9       
-[33] readxl_1.3.1       rstudioapi_0.13    gridGraphics_0.5-1 farver_2.0.3      
-[37] generics_0.1.0     jsonlite_1.7.2     Rcpp_1.0.5         munsell_0.5.0     
-[41] fansi_0.4.1        viridis_0.5.1      lifecycle_0.2.0    stringi_1.5.3     
-[45] whisker_0.4        yaml_2.2.1         MASS_7.3-53        grid_4.0.2        
-[49] parallel_4.0.2     promises_1.1.1     crayon_1.3.4       lattice_0.20-41   
-[53] haven_2.3.1        hms_0.5.3          tmvnsim_1.0-2      knitr_1.30        
-[57] pillar_1.4.7       reprex_0.3.0       glue_1.4.2         evaluate_0.14     
-[61] modelr_0.1.8       vctrs_0.3.5        tweenr_1.0.1       httpuv_1.5.4      
-[65] cellranger_1.1.0   gtable_0.3.0       polyclip_1.10-0    assertthat_0.2.1  
-[69] xfun_0.19          broom_0.7.2        later_1.1.0.1      ragg_0.4.0        
-[73] viridisLite_0.3.0  corrplot_0.84      ellipsis_0.3.1     here_1.0.1        </code></pre>
+[25] psych_2.0.12       systemfonts_0.3.2  digest_0.6.27      rmarkdown_2.6     
+[29] pkgconfig_2.0.3    htmltools_0.5.1.1  dbplyr_2.0.0       highr_0.8         
+[33] rlang_0.4.10       readxl_1.3.1       rstudioapi_0.13    gridGraphics_0.5-1
+[37] farver_2.0.3       generics_0.1.0     jsonlite_1.7.2     Rcpp_1.0.6        
+[41] munsell_0.5.0      fansi_0.4.2        viridis_0.5.1      lifecycle_0.2.0   
+[45] stringi_1.5.3      whisker_0.4        yaml_2.2.1         MASS_7.3-53       
+[49] grid_4.0.2         parallel_4.0.2     promises_1.1.1     crayon_1.3.4      
+[53] lattice_0.20-41    haven_2.3.1        hms_1.0.0          tmvnsim_1.0-2     
+[57] knitr_1.31         ps_1.5.0           pillar_1.4.7       reprex_1.0.0      
+[61] glue_1.4.2         evaluate_0.14      modelr_0.1.8       tweenr_1.0.1      
+[65] vctrs_0.3.6        httpuv_1.5.5       cellranger_1.1.0   polyclip_1.10-0   
+[69] gtable_0.3.0       assertthat_0.2.1   xfun_0.20          broom_0.7.4       
+[73] later_1.1.0.1      ragg_0.4.1         viridisLite_0.3.0  workflowr_1.6.2   
+[77] corrplot_0.84      ellipsis_0.3.1     here_1.0.1        </code></pre>
 </div>
 </div>
 
