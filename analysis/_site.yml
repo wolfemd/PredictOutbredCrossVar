@@ -50,4 +50,4 @@ output:
     toc: yes
     toc_float: yes
     theme: yeti
-    highlight: tango
+    highlight: breezedark

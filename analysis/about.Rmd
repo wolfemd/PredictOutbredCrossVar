@@ -15,5 +15,9 @@ Diverse crops ranging from staples (e.g., cassava) to cash crops (e.g., cacao) a
 
 # Acknowledgements
 
+We are grateful to the entire [Next Generation Cassava Breeding team](www.nextgencassava.org) and especially the International Institute of Tropical Agriculture Cassava Breeding team, so many of whom have contributed to this study in the field, in the lab and beyond. We appreciate Christian Werner for pointing us towards directional dominance models, and the Jean-Luc Jannink and Mark Sorrells research groups for fruitful discussions and comments along the way. Thanks to Lukas Mueller and Prasad Peteti for data hosting and curation respectively. 
+
 # Funding
+
+We acknowledge the Bill & Melinda Gates Foundation and UK Foreign, Commonwealth & Development Office (FCDO) (Grant 1048542) and support from the CGIAR Research Program on Roots, Tubers and Bananas.
 

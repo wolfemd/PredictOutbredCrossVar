@@ -7,6 +7,11 @@ editor_options:
   chunk_output_type: inline
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+
 For each of the genetic groups (GG, C1, C2, C3 , ALL):
 
 Compute the posterior mean variances and covariances from the on-disk-stored, post-burnIn, thinned posterior samples of marker effects.

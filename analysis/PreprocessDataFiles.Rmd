@@ -6,9 +6,10 @@ output: workflowr::wflow_html
 editor_options:
   chunk_output_type: inline
 ---
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE,
+                      eval = FALSE)
 ```
 
 # Chan et al. 2019 data

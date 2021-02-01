@@ -1,5 +1,5 @@
 ---
-title: "Reproducible documentation: Wolfe et al. Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices"
+title: "Reproducible documentation: Wolfe et al. Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices ([PREPRINT](https://doi.org/10.1101/2021.01.05.425443))"
 site: workflowr::wflow_site
 author: "Marnin Wolfe, Ariel Chan, Peter Kulakow, Ismail Rabbi, Jean-Luc Jannink"
 output:
@@ -9,9 +9,14 @@ editor_options:
   chunk_output_type: inline
 ---
 
-This repository and website documents all analyses, summary, tables and figures associated with a project with the current working title: 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
 
-**Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices**
+# PREPRINT
+
+This repository and website documents all analyses, summary, tables and figures associated with the following PREPRINT: [Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices](https://doi.org/10.1101/2021.01.05.425443)!
 
 # Abstract
 
