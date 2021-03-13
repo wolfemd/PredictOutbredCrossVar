@@ -266,45 +266,45 @@ For each family, compute the proportion of offspring subsequently used as parent
 
 Compute the realized "Usefulness" of the cross in terms of population improvement / parent-development as the mean GEBV of family members that are themselves parents. 
 
+**[NEW]:** compute realized UCs for component traits in addition to the selection indicies. 
+
 ```{r, eval=F}
 library(tidyverse); library(magrittr); library(predCrossVar)
 indices<-readRDS(here::here("data","selection_index_weights_4traits.rds"))
-realized_means_and_covs<-readRDS(here::here("output/crossRealizations","realized_cross_means_and_covs_traits.rds"))
+realized_means_and_covs<-readRDS(here::here("output/crossRealizations",
+                                            "realized_cross_means_and_covs_traits.rds"))
 
 ped<-readRDS(here::here("data","ped_awc.rds"))
 parents<-union(ped$sireID,ped$damID)
 
-realized_cross_gebvs_si<-realized_means_and_covs %>% 
+realized_cross_gebvs<-realized_means_and_covs %>% 
   filter(predOf=="BV") %>% 
   mutate(stdSI=map(famgblups,~as.matrix(.)%*%indices$stdSI),
          biofortSI=map(famgblups,~as.matrix(.)%*%indices$biofortSI),
-         GEBV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y))) %>% 
-  select(-famgblups,-means,-covMat,-stdSI,-biofortSI)
-
-realizedparentmetrics<-realized_cross_gebvs_si %>% 
+         GEBV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y)),
+         famgblups=map(famgblups,~rownames_to_column(.,var = "germplasmName")),
+         GEBV=map2(GEBV,famgblups,~left_join(.x,.y))) %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,GEBV) %>% 
   unnest(GEBV) %>% 
+  pivot_longer(cols = c(stdSI,biofortSI,DM,logFYLD,MCMDS,TCHART),
+               values_to = "GEBV", names_to = "Trait") %>% 
   mutate(IsParent=ifelse(germplasmName %in% parents,TRUE,FALSE)) %>% 
-  nest(Family=c(germplasmName,IsParent,stdSI,biofortSI)) 
-
-realizedparentmetrics %<>% 
+  nest(Family=c(germplasmName,IsParent,GEBV))
+realizedparentmetrics<-realized_cross_gebvs %>% 
   mutate(FamSize=map_dbl(Family,nrow),
          NmembersUsedAsParent=map_dbl(Family,~length(which(.$IsParent==TRUE))),
          propUsedAsParent=map_dbl(Family,~length(which(.$IsParent==TRUE))/nrow(.)),
-         realizedUCparent_stdSI=map_dbl(Family,~mean(.$stdSI[.$IsParent==TRUE],na.rm = T)),
-         realizedUCparent_biofortSI=map_dbl(Family,~mean(.$biofortSI[.$IsParent==TRUE],na.rm = T)),
+         realizedUCparent=map_dbl(Family,~mean(.$GEBV[.$IsParent==TRUE],na.rm = T)),
          # also compute the mean of top 1% of the family
          # correspond ~std. intensity = 2.67
          # provides alternative validation data for usefulness criteria
          # invariant to actual selection intensity 
-         meanTop1pctGEBV_stdSI=map_dbl(Family, ~slice_max(.data = .,
-                                                          order_by = stdSI, 
-                                                          n=ceiling(0.01*nrow(.))) %$% mean(stdSI)),
-         meanTop1pctGEBV_biofortSI=map_dbl(Family, ~slice_max(.data = .,
-                                                              order_by = biofortSI, 
-                                                              n=ceiling(0.01*nrow(.))) %$% mean(biofortSI))) %>% 
+         meanTop1pctGEBV=map_dbl(Family,~slice_max(.data = .,
+                                                          order_by = GEBV,
+                                                          n=ceiling(0.01*nrow(.))) %$% mean(GEBV))) %>%
   select(-Family) %>% 
   ungroup()
-rm(realized_cross_gebvs_si)
+rm(realized_cross_gebvs)
 ```
 
 ## Metrics as varieties
@@ -333,16 +333,25 @@ realizedVDPmetrics<-ped %>%
          advancedPastAYT=rowSums(.[,c("GeneticGain","UYT")],na.rm = T)>0) %>% 
   select(-c("GeneticGain","CET","ExpCET","PYT","AYT","UYT")) %>% 
   rename(germplasmName=GID)
-realized_cross_getgvs_si<-realized_means_and_covs %>% 
+```
+
+
+```{r, eval=F}
+realized_cross_getgvs<-realized_means_and_covs %>% 
   filter(predOf=="TGV") %>% 
   mutate(stdSI=map(famgblups,~as.matrix(.)%*%indices$stdSI),
          biofortSI=map(famgblups,~as.matrix(.)%*%indices$biofortSI),
-         GETGV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y))) %>% 
-  select(-famgblups,-means,-covMat,-stdSI,-biofortSI)
-realizedVDPmetrics<-realized_cross_getgvs_si %>% 
+         GETGV=map2(stdSI,biofortSI,~tibble(germplasmName=rownames(.x),stdSI=.x,biofortSI=.y)),
+         famgblups=map(famgblups,~rownames_to_column(.,var = "germplasmName")),
+         GETGV=map2(GETGV,famgblups,~left_join(.x,.y))) %>% 
+  select(Repeat,Fold,Model,predOf,sireID,damID,GETGV) %>% 
   unnest(GETGV) %>% 
-  left_join(realizedVDPmetrics) %>% 
-  nest(data=c(germplasmName,stdSI,biofortSI,IsPhenotyped,contains("advancedPast"))) %>% 
+  pivot_longer(cols = c(stdSI,biofortSI,DM,logFYLD,MCMDS,TCHART),
+               values_to = "GETGV", names_to = "Trait") %>% 
+  left_join(realizedVDPmetrics)
+
+realizedVDPmetrics<-realized_cross_getgvs %>% 
+  nest(data=c(germplasmName,GETGV,IsPhenotyped,contains("advancedPast"))) %>% 
   mutate(FamSize=map_dbl(data,nrow),
          NmembersPhenotyped=map_dbl(data,~length(which(.$IsPhenotyped==TRUE))),
          NmembersPastCET=map_dbl(data,~length(which(.$advancedPastCET==TRUE))),
@@ -352,27 +361,20 @@ realizedVDPmetrics<-realized_cross_getgvs_si %>%
          propPastCET=map_dbl(data,~length(which(.$advancedPastCET==TRUE))/nrow(.)),
          propPastPYT=map_dbl(data,~length(which(.$advancedPastPYT==TRUE))/nrow(.)),
          propPastAYT=map_dbl(data,~length(which(.$advancedPastAYT==TRUE))/nrow(.)),
-         realizedUCatCET_stdSI=map_dbl(data,~mean(.$stdSI[.$IsPhenotyped==TRUE],na.rm = T)),
-         realizedUCatPYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastCET==TRUE],na.rm = T)),
-         realizedUCatAYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastPYT==TRUE],na.rm = T)),
-         realizedUCatUYT_stdSI=map_dbl(data,~mean(.$stdSI[.$advancedPastAYT==TRUE],na.rm = T)),
-         realizedUCatCET_biofortSI=map_dbl(data,~mean(.$biofortSI[.$IsPhenotyped==TRUE],na.rm = T)),
-         realizedUCatPYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastCET==TRUE],na.rm = T)),
-         realizedUCatAYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastPYT==TRUE],na.rm = T)),
-         realizedUCatUYT_biofortSI=map_dbl(data,~mean(.$biofortSI[.$advancedPastAYT==TRUE],na.rm = T)),
+         realizedUCatCET=map_dbl(data,~mean(.$GETGV[.$IsPhenotyped==TRUE],na.rm = T)),
+         realizedUCatPYT=map_dbl(data,~mean(.$GETGV[.$advancedPastCET==TRUE],na.rm = T)),
+         realizedUCatAYT=map_dbl(data,~mean(.$GETGV[.$advancedPastPYT==TRUE],na.rm = T)),
+         realizedUCatUYT=map_dbl(data,~mean(.$GETGV[.$advancedPastAYT==TRUE],na.rm = T)),
          # also compute the mean of top 1% of the family
          # correspond ~std. intensity = 2.67
          # provides alternative validation data for usefulness criteria
          # invariant to actual selection intensity 
-         meanTop1pctGETGV_stdSI=map_dbl(data, ~slice_max(.data = .,
-                                                          order_by = stdSI, 
-                                                          n=ceiling(0.01*nrow(.))) %$% mean(stdSI)),
-         meanTop1pctGETGV_biofortSI=map_dbl(data, ~slice_max(.data = .,
-                                                              order_by = biofortSI, 
-                                                              n=ceiling(0.01*nrow(.))) %$% mean(biofortSI))) %>% 
+         meanTop1pctGETGV=map_dbl(data, ~slice_max(.data = .,
+                                                   order_by = GETGV, 
+                                                   n=ceiling(0.01*nrow(.))) %$% mean(GETGV))) %>% 
   select(-data) %>% 
   ungroup()
-rm(realized_cross_getgvs_si,trials)
+rm(realized_cross_getgvs,trials)
 ```
 Combine parent + variety metrics
 ```{r, eval=F}
