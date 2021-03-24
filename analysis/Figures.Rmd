@@ -125,8 +125,8 @@ p3<-baseplot +
 ```
 
 ```{r, warning=F}
-pngfile <- fs::path("figure/Figures.Rmd/","figure2.png")
-
+#pngfile <- fs::path("figure/Figures.Rmd/","figure2.png")
+pngfile<-fs::path(knitr::fig_path(),  "figure2.png")
 #pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 
