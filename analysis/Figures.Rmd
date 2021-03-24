@@ -125,7 +125,7 @@ p3<-baseplot +
 
 ```
 
-```{r, warning=F}
+```{r figure2, warning=F}
 fig2<-((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
   plot_layout(guides = 'collect',nrow=2) +
   plot_annotation(tag_levels = 'A') & 
@@ -141,7 +141,6 @@ pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 fig2
 invisible(dev.off())
-
 ```
 ![](`r here::here("docs/figure/Figures.Rmd/figure2-1/","figure2.png")`)
 
@@ -196,7 +195,6 @@ pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 fig3
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 ![](`r here::here("docs/figure/Figures.Rmd/figure3-1/","figure3.png")`)
 
@@ -251,9 +249,7 @@ p3<-forplot %>%
 ```
 
 ```{r figure4}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure4.png"))
-agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
-(p1 + p2 + plot_layout(widths = c(1, 2))) / p3 + 
+fig4<-(p1 + p2 + plot_layout(widths = c(1, 2))) / p3 + 
   plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text(face = 'bold'),
         axis.title = element_text(face = 'bold',color = 'black'),
@@ -262,15 +258,17 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.title = element_blank(),
         legend.text = element_text(face = 'bold'),
-        legend.position = 'bottom') 
+        legend.position = 'bottom')
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure4.png"))
+agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
+fig4
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure4-1/","figure4.png")`)
 
 **Figure 4. Population-level measures of the importance of dominance genetic effects.** The genetic variance estimates from the models fitted to the overall population (“All”) and also to its four genetic groups (x-axis) are presented in these barplots. Each panel contains results for a trait variance or covariance. For selection indices (A) and component traits (B) the proportion of genetic variance accounted for by dominance is shown on the y-axis. For covariances between component traits (C) the estimates themselves are plotted. In C, fill color indicates variance component (additive vs. dominance). 
 
 # Figure 5: Inbreeding Effect Estimates
-
 ```{r}
 library(tidyverse); library(magrittr);
 ## Table S16: Directional dominance effects estimates
@@ -301,18 +299,19 @@ p<-ggplot(forplot,aes(x=Group,y=InbreedingEffect,fill=Group)) +
 ```
 
 ```{r figure5}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure5.png"))
-agg_png(pngfile, width = 15.24, height = 7.62, units = "cm", res = 300, scaling = 0.9)
-p + 
+fig5<-p + 
   theme(plot.tag = element_text(face = 'bold'),
         axis.title = element_text(face = 'bold',color = 'black'),
         strip.text.x = element_text(face = 'bold',color = 'black'),
         #axis.text.x = element_text(face = 'bold',color = 'black', angle=30),
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.position = 'right') 
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure5.png"))
+agg_png(pngfile, width = 15.24, height = 7.62, units = "cm", res = 300, scaling = 0.9)
+fig5
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure5-1/","figure5.png")`)
 
 **Figure 5. Estimates of the genome-wide effect of inbreeding.** For each trait (panels), the fixed-effect for genome-wide proportion of homozygous sites is shown on the y-axis, as estimated by a directional dominance model. For the overall population (“All”) and four genetic groups (“C0”, “C1”, “C2” and “C3”), the posterior mean estimate and its standard deviation (bars) are shown on the x-axis. For comparison a boxplot showing the distribution of estimates from models fit to parent-wise cross-validation training and validation sets (“ParentwiseCV”) is also shown. 
 
@@ -372,9 +371,7 @@ bvVStgv<-forplot_std_bvVStgv %>%
 ```
 
 ```{r figure6}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
-agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
-(meanVSvar / bvVStgv) + 
+fig6<-(meanVSvar / bvVStgv) + 
   plot_layout(ncol=1,guides = 'collect',heights = c(0.6,0.4)) + 
   plot_annotation(tag_levels = 'A') &
   theme(plot.tag = element_text(face = 'bold'),
@@ -385,9 +382,12 @@ agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.text = element_text(face = 'bold'),
         legend.position = 'right')
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
+agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
+fig6
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure6-1/","figure6.png")`)
 
 **Figure 6. Genomic mate selection criteria for the StdSI predicted for previously untested crosses**. We predicted 47,083 crosses among 306 parents. We made four predictions: 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]. Selfs are shown as triangles, outcrosses as circles. For each of the predictions, we took the top 50 ranked crosses and then selected the union of crosses selected by at least one metric. The 462 crosses previously made are also shown and genetic groups (C0, C1 and C2) are distinguished by color from the 112 new crosses to highlight the opportunity for improvement. The predicted cross genetic mean is plotted against the predicted family genetic standard deviation (Sd, ) for breeding value [BV] and total genetic value [TGV] (panel rows) (A). The $UC_{parent}$ is plotted against the $UC_{variety}$ with a red one-to-one line in B.
 
@@ -396,12 +396,7 @@ knitr::include_graphics(pngfile)
 
 ```{r figure7}
 library(ggraph); library(tidygraph)
-
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
-agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
-
-#set_graph_style(plot_margin = margin(0.5,0.5,0.5,0.5))
-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
+fig7<-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
                            directed = F) %>% 
   mutate(degree = centrality_degree()) %>% 
   ggraph(., layout = 'nicely') +
@@ -410,9 +405,12 @@ as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
   geom_node_point(aes(size = degree),show.legend = F) + 
   scale_edge_color_manual(values = viridis::viridis(4)[1:2]) + #c("goldenrod2","darkorchid4")) + 
   plottheme + theme(axis.text = element_blank(), axis.title = element_blank())
-invisible(dev.off())
-knitr::include_graphics(pngfile)
 
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
+agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
+fig7
+invisible(dev.off())
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure7-1/","figure7.png")`)
 
 **Figure 7. Network plot of selected parents and matings for the StdSI.** There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels. 
