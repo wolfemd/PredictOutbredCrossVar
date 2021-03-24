@@ -9,10 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Marnin Wolfe, Ariel Chan, Peter Kulakow, Ismail Rabbi, Jean-Luc Jannink" />
 
 
-<title>Reproducible documentation: Wolfe et al. Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices (PREPRINT)</title>
+<title>Appendix</title>
 
 <script src="site_libs/header-attrs-2.7/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -30,7 +29,11 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -129,6 +132,15 @@ code span.va { color: #27aeae; } /* Variable */
 code span.vs { color: #da4453; } /* VerbatimString */
 code span.wa { color: #da4453; } /* Warning */
 
+.sourceCode .row {
+  width: 100%;
+}
+.sourceCode {
+  overflow-x: auto;
+}
+.code-folding-btn {
+  margin-right: -30px;
+}
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -313,7 +325,73 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
 
 
 
@@ -323,6 +401,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-sm-12 col-md-4 col-lg-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-sm-12 col-md-8 col-lg-9">
 
 
 
@@ -445,10 +533,18 @@ $(document).ready(function () {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">Reproducible documentation: Wolfe et al. Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices (<a href="https://doi.org/10.1101/2021.01.05.425443">PREPRINT</a>)</h1>
-<h4 class="author">Marnin Wolfe, Ariel Chan, Peter Kulakow, Ismail Rabbi, Jean-Luc Jannink</h4>
+
+<h1 class="title toc-ignore">Appendix</h1>
+<h4 class="date">2021-March-25</h4>
 
 </div>
 
@@ -650,7 +746,7 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML (<code>docs/index.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/Appendix.Rmd</code>) and HTML (<code>docs/Appendix.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -679,7 +775,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/45e6b20bcdef218696db24e5f166df7186b77d97/analysis/index.Rmd" target="_blank">45e6b20</a>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/45e6b20bcdef218696db24e5f166df7186b77d97/analysis/Appendix.Rmd" target="_blank">45e6b20</a>
 </td>
 <td>
 wolfemd
@@ -691,108 +787,6 @@ wolfemd
 Added the Appendix as a standalone HTML page. Include links on the Index page and Navbar (_site.yml).
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/be1e9fcf9d11a80e00a5ee37f8b4970266ded8d0/docs/index.html" target="_blank">be1e9fc</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-03-24
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/5018bd0436d23585b2d554848646ccd9ad8315a4/analysis/index.Rmd" target="_blank">5018bd0</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-03-24
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/4de1330d37b1c2f02a4c9e91970c8675f789d833/docs/index.html" target="_blank">4de1330</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-02-01
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/883b1d4d2dae0efefd64e4c238477ce34df13895/analysis/index.Rmd" target="_blank">883b1d4</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-02-01
-</td>
-<td>
-Update the syntax highlighting and code-block formatting throughout for
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/6a10c30fbe489268566e4b7568be67a4395c2080/analysis/index.Rmd" target="_blank">6a10c30</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-01-04
-</td>
-<td>
-Submission and GitHub ready version.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/6a10c30fbe489268566e4b7568be67a4395c2080/docs/index.html" target="_blank">6a10c30</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-01-04
-</td>
-<td>
-Submission and GitHub ready version.
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -800,53 +794,12 @@ Submission and GitHub ready version.
 </div>
 </div>
 </div>
-<div id="preprint" class="section level1">
-<h1>PREPRINT</h1>
-<p>This repository and website documents all analyses, summary, tables and figures associated with the following PREPRINT: <a href="https://doi.org/10.1101/2021.01.05.425443">Genomic mating in outbred species: predicting cross usefulness with additive and total genetic covariance matrices</a>!</p>
-</div>
-<div id="abstract" class="section level1">
-<h1>Abstract</h1>
-<p>Diverse crops are both outbred and clonally propagated. Breeders typically use truncation selection of parents and invest significant time, land and money evaluating the progeny of crosses to find exceptional genotypes. We developed and tested genomic mate selection criteria suitable for organisms of arbitrary homozygosity level where the full-sibling progeny are of direct interest as future parents and/or cultivars. We extended cross variance and covariance variance prediction to include dominance effects and predicted the multivariate selection index genetic variance of crosses based on haplotypes of proposed parents, marker effects and recombination frequencies. We combined the predicted mean and variance into usefulness criteria for parent and variety development. We present an empirical study of cassava (Manihot esculenta), a staple tropical root crop. We assessed the potential to predict the multivariate genetic distribution (means, variances and trait covariances) of 462 cassava families in terms of additive and total value using cross-validation. We were able to predict all genetic variances and most covariances with non-zero accuracy. We also tested a directional dominance model and found significant inbreeding depression for most traits and a boost in total merit accuracy for root yield. We predicted 47,083 possible crosses of 306 parents and contrasted them to those previously tested to show how mate selection can reveal new potential within the germplasm. We enable breeders to consider the potential of crosses to produce future parents (progeny with excellent breeding values) and varieties (progeny with top performance).</p>
-</div>
-<div id="manuscript" class="section level1">
-<h1>Manuscript</h1>
-<ol style="list-style-type: decimal">
-<li><a href="Results.html">Results</a>: numeric summaries for the text</li>
-<li><a href="Figures.html">Figures</a>: main text figures</li>
-<li><a href="SupplementaryTables.html">Supplementary Tables</a></li>
-<li><a href="SupplementaryFigures.html">Supplementary Figures</a>: referenced in both main text and appendix</li>
-<li><a href="Appendix.html">Appendix</a>: additional comparisons that did not quite belong in the primary article</li>
-</ol>
-<p>See also drop-down navigation menu “Manuscript”.</p>
-</div>
-<div id="data-availability-and-reproducibility" class="section level1">
-<h1>Data availability and reproducibility</h1>
-<p>The R package <strong>workflowr</strong> was used to document this study reproducibly.</p>
-<p>Much of the supporting data <em>and</em> output from the analyses documented here are too large for GitHub.</p>
-<p>The repository will be mirrored, here: <a href="ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020">ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020</a></p>
-<p>or until publication <a href="ftp://ftp.cassavabase.org/marnin_datasets/">here</a>.</p>
-</div>
-<div id="analyses" class="section level1">
-<h1>Analyses</h1>
-<ol style="list-style-type: decimal">
-<li><a href="PreprocessDataFiles.html">Preprocess data files</a>: Initial processing and subsetting of all input files.</li>
-<li><a href="fitMtBRRs.html">Fit multi-trait Bayesian ridge regressions (MtBRRs)</a>: We fit the following MtBRR models: (1) additive-only (<strong>A</strong>), (2) additive plus dominance (<strong>AD</strong> or <strong>ClassicAD</strong>) and (3) additive plus directional dominance (<strong>DirDom</strong> or <strong>DirDomAD</strong>). First, we <a href="fitMtBRRs.html#define_cvfolds">define parent-wise cross-validation folds</a>. Next, we fit <strong>MtBRRs</strong> for both the <a href="#mtBRRs_parentwise">parent-wise cross-validation</a> and each of the <a href="fitMtBRRs.html#mtBRRs_geneticgroups">genetic groups</a> in the pedigree. Finally, using <strong>MtBRR</strong> marker-effects, we <a href="fitMtBRRs.html#getGBLUPs">compute genomic BLUPs</a> (i.e. GEBV and GETGV) for later use.</li>
-<li><a href="predictCrossVars.html">Predict cross means, variances and co-variances</a>: Using training-set marker effects obtained in the previous step, we predict <a href="predictCrossVars.html#predictCrossVariances">(co)variances</a> and <a href="predictCrossVars.html#predictCrossMeans">means</a> for each cross according to the cross-validation scheme.</li>
-<li><a href="observedCrossVars.html">Compute observed cross means, variances and covariances</a>: This step is to create validation data to which predictions of cross means and (co)variances will be correlated. We compute the empirical means and variances for each validation-family in two ways. First, we use <a href="observedCrossVars.html#observedCrossVarsGBLUPs">GEBV and GETGV of actual offspring</a> based on test-set marker effeects. Second, and for comparison only, we use <a href="observedCrossVars.html#observedCrossVarsiidBLUPs">phenotypic BLUPs</a> of the offspring, where available. Lastly, we <a href="observedCrossVars.html#realIntensity">measure the realized selection intensity for each cross</a> and compute the mean GEBV / GETGV of selected family-members as validation data for predicted cross “usefulness criteria”.</li>
-<li><a href="predictionAccuracy.html">Compute prediction accuracy</a>: Format predicted and observed values for each cross specified by the cross-validation scheme.</li>
-<li><a href="predictUntestedCrosses.html">Exploratory analysis: predict the means and variances of previously untested crosses</a>: Using marker-effects obtained from fitting <strong>All</strong> data, predict all possible crosses between (1) the 100 clones with top rank on the “StdSI” and (2) the 209 clones already used as parents.</li>
-<li><a href="getPMVarComps.html">Compute posterior mean (co)variance parameters from MtBRRs</a>: For comparison and context, compute genetic variances and covariances accounting for LD (Lehermeier M2) for each of the genetic groups (“All”,“GG”,“TMS13”,“TMS14”,“TMS15”).</li>
-</ol>
-</div>
-<div id="supporting-r-package-predcrossvar" class="section level1">
-<h1>Supporting R package <code>predCrossVar</code></h1>
-<p>In addition, we combined many of the core (and useful) support functions for predicting crosses into an R package <strong>predCrossVar</strong>, which is available on GitHub and can be installed with, e.g.:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;wolfemd/predCrossVar&quot;</span>, <span class="at">ref =</span> <span class="st">&#39;master&#39;</span>) </span></code></pre></div>
-<p>The functions in <strong>predCrossVar</strong> are used throughout.</p>
-</div>
-<div id="supporting-functions-code" class="section level1">
-<h1>Supporting functions <code>code/</code></h1>
-<p>The analyses in the <strong>html</strong> / <strong>Rmd</strong> files referenced above often source R scripts in the <code>code/</code> sub-folder. These are wrapper functions around the packaged core functions in <strong>predCrossVar</strong>, to do the specific analyses for this paper.</p>
+<p><strong>Does the validation-data type (i.i.d. BLUPs vs. GBLUPs) make a difference?</strong> Most often, cross-validation done to test genomic prediction accuracy uses validation data (the stand-in for “truth”) consisting of adjusted values, (e.g. BLUPs or BLUEs) for total individual performance, not including genomic relatedness information. In our study we set-up cross-validation folds that enable us to predict the GEBV and GETGV (GBLUPs) of validation family-members, and to subsequently compute their sample means, variances and usefulness. This approach has the added advantage of expanding the available sample size of validation progeny with complete data across traits. Nevertheless, we made some comparison to results using BLUPs that do not incorporate genomic relatedness information; in other words, independent and identically distributed (i.i.d.) BLUPs.</p>
+<p>Prediction accuracy for family means were nearly uniformly higher using GBLUPs compared to iidBLUPs (median 0.18 higher). The Spearman rank correlation between prediction accuracies based on iidBLUPs and GBLUPs was high (median 0.75, range 0.55-0.84). Similar to the means, accuracy using GBLUP-validation-data appeared mostly higher compared to iidBLUPs (median difference GBLUPs-iidBLUPs = 0.07, interquartile range -0.002-0.14). The Spearman rank correlations of iidBLUP and GBLUP-validation-based accuracies was positive for family (co)variances, but smaller compared to family means (mean correlation 0.5, range 0.04-0.89). Supplementary plots comparing validation-data accuracies for means and (co)variances were inspected (Figure S6-S7). Based on this, we conclude that we would reach similar though more muted conclusions about which trait variances and trait-trait covariances are best or worst predicted, if restricted to iidBLUPs for validation data.</p>
+<p><strong>What if we consider only families with greater than a threshold size?</strong> In our primary analysis, we computed (co)variance prediction accuracies with weighted correlations, considering any family with more than one member. We also considered a more conservative alternative approach of including only families with <span class="math inline">\(\geq\)</span> 10 (n=112); we thought beyond that was too stringent as at <span class="math inline">\(\geq\)</span> 20 only 22 families remain. The Spearman rank correlation between accuracy estimates when all vs. only families with more than 10 members was 0.89. There should therefore be good concordance with our primary conclusions, depending on the family size threshold we impose. The median difference in accuracy (“threshold size families” minus "all families’’) was 0.01. Considering only size 10 or greater families noticeably improved prediction accuracy for several trait variances and especially for two covariances (DM-TCHART and logFYLD-MCMDS) (Figure S8).</p>
+<p><strong>Comparing posterior mean variance (PMV) to variance of posterior mean (VPM) predictions:</strong> Variances and covariances were predicted with the computationally intensive PMV method. Population variance estimates based on PMV were consistently larger than VPM, but the correlation of those estimates is 0.98 (Figure S9). Using the predictions from the cross-validation results, we further observed that the PMV predictions were consistently larger and most notably that the correlation between PMV and VPM was very high (0.995). Some VPM prediction accuracies actually appear better than PMV predictions (Figure S10).</p>
+<p>The critical point is that VPM and PMV predictions should have very similar rankings. In our primary analysis, we focus on the PMV results with the only exception being the exploratory predictions where we saved time/computation and used the VPM. If implementing mate selections via the usefulness criteria, choosing the VPM method would mostly have the consequence of shrinking the influence on selection decisions towards the mean.</p>
+<p><strong>Comparing the directional dominance to the “classic” model:</strong> Our focus in this article was not in finding the optimal or most accurate prediction model for obtaining marker effects. However, genome-wide estimates of directional dominance have not previously been made in cassava. For this reason, we make some brief comparison to the standard or “classic” additive-dominance prediction model, where dominance effects are centered on zero. Overall, the ranking of models and predictions between the two models were similar, as indicated by a rank correlation between model accuracy estimates of 0.98 for family means and 0.94 for variances and covariances. Three-quarters of family-mean and almost half of (co)variance accuracy estimates were higher using the directional dominance model. The most notably improved predictions were for the family-mean logFYLD TGV (Figure S11-S12). There was also an overall rank correlation of 0.98 between models in the prediction of untested crosses.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -854,7 +807,7 @@ Submission and GitHub ready version.
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>R version 4.0.3 (2020-10-10)
 Platform: x86_64-apple-darwin17.0 (64-bit)
 Running under: macOS Big Sur 10.16
@@ -883,7 +836,6 @@ loaded via a namespace (and not attached):
 [29] rmarkdown_2.7     stringi_1.5.3     bslib_0.2.4       compiler_4.0.3   
 [33] pillar_1.5.1      jsonlite_1.7.2    httpuv_1.5.5      pkgconfig_2.0.3  </code></pre>
 </div>
-</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -901,6 +853,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -932,7 +886,38 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
