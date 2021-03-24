@@ -14,7 +14,6 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
                       tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
 ```
 
-
 ```{r}
 library(tidyverse); library(magrittr); library(ragg); library(patchwork)
 ```
@@ -36,7 +35,7 @@ propHom %>%
   scale_fill_viridis_d()
 ```
 
-Figure S01: Boxplot of the genome-wide proportion of homozygous SNPs in each of four genetic groups comprising the study pedigree.
+**Figure S01: Boxplot of the genome-wide proportion of homozygous SNPs in each of four genetic groups comprising the study pedigree.**
 
 ## Figure S02: Correlations among phenotypic BLUPs (including Selection Indices)
 
@@ -64,7 +63,7 @@ blups %<>%
 ```
 
 ```{r, fig.width=10, fig.height=5}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS2.png"))
+pngfile<-"docs/supfigures/figureS2.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.8)
 
 library(patchwork)
@@ -75,10 +74,11 @@ corMat<-cor(blups[,-1],use = 'pairwise.complete.obs')
   plot_annotation(tag_levels = 'A',
                   title = 'Correlations among phenotypic BLUPs (including Selection Indices)')
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-Figure S02: Correlations among BLUPs (including Selection Indices). (A) StdSI vs. BiofortSI computed from i.i.d. BLUPs. (B) Heatmap of the correlation among BLUPs for each of four component traits and two derived selection indices.
+![](supfigures/figureS2.png)
+
+**Figure S02: Correlations among BLUPs (including Selection Indices).** (A) StdSI vs. BiofortSI computed from i.i.d. BLUPs. (B) Heatmap of the correlation among BLUPs for each of four component traits and two derived selection indices.
 
 ## Figure S03: Realized selection intensities: measuring post-cross selection
 
@@ -119,7 +119,7 @@ realIntensity<-crossmetrics %>%
 ```
 
 ```{r}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS3.png"))
+pngfile<-"docs/supfigures/figureS3.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.8)
 propPast + realIntensity +  
   plot_annotation(tag_levels = 'A',
@@ -128,10 +128,11 @@ propPast + realIntensity +
         plot.tag = element_text(size = 13, face='bold'),
         strip.text.x = element_text(size=11, face='bold'))
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-Figure S03: Realized selection intensities: measuring post-cross selection. Boxplots showing (A) the proportion of each family selected and (B) the standardized selection intensity for each stage of the breeding pipeline, in each genetic group.
+![](supfigures/figureS3.png)
+
+**Figure S03: Realized selection intensities: measuring post-cross selection.** Boxplots showing (A) the proportion of each family selected and (B) the standardized selection intensity for each stage of the breeding pipeline, in each genetic group.
 
 ## Figure S04: Correlation matrix for predictions on the StdSI
 
@@ -152,7 +153,7 @@ corrplot::corrplot(corMat_std, type = 'lower', col = viridis::viridis(n = 10), d
                    tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
 ```
 
-Figure S04: Correlation matrix for predictions on the StdSI. Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV. Predictions were made for 47,083 possible pairwise crosses of 306 parents with a directional dominance model.
+**Figure S04: Correlation matrix for predictions on the StdSI.** Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV. Predictions were made for 47,083 possible pairwise crosses of 306 parents with a directional dominance model.
 
 ## Figure S05: Correlation matrix for predictions on the BiofortSI
 
@@ -162,8 +163,7 @@ corrplot::corrplot(corMat_bio, type = 'lower', col = viridis::viridis(n = 10), d
                    tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
 ```
 
-Figure S05: Correlation matrix for predictions on the BiofortSI. Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV. Predictions were made for 47,083 possible pairwise crosses of 306 parents with a directional dominance model.
-
+**Figure S05: Correlation matrix for predictions on the BiofortSI.** Heatmap of the correlations between predictions of mean, standard deviation, and usefulness in terms of BV and TGV. Predictions were made for 47,083 possible pairwise crosses of 306 parents with a directional dominance model.
 
 # Supplementary Figures (Appendix)
 
@@ -194,7 +194,7 @@ p1<-baseplot +
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS6.png"))
+pngfile<-"docs/supfigures/figureS6.png"  
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 p1 + theme_bw() + labs(y="Accuracy") + 
   theme(plot.tag = element_text(face='bold'),
@@ -210,13 +210,14 @@ p1 + theme_bw() + labs(y="Accuracy") +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-**Figure S06: Contrasting GBLUPs and iidBLUPs as validation data for measuring family mean prediction accuracy.**
-The cross mean prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Each panel contains results for one of the selection indices (stdSI and biofortSI) and for the component traits (DM, logFYLD, MCMDS, TCHART). Prediction accuracies are on the y-axis and cross mean GEBV (MeanBV) and GETGV (MeanTGV) are on the x-axis. Colors distinguish the validation data used to estimate the accuracy. 
+![](supfigures/figureS6.png)
 
-## Figure S07: Contrasting GBLUPs and iidBLUPs as validation data for measuring family *co)variance prediction accuracy
+**Figure S06: Contrasting GBLUPs and iidBLUPs as validation data for measuring family mean prediction accuracy.** The cross mean prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Each panel contains results for one of the selection indices (stdSI and biofortSI) and for the component traits (DM, logFYLD, MCMDS, TCHART). Prediction accuracies are on the y-axis and cross mean GEBV (MeanBV) and GETGV (MeanTGV) are on the x-axis. Colors distinguish the validation data used to estimate the accuracy.
+
+## Figure S07: Contrasting GBLUPs and iidBLUPs as validation data for measuring family \*co)variance prediction accuracy
+
 ```{r}
 library(tidyverse); library(magrittr); library(patchwork); library(ragg)
 accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
@@ -248,7 +249,7 @@ p2<-forplot %>% filter(Trait1!=Trait2) %>%
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS7.png"))
+pngfile<-"docs/supfigures/figureS7.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 (p1 / p2) + 
   plot_layout(guides = 'collect',nrow=2) &
@@ -266,11 +267,11 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) & labs(y="Accuracy")
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-**Figure S07: Contrasting GBLUPs and iidBLUPs as validation data for measuring family (co)variance prediction accuracy.** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish the validation data used to estimate the accuracy. 
+![](supfigures/figureS7.png)
 
+**Figure S07: Contrasting GBLUPs and iidBLUPs as validation data for measuring family (co)variance prediction accuracy.** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish the validation data used to estimate the accuracy.
 
 ## Figure S08: Variance-covariance Accuracy considering only families with 10+ members?
 
@@ -322,7 +323,7 @@ p2<-forplot %>% filter(Trait1!=Trait2) %>%
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS8.png"))
+pngfile<-"docs/supfigures/figureS8.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 (p1 / p2) + 
   plot_layout(guides = 'collect',nrow=2) &
@@ -341,11 +342,11 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         panel.grid.minor = element_blank()) & 
   labs(y="Accuracy")
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-**Figure S08: Variance-covariance Accuracy considering only families with 10+ members?** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Results are shown based on the directional dominance model. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish whether all families (AllFams) or just the ones with at least 10 members were included in the accuracy estimates. 
+![](supfigures/figureS8.png)
 
+**Figure S08: Variance-covariance Accuracy considering only families with 10+ members?** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Results are shown based on the directional dominance model. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish whether all families (AllFams) or just the ones with at least 10 members were included in the accuracy estimates.
 
 ## Figure S09: Population estimates of genetic variance parameters - PMV vs. VPM
 
@@ -354,7 +355,7 @@ library(tidyverse); library(magrittr);
 ## Table S15: Variance estimates for genetic groups
 varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
 
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS9.png"))
+pngfile<-"docs/supfigures/figureS9.png"  
 agg_png(pngfile, width = 9, height = 9, units = "cm", res = 300, scaling = 0.9)
 
 varcomps %>% 
@@ -378,11 +379,14 @@ varcomps %>%
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
-**Figure S09: Population estimates of genetic variance parameters - PMV vs. VPM.** We contrasted the variance of posterior means (VPM; x-axis) to the less biased, more intensive-to-compute posterior mean variance (PMV; y-axis). Each point is a trait variance or trait-trait covariance estimate from the directional dominance model. Colors distinguish additive variance (VarA) and dominance variance(VarD). 
+
+![](supfigures/figureS9.png)
+
+**Figure S09: Population estimates of genetic variance parameters - PMV vs. VPM.** We contrasted the variance of posterior means (VPM; x-axis) to the less biased, more intensive-to-compute posterior mean variance (PMV; y-axis). Each point is a trait variance or trait-trait covariance estimate from the directional dominance model. Colors distinguish additive variance (VarA) and dominance variance(VarD).
 
 ## Figure S10: PMV vs. VPM - Compare prediction accuracy
+
 ```{r}
 library(tidyverse); library(magrittr); library(patchwork); library(ragg)
 accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
@@ -419,7 +423,7 @@ p2<-forplot %>% filter(Trait1!=Trait2) %>%
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS10.png"))
+pngfile<-"docs/supfigures/figureS10.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 (p1 / p2) + 
   #plot_annotation(title="Compare PMV vs. VPM accuracy") +
@@ -439,10 +443,11 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         panel.grid.minor = element_blank()) & 
   labs(y="Accuracy")
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
-**Figure S10: Variance-covariance Accuracy comparing VPM vs. PMV.** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Results are shown based on the directional dominance model. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish whether predictions were based on the VPM or the PMV. 
+![](supfigures/figureS10.png)
+
+**Figure S10: Variance-covariance Accuracy comparing VPM vs. PMV.** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Results are shown based on the directional dominance model. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish whether predictions were based on the VPM or the PMV.
 
 ## Figure S11: Directional Dominance vs. Classic Model - Family Mean Prediction Accuracy
 
@@ -475,7 +480,7 @@ p1<-baseplot +
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS11.png"))
+pngfile<-"docs/supfigures/figureS11.png"  
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 p1 + theme_bw() + 
   theme(plot.tag = element_text(face='bold'),
@@ -492,13 +497,14 @@ p1 + theme_bw() +
         panel.grid.minor = element_blank()) & 
   labs(y="Accuracy")
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
+
+![](supfigures/figureS11.png)
 
 **Figure S11: Contrasting directional and non-directional dominance models accuracy predicting family means.** The cross mean prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Each panel contains results for one of the selection indices (stdSI and biofortSI) and for the component traits (DM, logFYLD, MCMDS, TCHART). Prediction accuracies are on the y-axis and cross mean GEBV (MeanBV) and GETGV (MeanTGV) are on the x-axis. Colors distinguish whether results are based on the directional dominance (DirDom) model or not (Classic).
 
-
 ## Figure S12: Directional Dominance vs. Classic Model - Family (Co)variance Prediction Accuracy
+
 ```{r}
 ## Table S11: Accuracies predicting the variances
 accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
@@ -542,7 +548,7 @@ p2<-forplot %>% filter(Trait1!=Trait2) %>%
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figureS12.png"))
+pngfile<-"docs/supfigures/figureS12.png"  
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 (p1 / p2) +
   plot_layout(guides = 'collect',nrow=2) &
@@ -560,11 +566,8 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) & labs(y="Accuracy")
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
 
+![](supfigures/figureS12.png)
+
 **Figure S12: Contrasting directional and non-directional dominance models accuracy predicting family (co)variances.** The cross variance and covariance prediction accuracy based on fivefold parent-wise cross-validation is shown using boxplots. Results are shown based on the directional dominance model. Each panel in the top row contains results for either a selection index (stdSI and biofortSI) or a component trait (DM, logFYLD, MCMDS, TCHART) variance. Each panel on the bottom row contains one of the six pairwise covariances between the four component traits. Prediction accuracies are on the y-axis and cross variance/covariance for GEBV (VarBV) and GETGV (VarTGV) are on the x-axis. Colors distinguish whether results are based on the directional dominance (DirDom) model or not (Classic).
-
-
-
-
