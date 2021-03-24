@@ -60,7 +60,7 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r,warning=F}
-pngfile <- here::here("docs/figure/Figures.Rmd","figure1.png")
+pngfile <- fs::path("figure/Figures.Rmd/","figure1.png")
 
 #pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
@@ -124,8 +124,10 @@ p3<-baseplot +
 
 ```
 
-```{r figure2, warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
+```{r, warning=F}
+pngfile <- fs::path("figure/Figures.Rmd/","figure2.png")
+
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 
 ((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
