@@ -69,14 +69,14 @@ fig1<-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') +
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom')
-
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure1.png"))
+pngfile<-"figures/figure1.png"
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure1.png"))
 agg_png(pngfile,width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 fig1
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure1-1/","figure1.png")`)
 
+![](../figures/figure1.png)
 
 **Figure 1. Accuracy predicting the family mean.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample mean GEBV or GETGV. For each trait, accuracies are given for two predictions types: family mean BV vs. TGV.
 
@@ -136,13 +136,14 @@ fig2<-((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) +
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom') & labs(y="Accuracy")
-  
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
+pngfile<-"figures/figure2.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 fig2
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure2-1/","figure2.png")`)
+
+![](../figures/figure2.png)
 
 **Figure 2. Accuracy predicting the genetic (co)variances.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the genetic variance of crosses on selection indices (A) and for component trait variances (B) and covariances (C). Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample (co)variance of **GEBV** or **GETGV**. For each trait (panel), accuracies for two prediction types are given: **VarBV** and **VarTGV.**
 
@@ -191,18 +192,20 @@ fig3<-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') +
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom') & labs(y="Accuracy")
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
+pngfile<-"figures/figure3.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 fig3
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure3-1/","figure3.png")`)
+
+![](../figures/figure3.png)
 
 **Figure 3. Accuracy predicting the usefulness (the expected mean of future selected offspring).** Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the family-size weighted correlation between the predicted and observed usefulness of crosses for breeding parents ($UC_{parent}$) or varieties ($UC_{variety}$).
 
 # Figure 4: Importance of non-additive effects (variance components)
 
-```{r, fig.width=12, fig.height=5}
+```{r}
 library(tidyverse); library(magrittr); library(patchwork)
 ## Table S15: Variance estimates for genetic groups
 varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
@@ -259,16 +262,18 @@ fig4<-(p1 + p2 + plot_layout(widths = c(1, 2))) / p3 +
         legend.title = element_blank(),
         legend.text = element_text(face = 'bold'),
         legend.position = 'bottom')
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure4.png"))
+pngfile<-"figures/figure4.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure4.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 fig4
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure4-1/","figure4.png")`)
+![](../figures/figure4.png)
 
-**Figure 4. Population-level measures of the importance of dominance genetic effects.** The genetic variance estimates from the models fitted to the overall population (“All”) and also to its four genetic groups (x-axis) are presented in these barplots. Each panel contains results for a trait variance or covariance. For selection indices (A) and component traits (B) the proportion of genetic variance accounted for by dominance is shown on the y-axis. For covariances between component traits (C) the estimates themselves are plotted. In C, fill color indicates variance component (additive vs. dominance). 
+**Figure 4. Population-level measures of the importance of dominance genetic effects.** The genetic variance estimates from the models fitted to the overall population ("All") and also to its four genetic groups (x-axis) are presented in these barplots. Each panel contains results for a trait variance or covariance. For selection indices (A) and component traits (B) the proportion of genetic variance accounted for by dominance is shown on the y-axis. For covariances between component traits (C) the estimates themselves are plotted. In C, fill color indicates variance component (additive vs. dominance).
 
 # Figure 5: Inbreeding Effect Estimates
+
 ```{r}
 library(tidyverse); library(magrittr);
 ## Table S16: Directional dominance effects estimates
@@ -306,14 +311,16 @@ fig5<-p +
         #axis.text.x = element_text(face = 'bold',color = 'black', angle=30),
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.position = 'right') 
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure5.png"))
+pngfile<-"figures/figure5.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure5.png"))
 agg_png(pngfile, width = 15.24, height = 7.62, units = "cm", res = 300, scaling = 0.9)
 fig5
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure5-1/","figure5.png")`)
 
-**Figure 5. Estimates of the genome-wide effect of inbreeding.** For each trait (panels), the fixed-effect for genome-wide proportion of homozygous sites is shown on the y-axis, as estimated by a directional dominance model. For the overall population (“All”) and four genetic groups (“C0”, “C1”, “C2” and “C3”), the posterior mean estimate and its standard deviation (bars) are shown on the x-axis. For comparison a boxplot showing the distribution of estimates from models fit to parent-wise cross-validation training and validation sets (“ParentwiseCV”) is also shown. 
+![](../figures/figure5.png)
+
+**Figure 5. Estimates of the genome-wide effect of inbreeding.** For each trait (panels), the fixed-effect for genome-wide proportion of homozygous sites is shown on the y-axis, as estimated by a directional dominance model. For the overall population ("All") and four genetic groups ("C0", "C1", "C2" and "C3"), the posterior mean estimate and its standard deviation (bars) are shown on the x-axis. For comparison a boxplot showing the distribution of estimates from models fit to parent-wise cross-validation training and validation sets ("ParentwiseCV") is also shown.
 
 # Figure 6: Exploring Untested Crosses
 
@@ -367,7 +374,6 @@ bvVStgv<-forplot_std_bvVStgv %>%
              aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F, alpha=0.7) + 
   labs(x = expression(bold("UC"["parent"]~" (BV)")), y=expression(bold("UC"["variety"]~" (TGV)"))) + 
   plottheme
-
 ```
 
 ```{r figure6}
@@ -382,15 +388,15 @@ fig6<-(meanVSvar / bvVStgv) +
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.text = element_text(face = 'bold'),
         legend.position = 'right')
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
+pngfile<-"figures/figure6.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
 agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
 fig6
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure6-1/","figure6.png")`)
+![](../figures/figure6.png)
 
-**Figure 6. Genomic mate selection criteria for the StdSI predicted for previously untested crosses**. We predicted 47,083 crosses among 306 parents. We made four predictions: 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]. Selfs are shown as triangles, outcrosses as circles. For each of the predictions, we took the top 50 ranked crosses and then selected the union of crosses selected by at least one metric. The 462 crosses previously made are also shown and genetic groups (C0, C1 and C2) are distinguished by color from the 112 new crosses to highlight the opportunity for improvement. The predicted cross genetic mean is plotted against the predicted family genetic standard deviation (Sd, ) for breeding value [BV] and total genetic value [TGV] (panel rows) (A). The $UC_{parent}$ is plotted against the $UC_{variety}$ with a red one-to-one line in B.
-
+**Figure 6. Genomic mate selection criteria for the StdSI predicted for previously untested crosses**. We predicted 47,083 crosses among 306 parents. We made four predictions: 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]. Selfs are shown as triangles, outcrosses as circles. For each of the predictions, we took the top 50 ranked crosses and then selected the union of crosses selected by at least one metric. The 462 crosses previously made are also shown and genetic groups (C0, C1 and C2) are distinguished by color from the 112 new crosses to highlight the opportunity for improvement. The predicted cross genetic mean is plotted against the predicted family genetic standard deviation (Sd, ) for breeding value [BV] and total genetic value [TGV] (panel rows) (A). The $UC_{parent}$ is plotted against the $UC_{variety}$ with a red one-to-one line in B.
 
 # Figure 7: Network plot of selected parents and matings
 
@@ -406,11 +412,12 @@ fig7<-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
   scale_edge_color_manual(values = viridis::viridis(4)[1:2]) + #c("goldenrod2","darkorchid4")) + 
   plottheme + theme(axis.text = element_blank(), axis.title = element_blank())
 
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
+pngfile<-"figures/figure7.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
 agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
 fig7
 invisible(dev.off())
 ```
-![](`r here::here("docs/figure/Figures.Rmd/figure7-1/","figure7.png")`)
+![](../figures/figure7.png)
 
-**Figure 7. Network plot of selected parents and matings for the StdSI.** There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels. 
+**Figure 7. Network plot of selected parents and matings for the StdSI.** There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels.
