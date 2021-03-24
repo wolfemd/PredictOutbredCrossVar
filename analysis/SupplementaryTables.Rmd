@@ -1,7 +1,7 @@
 ---
 title: "Supplementary Dataset"
 site: workflowr::wflow_site
-date: "2020-July-29"
+date: "2021-March-22"
 output: 
   workflowr::wflow_html:
     code_folding: "hide"
@@ -26,7 +26,7 @@ suptables<-list()
 
 ## Table S1: Selection indices
 
-Table S1: Selection indices. For each trait, the standard deviation of BLUPs, which were divided by "unscaled" index weights for the StdSI and BiofortSI indices to get StdSI and BiofortSI weights used throughout the study.
+Table S1: Selection indices. For each trait, the standard deviation of BLUPs (blupSD), which were divided by "unscaled" index weights for the StdSI and BiofortSI indices to get StdSI and BiofortSI weights used throughout the study.
 
 ```{r}
 library(tidyverse); library(magrittr); 
@@ -47,7 +47,6 @@ ped<-readRDS(here::here("data","ped_awc.rds")) %>%
 parentfolds %<>% 
   mutate(CrossesToPredict=map(testparents,~filter(ped,sireID %in% . | damID %in% .)))
 ```
-
 ```{r}
 parentfold_summary<-parentfolds %>% 
   rename(Rep=id,Fold=id2) %>% 
@@ -117,7 +116,7 @@ obsVSpredMeans %>% count(Model,predOf,ValidationData) %>% spread(predOf,n) %>% r
 
 ## Table S7: Predicted cross variances
 
-Table S7: Predicted cross variances. All predictions of cross-variance from the cross-validation scheme are detailed. For each fold of each repeat and each unique cross (sireID-damID). Both variances (Trait1==Trait2) and co-variances (Trait1!=Trait2) are given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), the variance component being predict (VarA or VarD), along with the number of segregating SNPs in the family (Nsegsnps) and the time taken in seconds for computation, per family (totcomputetime) are given. The predictions based on the variance of posterior means (VPM) and the posterior mean variances (PMV) are both shown. 
+Table S7: Predicted cross variances. All predictions of cross-variance from the cross-validation scheme are detailed. For each fold of each repeat and each unique cross (sireID x damID). Both variances (Trait1==Trait2) and co-variances (Trait1!=Trait2) are given. The genetic model used (Model: A, AD, DirDomAD, DirDomBV), the variance component being predicted (VarComp=VarA or VarD), along with the number of segregating SNPs in the family (Nsegsnps) and the time taken in seconds for computation, per family (totcomputetime) are given. The predictions based on the variance of posterior means (VPM) and the posterior mean variances (PMV) are both shown. 
 
 ```{r}
 library(tidyverse); library(magrittr); library(predCrossVar)
@@ -175,9 +174,9 @@ predictedCrossVars %>% str
 predictedCrossVars %>% count(Model,VarComp) %>% rmarkdown::paged_table()
 ```
 
-## Table S8: Predicted and observed cross variances
+## Table S8: Predicted versus observed cross variances
 
-Table S8: Predicted and observed cross variances. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predVar) and observations (obsVar) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). The family size (number of genotyped offspring, FamSize) or number of offspring with direct phenotypes (Nobs) are used (CorrWeight) to weight the correlation between observed and predicted family variances.
+Table S8: Predicted versus observed cross variances. From the cross-validation analysis. For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The genetic model used (Model: A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) and corresponding prediction (predVar) and observations (obsVar) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). The family size (number of genotyped offspring, FamSize) or number of offspring with direct phenotypes (Nobs) are used to weight the correlation (CorrWeight) between observed and predicted family variances.
 
 ```{r}
 obsVSpredVars<-readRDS(here::here("output","obsVSpredVars.rds"))
@@ -190,9 +189,9 @@ obsVSpredVars %>% str
 obsVSpredVars %>% count(Model,predOf,VarMethod,ValidationData) %>% spread(ValidationData,n) %>% rmarkdown::paged_table()
 ```
 
-## Table S9: Predicted and observed UC
+## Table S9: Predicted vs observed UC
 
-Table S9: Predicted and observed UC.  For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The predicted usefulness criterion (predUC) was computed as the predMean + realIntensity*predSD, where predMean is the predicted family mean and predSD is the predicted genetic standard deviation. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI) and corresponding prediction (predUC) and observations (obsUC) are shown. The family size (number of genotyped offspring, FamSize) is shown along with the realized selection intensity (realIntensity) for each selection stage in the breeding pipeline (Parent, CET, PYT, AYT, UYT) and also a constant intensity value (Stage=ConstIntensity). 
+Table S9: Predicted versus observed UC.  For each fold of each repeat, each cross distinguished by a unique pair of sireID and damID is given. The predicted usefulness criterion (predUC) was computed as the predMean + realIntensity*predSD, where predMean is the predicted family mean and predSD is the predicted genetic standard deviation. The genetic model used (Model: A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI) and corresponding prediction (predUC) and observations (obsUC) are shown. The family size (number of genotyped offspring, FamSize) is shown along with the realized selection intensity (realIntensity) for each selection stage in the breeding pipeline (Parent, CET, PYT, AYT, UYT) and also a constant intensity value (Stage=ConstIntensity). 
 
 ```{r}
 obsVSpredUC<-readRDS(here::here("output","obsVSpredUC.rds"))
@@ -207,18 +206,19 @@ obsVSpredUC %>% count(Model,predOf,VarMethod,Stage) %>% spread(VarMethod,n) %>% 
 
 ## Table S10: Accuracies predicting the mean
 
-Table S10: Accuracies predicting the mean. For each fold of each repeat, the accuracy predicting family means (Accuracy) is given. The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown.  
+Table S10: Accuracies predicting the mean. For each fold of each repeat, the accuracy predicting family means (Accuracy) is given. The genetic model used (Model: A, AD, DirDomAD, DirDomBV), whether the prediction is of mean breeding value (predOf=MeanBV) or mean total genetic value (predOf=MeanTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown.  
 
 
 ```{r}
 accMeans<-readRDS(here::here("output","accuraciesMeans.rds"))
 suptables[["TableS10"]]<-accMeans
-accMeans %>% count(Model,predOf,ValidationData,Trait) %>% spread(Trait,n) %>% rmarkdown::paged_table()
+accMeans %>% str
+#accMeans %>% count(Model,predOf,ValidationData,Trait) %>% spread(Trait,n) %>% rmarkdown::paged_table()
 ```
 
 ## Table S11: Accuracies predicting the variances
 
-Table S11: Accuracy of predicting the variances. For each fold of each repeat the estimated accuracy of predicting family variances is given. Accuracy was computed the correlation between predicted and observed variance, either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). 
+Table S11: Accuracy of predicting the variances. For each fold of each repeat the estimated accuracy of predicting family variances is given. Accuracy was computed the correlation between predicted and observed variance, either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Model: A, AD, DirDomAD, DirDomBV), whether the prediction is of family variance in breeding value (predOf=VarBV) or variance in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. The predictions are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). 
 
 ```{r}
 accVars<-readRDS(here::here("output","accuraciesVars.rds"))
@@ -233,7 +233,7 @@ accVars %>% #mutate(Trait1_Trait2=paste0(Trait1,"_",Trait2)) %>%
 
 ## Table S12: Accuracies predicting the usefulness criteria
 
-Table S12: Accuracy predicting the usefulness criteria. For each fold of each repeat the estimated accuracy of predicting family usefulness criteria is given. Accuracy was computed as the correlation between predicted UC and observed UC (mean of selected offspring), either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Models A, AD, DirDomAD, DirDomBV), whether the prediction is of UC in breeding value (predOf=VarBV) or UC in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. 
+Table S12: Accuracy predicting the usefulness criteria. For each fold of each repeat the estimated accuracy of predicting family usefulness criteria is given. Accuracy was computed as the correlation between predicted UC and observed UC (mean of selected offspring), either weighted by family size (AccuracyWtCor) or not (AccuracyCor). The genetic model used (Model: A, AD, DirDomAD, DirDomBV), whether the prediction is of UC in breeding value (predOf=VarBV) or UC in total genetic value (predOf=VarTGV), the trait (BiofortSI or StdSI), type of observation (ValidationData: GBLUPs or iidBLUPs) are shown. The predictions of cross variance used to compute the UC are based on either only the variance of posterior means (VarMethod=VPM) or the posterior mean variances (VarMethod=PMV). 
 
 ```{r}
 accUC<-readRDS(here::here("output","accuraciesUC.rds"))
@@ -248,7 +248,7 @@ accUC %>%
 
 ## Table S13: Realized within-cross selection metrics
 
-Table S13: Realized within-cross selection metrics. Table summarizing measurements made of selection within each cross (unique sireID-damID). Summaries included: family size (FamSize), number and proportion of members used as parents, mean GEBV and GETGV of top 1% of each family, for each selection index (BiofortSI, StdSI), proportion of each family that has been phenotyped and past each stage of the breeding pipeline (past CET, PYT, AYT) and finally the corresponding realized intensity of selection for each stage.
+Table S13: Realized within-cross selection metrics. Table summarizing measurements made of selection within each cross (unique sireID-damID). Summaries included: family size (FamSize), number (NmembersUsedAsParent) and proportion of members used as parents (propUsedAsParent), mean GEBV and GETGV of top 1% of each family (meanTop1pctGEBV, meanTop1pctGETGV), for each selection index Trait (Trait: BiofortSI, StdSI), proportion of each family that has been phenotyped (propPhenotyped, NmembersPhenotyped) and past each stage of the breeding pipeline (propPast and NmembersPast CET, PYT, AYT) and finally the corresponding realized intensity of selection for each stage (e.g. realIntensityAYT).
 
 ```{r, cols.print=28}
 realizedcrossmetrics<-readRDS(file=here::here("output/crossRealizations","realizedCrossMetrics.rds"))
@@ -263,7 +263,7 @@ realizedcrossmetrics %>% str
 
 ## Table S14: Proportion homozygous per clone
 
-Table S14: Proportion homozygous per clone. Genome-wide proportion of SNPs that are homozygous, for each clone in the study.
+Table S14: Genome-wide proportion of SNPs that are homozygous, for each clone (GID=germplasmName).
 
 ```{r, eval=F}
 library(tidyverse); library(magrittr); library(rsample); library(predCrossVar)
@@ -276,7 +276,6 @@ f<-getPropHom(snps)
 propHom<-tibble(GID=names(f), PropSNP_homozygous=as.numeric(f))
 saveRDS(propHom,file=here::here("output","propHomozygous.rds"))
 ```
-
 ```{r}
 propHom<-readRDS(file=here::here("output","propHomozygous.rds"))
 suptables[["TableS14"]]<-propHom
@@ -285,7 +284,7 @@ head(propHom) %>% rmarkdown::paged_table()
 
 ## Table S15: Variance estimates for genetic groups
 
-Table S15: Variance estimates for genetic groups. Summary of the population-level genetic variance estimates in each genetic group (GG, TMS13, TMS14, TMS15), for each genetic model (A, AD, DirDomA, DirDomAD), each variance (Trait1==Trait2) and covariance (Trait1!=Trait2). The estimates are computed both based on the variance of posterior means (VarMethod=VPM) and the posterior mean variances (VarMethod=PMV). The "Method" refers to whether linkage disequilibrium is accounted for (M2) or not (M1). 
+Table S15: Variance-covariance estimates for each genetic group. Summary of the population-level genetic variance estimates in each genetic group (GG=C0, TMS13=C1, TMS14=C2, TMS15=C3), for each genetic model (Model: A, AD, DirDomA, DirDomAD), each variance (Trait1==Trait2) and covariance (Trait1!=Trait2). The estimates are computed both based on the variance of posterior means (VarMethod=VPM) and the posterior mean variances (VarMethod=PMV). The "Method" refers to whether linkage disequilibrium is accounted for (M2) or not (M1). 
 
 ```{r}
 varcomps_geneticgroups<-readRDS(here::here("output","pmv_varcomps_geneticgroups_tidy_includingSIvars.rds"))
@@ -309,7 +308,7 @@ varcomps_geneticgroups %>% count(Group,Model) %>% spread(Model,n) %>% rmarkdown:
 
 ## Table S16: Directional dominance effects estimates
 
-Table S16: Directional dominance effects estimates. For each trait in each genetic group and each fold of each cross-validation repeat of the directional dominance model, the posterior mean and standard deviation of the effect of genome-wide homozygosity is given. 
+Table S16: Directional dominance effects estimates. Based on the directional dominance model, the genome-wide posterior mean (InbreedingEffect) and posterior standard deviation (InbreedingEffectSD) inbreeding effect is given. Estimates are provided for each trait, genetic group (Group), and each repeat-fold of the cross-validation study. 
 
 ```{r}
 ddEffects<-readRDS(file=here::here("output","ddEffects.rds"))
@@ -326,7 +325,7 @@ ddEffects %>% count(Group,Dataset,Trait) %>% spread(Trait,n) %>% arrange(Dataset
 
 ## Table S17: Predictions of untested crosses
 
-Table S17: Predictions of untested crosses. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.
+Table S17: Predictions of untested crosses. Compiled predictions of 47,083 possible crosses (sireID x damID) of 306 parents. Predictions were made with two additive-dominance genetic models: either with (Model=DirDomAD) or without (Model=ClassicAD) a directional dominance term. The predictions included are the cross mean (predMeanBV,predMeanGV), standard deviation (predSdBV,predSdGV) and usefulness (predUCparent,predUCvariety) in terms of breeding (BV) and total genetic (GV) value. Additional information provided for each cross include: whether the cross is a self (IsSelf=T/F), has previously been made (CrossPrevMade=Yes/No), the number of segregating SNPs expected in the family (Nsegsnps) and the parental GEBV (sireGEBV, damGEBV). 
 
 ```{r}
 library(tidyverse); library(magrittr);
@@ -356,7 +355,10 @@ predUntestedCrosses %<>%
   mutate(CrossPrevMade=ifelse(is.na(CrossPrevMade),"No",CrossPrevMade),
          IsSelf=ifelse(sireID==damID,TRUE,FALSE))
 rm(ped)
+```
 
+
+```{r}
 predUntestedCrosses %>% str
 ```
 
@@ -367,7 +369,9 @@ write.csv(predUntestedCrosses,file = here::here("manuscript", "SupplementaryTabl
 
 ## Table S18: Long-form table of predictions about untested crosses
 
-Table S18: Long-form table of predictions about untested crosses. Compiled predictions of 47,083 possible crosses of 306 parents. Predictions were made either with the classic additive-plus-dominance (ClassicAD) or the directional dominance (DirDomAD) model. Whether the cross is a self and/or has previously been made is indicated along with the number of segregating SNPs expected in the family. The predicted mean, standard deviation and usefulness in terms of breeding values (BV) and total genetic values is given.
+Table S18: Long-form table of predictions about untested crosses. Compiled predictions of 47,083 possible crosses (sireID x damID) of 306 parents. Predictions were made with two additive-dominance genetic models: either with (Model=DirDomAD) or without (Model=ClassicAD) a directional dominance term. The predictions (Pred) included are of the cross mean (PredOf=Mean), standard deviation (PredOf=Sd) and usefulness (PredOf=UC) in terms of breeding (Component=BV) and total genetic (Component=GV) value. Additional information provided for each cross include: whether the cross is a self (IsSelf=T/F) and has previously been made (CrossPrevMade=Yes/No). 
+
+
 
 ```{r}
 predBVs<-predUntestedCrosses %>%
@@ -393,6 +397,10 @@ predUntestedCrosses_long<-bind_rows(predBVs %>% mutate(Component="BV"),
 #               ungroup()) %>% 
 #   mutate(Selected=ifelse(Pred>=top1pct,"Selected","NotSelected")) %>% 
 #   mutate_all(~`attributes<-`(.,NULL))
+```
+
+
+```{r}
 predUntestedCrosses_long %>% str
 ```
 
@@ -412,7 +420,8 @@ rm(list=grep("suptables",ls(),invert = T, value = T)); gc()
 
 ## Table S19: Top 50 crosses selected by each criterion
 
-Table S19: Top 50 crosses selected by each criterion. For each of the 16 predictions of 47,083 crosses, select the top 50 ranked crosses.
+Table S19: Top 50 crosses (sireID x damID) selected by each of 16 predictions of 47,083 crosses. Predictions for each trait were made with two additive-dominance genetic models: either with (Model=DirDomAD) or without (Model=ClassicAD) a directional dominance term. The predictions (Pred) selected on are of the cross mean (PredOf=Mean), standard deviation (PredOf=Sd) and usefulness (PredOf=UC) in terms of breeding (Component=BV) and total genetic (Component=GV) value. Additional information provided for each cross include: whether the cross is a self (IsSelf=T/F) and has previously been made (CrossPrevMade=Yes/No). 
+
 
 ```{r}
 library(tidyverse); library(magrittr); library(ggforce)
@@ -422,6 +431,9 @@ top50crosses<-predUntestedCrosses %>%
   group_by(Trait,Model,PredOf,Component) %>% 
   slice_max(order_by = Pred,n=50) %>% ungroup()
 suptables[["TableS19"]]<-top50crosses
+```
+```{r}
+top50crosses %>% str
 ```
 
 # Write SupplementaryTables.xlsx

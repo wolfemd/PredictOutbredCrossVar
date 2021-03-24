@@ -143,18 +143,17 @@ obsVSpredVars %<>%
 ```{r, eval=T}
 # Usefulness
 realizedcrossmetrics<-readRDS(file=here::here("output/crossRealizations","realizedCrossMetrics.rds"))
-## Join the predicted means and variances
-## Only for Sel Indices
-#predvars %>% count(Model,predOf)
-#predmeans %>%  count(Model,predOf)
+# previously only calculated UC accuracy
+# for sel. indices
+# Now include component traits
 predUsefulness<-left_join(predvars %>% # Variances
-                            filter(Trait1 %in% c("stdSI","biofortSI"),
+                            filter(#Trait1 %in% c("stdSI","biofortSI"),
                                    Trait1==Trait2) %>% 
                             rename(Trait=Trait1) %>% 
                             select(-Trait2) %>% 
                             mutate(predOf=gsub("Var","",predOf)),
                           predmeans %>% # Means
-                            filter(Trait %in% c("stdSI","biofortSI")) %>% 
+                            #filter(Trait %in% c("stdSI","biofortSI")) %>% 
                             mutate(predOf=gsub("Mean","",predOf))) %>% 
   mutate(predSD=sqrt(predVar)) %>% 
   select(-predVar)
@@ -167,14 +166,15 @@ predUsefulness<-left_join(predvars %>% # Variances
 predBVs<-predUsefulness %>% 
   filter(predOf=="BV") %>% 
   left_join(realizedcrossmetrics %>% 
-              select(Repeat,Fold,Model,sireID,damID,FamSize,realIntensityParent) %>% 
+              select(Repeat,Fold,Model,sireID,damID,Trait,FamSize,realIntensityParent) %>% 
               rename(realIntensity=realIntensityParent) %>% 
               mutate(Stage="Parent",
                      Model=ifelse(Model=="ClassicAD","A","DirDomBV")))
 predTGVs<-predUsefulness %>% 
   filter(predOf=="TGV") %>% 
   left_join(realizedcrossmetrics %>% 
-              select(Repeat,Fold,Model,sireID,damID,FamSize,contains("realIntensity"),-realIntensityParent) %>% 
+              select(Repeat,Fold,Model,sireID,damID,Trait,FamSize,
+                     contains("realIntensity"),-realIntensityParent) %>% 
               pivot_longer(cols = contains("realIntensity"),
                            names_to = "Stage", 
                            values_to = "realIntensity", 
@@ -186,65 +186,50 @@ predUsefulness<-bind_rows(predBVs,
   # where intensity for predicted UC is set to 2.67
   bind_rows(predUsefulness %>% 
               left_join(realizedcrossmetrics %>% 
-                          distinct(Repeat,Fold,sireID,damID,FamSize)) %>% 
+                          distinct(Repeat,Fold,sireID,damID,Trait,FamSize)) %>% 
               mutate(Stage="ConstIntensity",
                      realIntensity=2.67))
 
 ## Compute predicted UCs
 predUsefulness %<>% 
   dplyr::mutate(predUC=predMean+(realIntensity*predSD))
-predUsefulness %>% count(Model,predOf,Stage)
-predUsefulness %>% filter(!is.na(predUC)) %>% count(Model,predOf,Stage)
+# predUsefulness %>% count(Model,predOf,Stage)
+# predUsefulness %>% filter(!is.na(predUC)) %>% count(Model,predOf,Stage)
 
-```
-
-```{r, eval=T}
 ## Format observed UCs
 obsUCgca<-realizedcrossmetrics %>% 
-  select(Repeat,Fold,Model,sireID,damID,contains("realizedUCparent")) %>% 
-  pivot_longer(cols = contains("realizedUCparent"),
-               names_to = "Trait", 
-               values_to = "obsUC", 
-               names_prefix = "realizedUCparent_",
-               values_drop_na = T) %>% 
+  select(Repeat,Fold,Model,sireID,damID,Trait,realizedUCparent) %>%
+  rename(obsUC=realizedUCparent) %>% 
   mutate(predOf="BV",
          Stage="Parent")
 #obsUCgca %>% count(VarComp,Stage,Model,Trait)
 obsUCtgv<-realizedcrossmetrics %>% 
-  select(Repeat,Fold,Model,sireID,damID,contains("realizedUCat")) %>% 
+  select(Repeat,Fold,Model,sireID,damID,Trait,contains("realizedUCat")) %>% 
   pivot_longer(cols = contains("realizedUCat"),
-               names_to = "Trait", 
+               names_to = "Stage", 
                values_to = "obsUC", 
                names_prefix = "realizedUCat",
                values_drop_na = T) %>% 
-  separate(Trait,c("Stage","Trait"),"_") %>% 
   mutate(predOf="TGV")
 #obsUCtgv %>% count(VarComp,Stage,Model)
 obsUsefulness<-bind_rows(obsUCgca,obsUCtgv)
 obsUsefulness %<>% 
   bind_rows(realizedcrossmetrics %>% 
-              select(Repeat,Fold,Model,sireID,damID,contains("meanTop1pctGEBV")) %>% 
-              pivot_longer(cols = contains("meanTop1pctGEBV"),
-                           names_to = "Trait", 
-                           values_to = "obsUC",
-                           names_prefix = "meanTop1pctGEBV_",
-                           values_drop_na = T) %>% 
-              mutate(predOf="BV",
+              select(Repeat,Fold,Model,sireID,damID,Trait,meanTop1pctGEBV) %>%
+               rename(obsUC=meanTop1pctGEBV) %>% 
+               mutate(predOf="BV",
                      Stage="ConstIntensity")) %>% 
   bind_rows(realizedcrossmetrics %>% 
-              select(Repeat,Fold,Model,sireID,damID,contains("meanTop1pctGETGV")) %>% 
-              pivot_longer(cols = contains("meanTop1pctGETGV"),
-                           names_to = "Trait", 
-                           values_to = "obsUC",
-                           names_prefix = "meanTop1pctGETGV_",
-                           values_drop_na = T) %>% 
+              select(Repeat,Fold,Model,sireID,damID,Trait,meanTop1pctGETGV) %>% 
+              rename(obsUC=meanTop1pctGETGV) %>% 
               mutate(predOf="TGV",
                      Stage="ConstIntensity"))
 obsUsefulness %<>% 
   mutate(Model=ifelse(Model=="ClassicAD",
                       ifelse(predOf=="BV","A","AD"),
                       ifelse(predOf=="BV","DirDomBV","DirDomAD")))
-# obsUsefulness
+
+#obsUsefulness %>% count(Trait,Stage,predOf,Model) %>% spread(Trait,n)
 # predUsefulness %>% count(Model,predOf,Stage)
 # obsUsefulness %>% count(Model,predOf,Stage)
 # obsUsefulness %>% filter(!is.na(obsUC))
@@ -257,6 +242,7 @@ obsUsefulness %<>%
 obsVSpredUC<-left_join(predUsefulness,obsUsefulness) %>% ungroup()
 obsVSpredUC %<>% drop_na(.) %>% ungroup()
 obsVSpredUC %>% str
+obsVSpredUC %>% count(Trait)
 #obsVSpredUC %>% count(Model,predOf,Stage)
 ```
 

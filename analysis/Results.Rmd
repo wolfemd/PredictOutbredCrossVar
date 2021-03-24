@@ -1,8 +1,10 @@
 ---
 title: "Results"
 site: workflowr::wflow_site
-date: "2020-August-02"
-output: workflowr::wflow_html
+date: "2021-March-22"
+output:
+  workflowr::wflow_html:
+    code_folding: "hide"
 editor_options:
   chunk_output_type: inline
 ---
@@ -14,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
 
 
 ```{r}
-library(tidyverse); library(magrittr)
+library(tidyverse); library(magrittr); library(ragg); 
 ```
 
 # Initial summaries
@@ -125,595 +127,143 @@ corMat<-cor(blups[,-1],use = 'pairwise.complete.obs')
                   title = 'Correlations among phenotypic BLUPs (including Selection Indices)')
 ```
 
-# Predictions of means
+# Predictions accuracies
 
-```{r, fig.width=12}
+```{r}
 library(tidyverse); library(magrittr);
-# Table S6: Predicted and observed cross means 
-# obsVSpredMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS06")
-
 # Table S10: Accuracies predicting the mean
 accMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS10")
 ```
 
-## Compare validation data types
+## Primary analysis
 
+### Means
 ```{r}
-accMeans %>% #count(ValidationData,Model,VarComp)
-  spread(ValidationData,Accuracy) %>% 
-  ggplot(.,aes(x=iidBLUPs,y=GBLUPs,color=predOf,shape=Trait)) + 
-  geom_point() +
-  geom_abline(slope=1,color='darkred') + 
-  facet_wrap(~predOf+Model,scales = 'free') + 
-  theme_bw() + scale_color_viridis_d()
+accMeansMain<-accMeans %>% 
+  filter(ValidationData=="GBLUPs", grepl("DirDom",Model))
 ```
 
 ```{r}
-accMeans %>% 
-  spread(ValidationData,Accuracy) %>% 
-  mutate(diffAcc=GBLUPs-iidBLUPs) %$% summary(diffAcc)
+accMeansMain %>% 
+  select(-Model,-ValidationData) %>% 
+  spread(predOf,Accuracy) %>% 
+  mutate(diffAcc=MeanTGV-MeanBV) -> diffAcc
+diffAcc %$% summary(diffAcc)
 ```
-
-Prediction accuracy using GBLUPs as validation give a nearly uniform higher correlation (mean 0.17 higher).
-
-The figure below tries to show that accuracies per trait-fold-rep-Model do not re-rank much from iid-to-GBLUP validation data.
-
-```{r, fig.width=12}
-forplot<-accMeans %>% 
-  mutate(Pred=paste0(predOf,"_",Model), 
-         Pred=factor(Pred,levels=c("MeanBV_A","MeanBV_DirDom","MeanTGV_AD","MeanTGV_DirDom")),
-         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         predOf=factor(predOf,levels=c("MeanBV","MeanTGV")),
-         Model=factor(Model,levels=c("A","AD","DirDom")),
-         RepFold=paste0(Repeat,"_",Fold,"_",Trait))
-
-forplot %>% 
-  ggplot(aes(x=ValidationData,y=Accuracy)) + 
-  geom_violin(data=forplot,aes(fill=ValidationData), alpha=0.75) + 
-  geom_boxplot(data=forplot,aes(fill=ValidationData), alpha=0.85, color='gray',width=0.2) + 
-  geom_line(data=forplot,aes(group=RepFold),color='darkred',size=0.6,alpha=0.8) +
-  geom_point(data=forplot,aes(color=ValidationData, group=RepFold),size=1.5) + 
-  theme_bw() + 
-  scale_fill_viridis_d(option = "A") + 
-  scale_color_viridis_d() + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_grid(Trait~Pred, scales='free_y')
-  labs(title = "Accuracies per trait-fold-rep-Model do not re-rank much from iid-to-GBLUP validation data")
-```
-
-```{r, fig.width=10}
-accMeans %>% 
-  mutate(Pred=paste0(predOf,"_",Model),
-         Pred=factor(Pred,levels=c("MeanBV_A","MeanBV_DirDomBV","MeanTGV_AD","MeanTGV_DirDomAD")),
-         Trait=factor(Trait,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         predOf=factor(predOf,levels=c("MeanBV","MeanTGV")),
-         Model=factor(Model,levels=c("A","AD","DirDom"))) %>% 
-  ggplot(.,aes(x=Trait,y=Accuracy,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
-  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-    facet_grid(.~ValidationData)
-```
-
-From hereon, for means, only considering GBLUP validation data.
-
-## Compare models
-
 ```{r}
-accMeans %>% 
-  filter(ValidationData=="GBLUPs") %>% 
-  group_by(Model,predOf) %>% 
-  summarize(meanAcc=mean(Accuracy)) %>% 
-  mutate_if(is.numeric,~round(.,3)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom")) %>% 
-  spread(predOf,meanAcc) %>% 
-  mutate(diffAcc=MeanTGV-MeanBV)
-```
-
-On average, across traits, the accuracy of predicting family-mean TGV were lower by -0.043 (0.002) for the ClassicAD (and DirDom) models.
-
-```{r, rows.print=12}
-accMeans %>% 
-  filter(ValidationData=="GBLUPs") %>% 
-  group_by(Model,predOf,Trait) %>% 
-  summarize(meanAcc=mean(Accuracy)) %>% 
-  mutate_if(is.numeric,~round(.,3)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom")) %>% 
-  spread(predOf,meanAcc) %>% 
-  mutate(diffAcc=MeanTGV-MeanBV)
-```
-
-But on a per-trait basis, for yield MeanTGV\>MeanBV by 0.01 in the ClassicAD model, and was even higher (by 0.13) for the DirDom model.
-
-```{r, rows.print=12}
-accMeans %>% 
-  filter(ValidationData=="GBLUPs") %>% 
-  group_by(Model,predOf) %>% 
-  summarize(meanAcc=mean(Accuracy)) %>% 
-  mutate_if(is.numeric,~round(.,3)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom")) %>% 
-  spread(Model,meanAcc) %>% 
-  mutate(diffAcc=DirDom-ClassicAD)
-```
-
-For both BV (0.003) and TGV (0.05), the DirDom model was on average more accurate.
-
-```{r, rows.print=12}
-accMeans %>% 
-  filter(ValidationData=="GBLUPs") %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom")) %>% 
-  group_by(Model,predOf,Trait) %>% 
-  summarize(meanAcc=mean(Accuracy)) %>% 
-  mutate_if(is.numeric,~round(.,3)) %>% 
-  spread(Model,meanAcc) %>% 
-  mutate(diffAcc=DirDom-ClassicAD) %>% 
-  select(predOf,Trait,diffAcc) %>% 
-  spread(predOf,diffAcc)
-  # ggplot(.,aes(x=MeanBV,y=MeanTGV,label=Trait)) + geom_label() + geom_point() + theme_bw() +
-  # labs(title="Compare diff Acc (DirDom-ClassicAD)") + geom_abline(slope=1)
-```
-
-The accuracy for yield was higher for TGV than BV by 0.11had the highest increase (0.231 for BVs and 0.181 for TGVs) when using the DirDom vs. the ClassicAD model. DM and the StdSI were both more poorly predicted.
-
-# Predictions of variances and covariances
-
-```{r}
-## Table S7: Predicted cross variances
-predVars<-read.csv(here::here("manuscript","SupplementaryTable07.csv"),stringsAsFactors = F)
-```
-
-## PMV vs. VPM
-
-First thing is to compare the PMV and VPM results. Ideally, they will be the same in accuracy and provide similar rankings. VPM is much faster and we would prefer to use it, e.g. for the predictions of untested crosses.
-
-```{r}
-predVars %>% 
-  group_by(Model,VarComp) %>% 
-  summarize(corPMV_VPM=cor(VPM,PMV),
-            pctIncreasePMV_over_VPM=mean((PMV-VPM)/VPM))
-```
-
-Across all predictions and models, the correlation between the PMV and VPM was very high.
-
-```{r}
-predVars %>% 
-  group_by(Model,VarComp) %>% 
-  summarize(corPMV_VPM=cor(VPM,PMV),
-            pctIncreasePMV_over_VPM=mean((PMV-VPM)/VPM)) %$% mean(corPMV_VPM)
-```
-
-However, there is a difference in scale between predictions by VPM and PMV as seen in the figure below.
-
-```{r figureS06, fig.width=10}
-predVars %>% 
-  mutate(VarCovar=paste0(Trait1,"_",Trait2),
-         Pred=paste0(Model,"_",VarComp),
-         diffPredVar=PMV-VPM) %>% 
-  ggplot(.,aes(x=Pred,y=diffPredVar,fill=Pred,linetype=VarComp)) + 
-  geom_boxplot() + facet_wrap(~VarCovar,scales='free',nrow=2) + 
-  geom_hline(yintercept = 0) + theme_bw() +
-  theme(axis.text.x = element_text(angle=90)) + 
-  scale_fill_viridis_d() + 
-  labs(title="The difference between PMV and VPM for variance and covariance predictions",
-       y="diffPredVar = PMV minus VPM ")
-```
-
-PMV gave consistently higher variance predictions and *larger* covariance ($|\sigma|$) (either more negative i.e. DM-TCHART or more positive i.e. MCMDS\_TCHART).
-
-What about prediction accuracy according to PMV vs. VPM?
-
-```{r}
-## Table S11: Accuracies predicting the variances
-accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
-accVars %>% 
-  select(-AccuracyCor) %>% 
-  spread(VarMethod,AccuracyWtCor) %>% 
-  mutate(diffAcc=PMV-VPM) %$% summary(diffAcc)
-```
-
-PMV-based estimates of prediction accuracy were nearly uniformly lower (mean decrease in acc. -0.07).
-
-```{r figureS07, fig.width=10}
-accVars %>% 
-  select(-AccuracyCor) %>% 
-  spread(VarMethod,AccuracyWtCor) %>% 
-  mutate(VarCovar=paste0(Trait1,"_",Trait2),
-         Pred=paste0(Model,"_",predOf),
-         diffAcc=PMV-VPM) %>% 
-  ggplot(.,aes(x=Pred,y=diffAcc,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + facet_wrap(~VarCovar,scales='free',nrow=2) + 
-  geom_hline(yintercept = 0) + theme_bw() +
-  theme(axis.text.x = element_text(angle=90)) + 
-  scale_fill_viridis_d() + 
-  labs(title="The difference between PMV and VPM in terms of prediction accuracy",
-       y="diffPredAcc = predAccPMV minus predAccVPM ")
-```
-
-We will proceed with PMV results, except for the [exploratory analyses](predictUntestedCrosses.html), where we will save time/computation and use the VPM.
-
-## Compare validation data types
-
-```{r figureS08}
-accVars %>%
-  filter(VarMethod=="PMV") %>% 
-  select(-AccuracyCor) %>% #count(ValidationData,Model,VarComp)
-  spread(ValidationData,AccuracyWtCor) %>% 
-  mutate(Component=paste0(Trait1,"_",Trait2)) %>% 
-  ggplot(.,aes(x=iidBLUPs,y=GBLUPs,shape=predOf,color=Component)) + 
-  geom_point() +
-  geom_abline(slope=1,color='darkred') + 
-  facet_wrap(~predOf+Model,scales = 'free') + 
-  theme_bw() + scale_color_viridis_d(option = "B")
+diffAcc %>% 
+  summarise(quantile = scales::percent(c(0.05,0.25, 0.5, 0.75,0.95)),
+            diffAcc = quantile(diffAcc, c(0.05,0.25, 0.5, 0.75,0.95))) %>% 
+  spread(quantile,diffAcc)
 ```
 
 ```{r}
-accVars %>% 
-  filter(VarMethod=="PMV") %>% 
-  select(-AccuracyCor) %>% 
-  spread(ValidationData,AccuracyWtCor) %>% 
-  mutate(diffAcc=GBLUPs-iidBLUPs) %$% summary(diffAcc)
+diffAcc %>% 
+  group_by(Trait) %>% 
+  summarise(quantile = scales::percent(c(0.05,0.25, 0.5, 0.75,0.95)),
+            diffAcc = quantile(diffAcc, c(0.05,0.25, 0.5, 0.75,0.95))) %>% 
+  spread(quantile,diffAcc)
 ```
 
-Similar to the means, GBLUPs as validation data for variances was higher on average (mean 0.073).
+### (Co)variances
 
-Below I make several plots of the data to explore the consequences of using GBLUPs vs. iidBLUPs as validation data. The first one shows (for simplicity just for the variances on the SI's) that there *is* re-ranking of accuracies b/t validation data-types. The boxplots that follow try to determine if similar conclusions would be reached from either validation data.
-
-```{r, fig.width=12}
-forplot<-accVars %>% 
-  filter(VarMethod=="PMV") %>% 
-  filter(Trait1==Trait2,grepl("SI",Trait1)) %>% 
-  mutate(Pred=paste0(predOf,"_",Model), 
-         Pred=factor(Pred,levels=c("VarBV_A","VarBV_DirDomBV","VarTGV_AD","VarTGV_DirDomAD")),
-         Trait1=factor(Trait1,levels=c("stdSI","biofortSI")),#,"DM","logFYLD","MCMDS","TCHART")),
-         Trait2=factor(Trait2,levels=c("stdSI","biofortSI")),#,"DM","logFYLD","MCMDS","TCHART")),
-         Component=paste0(Trait1,"_",Trait2),
-         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
-         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
-         RepFold=paste0(Repeat,"_",Fold,"_",Component))
-
-forplot %>% 
-  ggplot(aes(x=ValidationData,y=AccuracyWtCor)) + 
-  geom_violin(data=forplot,aes(fill=ValidationData), alpha=0.75) + 
-  geom_boxplot(data=forplot,aes(fill=ValidationData), alpha=0.85, color='gray',width=0.2) + 
-  geom_line(data=forplot,aes(group=RepFold),color='darkred',size=0.6,alpha=0.8) +
-  geom_point(data=forplot,aes(color=ValidationData, group=RepFold),size=1.5) + 
-  theme_bw() + 
-  scale_fill_viridis_d(option = "A") + 
-  scale_color_viridis_d() + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_grid(Component~Pred, scales='free_y') + 
-  labs(title="Plot of variance-prediction accuracy: Re-ranking according choice of validation?")
-```
-
-```{r figureS10a, fig.width=12}
-forplot<-accVars %>% 
-  filter(VarMethod=="PMV") %>% 
-  mutate(Pred=paste0(predOf,"_",Model), 
-         Pred=factor(Pred,levels=c("VarBV_A","VarTGV_AD","VarBV_DirDomBV","VarTGV_DirDomAD")),
-         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         Component=paste0(Trait1,"_",Trait2),
-         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
-         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
-         RepFold=paste0(Repeat,"_",Fold,"_",Component))
-
-forplot %>% 
-  filter(Trait1==Trait2) %>% 
-  ggplot(.,aes(x=Component,y=AccuracyWtCor,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
-  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_wrap(~ValidationData,scales='free') +
-  ggtitle(expression(paste("Plot of ", underline(variance), "-prediction accuracy"))) + 
-  labs(subtitle="GBLUPs vs. iidBLUPs as validation-data")
-```
-
-```{r figureS10b, fig.width=12}
-forplot %>% 
-  filter(VarMethod=="PMV") %>% 
-  filter(Trait1!=Trait2) %>% 
-  ggplot(.,aes(x=Component,y=AccuracyWtCor,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
-  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_wrap(~ValidationData,scales='free') +
-  ggtitle(expression(paste("Plot of ", underline(co), "variance-prediction accuracy"))) + 
-  labs(subtitle="GBLUPs vs. iidBLUPs as validation-data")
-```
-
-The two sets of boxplots (variances and covariances) above suggest that we would reach similar but less strong conclusions above the difference between prediction models and variance components. Moreover, we would reach similar conclusions about which trait variances and trait-trait covariances are best or worst predicted. We consider for our primary conclusions, the prediction accuracy with GBLUP-derived validation data.
-
-## What difference does the weighted correlation make?
-
-For variances (but not means), we chose to weight prediction-observation pairs according to the number of family members (GBLUPs-as-validation) or the number of observed non-missing iid-BLUPs per family per trait (iidBLUPs-as-validation) when computing prediction accuracies. The weighted correlations should be justified because large families (or heavily phenotyped ones) should have better-estimated variances than small ones. Below, we consider briefly the effect weighted correlations have on results.
-
-```{r}
-accVars %>% 
-  group_by(VarMethod,ValidationData,predOf,Model) %>% 
-  summarize(corWT_vs_noWT=cor(AccuracyWtCor,AccuracyCor)) %$% summary(corWT_vs_noWT)
-```
-
-```{r}
-accVars %>% 
-  group_by(VarMethod,ValidationData,predOf,Model,Trait1,Trait2) %>% 
-  summarize(corWT_vs_noWT=cor(AccuracyWtCor,AccuracyCor)) %$% summary(corWT_vs_noWT)
-```
-
-We found that the weighted-vs-unweighted accuracies are themselves similar highly correlated (mean cor. 0.87) across traits, varcomps, models and validation-data types.
-
-```{r}
-accVars %>% 
-  mutate(diffAcc=AccuracyWtCor-AccuracyCor) %$% summary(diffAcc)
-```
-
-Definitely not a consistent increase or decrease in accuracy according to weighting.
-
-```{r,rows.print=16}
-accVars %>% 
-  mutate(diffAcc=AccuracyWtCor-AccuracyCor) %>% 
-  group_by(VarMethod,ValidationData,predOf,Model) %>% 
-  summarize(meanDiffAcc_WT_vs_noWT=mean(diffAcc))
-```
-
-Across varcomps, models, validation-data and var. methods (PMV vs. VPM), very close to mean 0 diff. b/t WT and no WT, but generally WT\>noWT.
-
-```{r,rows.print=16}
-accVars %>% 
-  filter(VarMethod=="PMV",ValidationData=="GBLUPs") %>% 
-  mutate(Pred=paste0(predOf,"_",Model), 
-         Pred=factor(Pred,levels=c("VarBV_A","VarTGV_AD","VarBV_DirDomBV","VarTGV_DirDomAD")),
-         diffAcc=AccuracyWtCor-AccuracyCor,
-         Component=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Pred,Component) %>% 
-  summarize(meanDiffAcc_WT_vs_noWT=round(mean(diffAcc),3)) %>% 
-  spread(Pred,meanDiffAcc_WT_vs_noWT)
-```
-
-Considering the boxplots below, conclusions appear to be at least qualitatively similar whether or not weighted correlations are considered as measures of accuracy.
-
-```{r, fig.width=12}
-forplot<-accVars %>% 
-  filter(VarMethod=="PMV",ValidationData=="GBLUPs") %>% 
-  pivot_longer(cols=contains("Cor"),names_to = "WT_or_NoWT", values_to = "Accuracy") %>% 
-   mutate(Pred=paste0(predOf,"_",Model), 
-         Pred=factor(Pred,levels=c("VarBV_A","VarTGV_AD","VarBV_DirDomBV","VarTGV_DirDomAD")),
-         Trait1=factor(Trait1,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         Trait2=factor(Trait2,levels=c("stdSI","biofortSI","DM","logFYLD","MCMDS","TCHART")),
-         Component=paste0(Trait1,"_",Trait2),
-         predOf=factor(predOf,levels=c("VarBV","VarTGV")),
-         Model=factor(Model,levels=c("A","AD","DirDomBV","DirDomAD")),
-         RepFold=paste0(Repeat,"_",Fold,"_",Component))
-
-forplot %>% 
-  filter(Trait1==Trait2) %>% 
-  ggplot(.,aes(x=Component,y=Accuracy,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
-  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_wrap(~WT_or_NoWT,scales='free') +
-  ggtitle(expression(paste("Plot of ", underline(variance), "-prediction accuracy"))) + 
-  labs(subtitle="Weighted vs. Unweighted Correlation, GBLUPs as validation-data")
-```
-
-```{r, fig.width=12}
-forplot %>% 
-  filter(Trait1!=Trait2) %>% 
-  ggplot(.,aes(x=Component,y=Accuracy,fill=Pred,linetype=predOf)) + 
-  geom_boxplot() + theme_bw() + scale_fill_viridis_d() + 
-  geom_hline(yintercept = 0, color='darkred', size=1.5) + 
-  theme(axis.text.x = element_text(face='bold', size=10, angle=90),
-        axis.text.y = element_text(face='bold', size=10)) + 
-  facet_wrap(~WT_or_NoWT,scales='free') +
-  ggtitle(expression(paste("Plot of ", underline(co), "variance-prediction accuracy"))) + 
-  labs(subtitle="Weighted vs. Unweighted Correlation, GBLUPs as validation-data")
-```
-
-## Compare models
-
-We consider the accuracy of predicting variances (and subsequently also usefulness criteria) using the "PMV" variance method, GBLUPs as validation-data and family-size-weighted correlations.
 
 ```{r}
 library(tidyverse); library(magrittr);
 ## Table S11: Accuracies predicting the variances
 accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11")
+accVarsMain<-accVars %>% 
+  filter(ValidationData=="GBLUPs", grepl("DirDom",Model),VarMethod=="PMV")
 ```
 
+Across traits. Proportion of accuracy estimates above zero? Percentiles: 10%, 50% (median), 90%
+
 ```{r}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
+accVarsMain %>% 
+  select(-Model,-ValidationData,-AccuracyCor) %>% 
+  mutate(Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
          TraitType=ifelse(grepl("SI",Trait1),"SI","ComponentTrait")) %>% 
   group_by(Component) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3),
-            sdAcc=round(sd(AccuracyWtCor),3))
+  summarize(propAboveZero=length(which(AccuracyWtCor>=0))/n(),
+            quantile = scales::percent(c(0.1,0.5,0.9)),
+            AccuracyWtCor = quantile(AccuracyWtCor, c(0.1,0.5,0.9))) %>% 
+  pivot_wider(names_from = "quantile", values_from = "AccuracyWtCor")
 ```
-
-Most variance prediction accuracy estimates were positive, with a mean weighted correlation of 0.14. Mean accuracy for covariance prediction was less (0.09).
-
-```{r, rows.print=12}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
+By trait variance / trait-trait covariances.
+```{r}
+accVarsMain %>% 
+  select(-Model,-ValidationData,-AccuracyCor) %>% 
+  mutate(Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
          TraitType=ifelse(grepl("SI",Trait1),"SI","ComponentTrait")) %>% 
   group_by(Component,TraitType,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% arrange(desc(meanAcc))
+  summarize(propAboveZero=length(which(AccuracyWtCor>=0))/n(),
+            quantile = scales::percent(c(0.1,0.5,0.9)),
+            AccuracyWtCor = quantile(AccuracyWtCor, c(0.1,0.5,0.9))) %>% 
+  pivot_wider(names_from = "quantile", values_from = "AccuracyWtCor") %>% 
+  arrange(desc(Component),TraitType,desc(`50%`))
 ```
-
-In contrast to results for predicting family means, the most accurately predicted trait-variances were MCMDS (mean acc. 0.24) and logFYLD (mean acc. 0.17) while Var(DM), for example, had among the lowest accuracies at 0.07). Interestingly, the DM-TCHART covariance was the most well predicted component (mean acc. 0.24). Accuracy for the selection index variances were intermediate (mean stdSI = 0.18, mean biofortSI = 0.08) compared to the component traits. Like the accuracy for means on the SI's, accuracy for variance corresponding to the accuracy of the component traits. In contrast to predicting cross means on SI's, for variances, the stdSI \> biofortSI. This makes sense as the stdSI emphasized logFYLD and MCMDS, which are better predicted than DM, TCHART and related covariances.
+Difference in accuracy between VarTGV and VarBV? 
 
 ```{r}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
-  group_by(Model,predOf) %>% 
-  summarize(meanAcc=mean(AccuracyWtCor)) %>% 
-  mutate_if(is.numeric,~round(.,3)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom")) %>% 
-  spread(predOf,meanAcc) %>% 
-  mutate(diffAcc=VarTGV-VarBV)
+accVarsMain %>% 
+  select(-Model,-ValidationData,-AccuracyCor) %>% 
+  mutate(Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
+         TraitType=ifelse(grepl("SI",Trait1),"SI","ComponentTrait")) %>% 
+  spread(predOf,AccuracyWtCor) %>% 
+  mutate(diffAcc=VarTGV-VarBV) -> diffAcc
+diffAcc %$% round(summary(diffAcc),3)
 ```
-
-There were, overall, only small differences in accuracy between prediction models (ClassicAD and DirDom) and var. components (VarBV, VarTGV). On average, across trait variances and covariances, the accuracy of predicting family-(co)variance in TGV were higher (than predicting VarBV) by 0.01 for the ClassicAD but lower by -0.002 for the DirDom model.
-
-VarTGV: ClassicAD was best for most components.
-
-VarBV: DirDom was best for most components.
-
-```{r, rows.print=24}
-# Interesting differences between accuracy VarBV vs. VarTGV? 
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
-         Trait=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Model,predOf,Component,Trait,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% 
-  spread(predOf,meanAcc) %>% 
-  mutate(diffAcc=VarTGV-VarBV) %>% arrange(Model,desc(diffAcc))
-```
-
-Interesting differences between accuracy VarBV vs. VarTGV?
-
-The largest increases (diffAcc = accVarTGV - accVarBV) were logFYLD-MCMDS (0.065) and logFYLD-TCHART (0.053) followed by the stdSI variance (0.04), all for the ClassicAD model. VarTGV was better predicted than VarBV for yield in the ClassicAD model (0.03), but decreased sharply (-0.08) for the DirDom model.
-
-```{r, rows.print=24}
-# Interesting differences between accuracy DirDom vs. ClassicAD? 
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
-         Trait=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Model,predOf,Component,Trait,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% 
-  spread(Model,meanAcc) %>% 
-  mutate(diffAcc=DirDom-ClassicAD) %>% arrange(predOf,desc(diffAcc))
-```
-
-Focusing next on differences between the DirDom and ClassicAD models (diffAcc = DirDom - ClassicAD).
-
-logFYLD and logFYLD-TCHART variances and covariances for BVs were up by 0.1 for DirDom. In contrast, both of these components for TGV were down (-0.01 logFYLD, -0.05 logFYLD-TCHART).
 
 ```{r}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV", grepl("SI",Trait1)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
-         Trait=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Trait,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% ungroup() 
+diffAcc %>% 
+  summarise(quantile = scales::percent(c(0.1,0.5,0.9)),
+            diffAcc = quantile(diffAcc, c(0.1,0.5,0.9))) %>% 
+  spread(quantile,diffAcc)
 ```
-
-Regarding the selection index variance accuracies:
-
-On average, the accuracy for the StdSI was twice that of the biofortSI (0.18 vs. 0.08).
-
-```{r, rows.print=12}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV", grepl("SI",Trait1)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
-         Trait=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Model,predOf,Component,Trait,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% ungroup() %>% 
-  select(-Trait,-Trait2,-Component) %>% spread(predOf,meanAcc)
-```
-
-For both models and both indices, VarTGV was better predicted than VarBV.
 
 ```{r}
-accVars %>% 
-  filter(ValidationData=="GBLUPs",VarMethod=="PMV", grepl("SI",Trait1)) %>% 
-  mutate(Model=ifelse(!grepl("DirDom",Model),"ClassicAD","DirDom"),
-         Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
-         Trait=paste0(Trait1,"_",Trait2)) %>% 
-  group_by(Model,predOf,Component,Trait,Trait1,Trait2) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),3)) %>% ungroup() %>% 
-  select(-Trait,-Trait2,-Component) %>% spread(Model,meanAcc)
+diffAcc %>% 
+  group_by(Component,TraitType,Trait1,Trait2) %>% 
+  summarise(quantile = scales::percent(c(0.1,0.5,0.9)),
+            diffAcc = quantile(diffAcc, c(0.1,0.5,0.9))) %>% 
+  spread(quantile,diffAcc) %>% 
+  arrange(desc(Component),TraitType,desc(`50%`))
 ```
 
-However, the DirDom model (compared to the ClassicAD model) increased accuracy slightly for both VarBV and VarTGV on the biofortSI, but decreased it on the StdSI.
+### Usefulness
 
-# Prediction of the UC
 
-The usefulness criteria i.e. $UC_{parent}$ and $UC_{clone}$ are predicted by:
+The usefulness criteria i.e. $UC_{parent}$ and $UC_{variety}$ are predicted by:
 
-$$UC_{parent}=UC_{RS}=\mu_{BV} + (i_{RS} \times \sigma_{BV})$$
+$$UC_{parent}=\mu_{BV} + (i_{RS} \times \sigma_{BV})$$
 
-$$UC_{clone}=UC_{VDP}=\mu_{TGV} + (i_{VDP} \times \sigma_{TGV})$$
+$$UC_{variety}=\mu_{TGV} + (i_{VDP} \times \sigma_{TGV})$$
 
-The observed (or realized) **UC** are the mean **GEBV** of family members who were themselves later used as parents.
+#### Selection intensity
 
-In order to combined predicted means and variances into a **UC**, we first calculated the realized intensity of within-family selection ($i_{RS}$ and $i_{VDP}$). For $UC_{parent}$ we computed the $i_{RS}$ based on the proportion of progeny from each family, that themselves later appeared in the pedigree as parents. For $UC_{clone}$ we compute computed $i_{VDP}$ based on the proportion of family-members that had at least one plot at each **VDP** stage (CET, PYT, AYT, UYT).
-
-Below, we plot the proportion of each family selected (A) and the selection intensity (B) for each stage.
-
-```{r}
-library(tidyverse); library(magrittr);
-## Table S13: Realized within-cross selection metrics
-crossmetrics<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS13")
-```
-
-```{r, fig.width=10, fig.height=5}
-library(patchwork)
-propPast<-crossmetrics %>% 
-  mutate(Cycle=ifelse(!grepl("TMS13|TMS14|TMS15",sireID) & !grepl("TMS13|TMS14|TMS15",damID),"C0",
-                      ifelse(grepl("TMS13",sireID) | grepl("TMS13",damID),"C1",
-                             ifelse(grepl("TMS14",sireID) | grepl("TMS14",damID),"C2",
-                                    ifelse(grepl("TMS15",sireID) | grepl("TMS15",damID),"C3","mixed"))))) %>% 
-  select(Cycle,starts_with("prop")) %>% 
-  pivot_longer(cols = contains("prop"),values_to = "PropPast",names_to = "StagePast",names_prefix = "propPast|prop") %>% 
-  rename(DescendentsOfCycle=Cycle) %>% 
-  mutate(StagePast=gsub("UsedAs","",StagePast),
-         StagePast=factor(StagePast,levels=c("Parent","Phenotyped","CET","PYT","AYT"))) %>% 
-  ggplot(.,aes(x=StagePast,y=PropPast,fill=DescendentsOfCycle)) + 
-  geom_boxplot(position = 'dodge2',color='black') + 
-  theme_bw() + scale_fill_viridis_d()  + labs(y="Proportion of Family Selected") +
-  theme(legend.position = 'none')
-realIntensity<-crossmetrics %>% 
-  mutate(Cycle=ifelse(!grepl("TMS13|TMS14|TMS15",sireID) & !grepl("TMS13|TMS14|TMS15",damID),"C0",
-                      ifelse(grepl("TMS13",sireID) | grepl("TMS13",damID),"C1",
-                             ifelse(grepl("TMS14",sireID) | grepl("TMS14",damID),"C2",
-                                    ifelse(grepl("TMS15",sireID) | grepl("TMS15",damID),"C3","mixed"))))) %>% 
-  select(Cycle,sireID,damID,contains("realIntensity")) %>% 
-  pivot_longer(cols = contains("realIntensity"),names_to = "Stage", values_to = "Intensity",names_prefix = "realIntensity") %>% 
-  rename(DescendentsOfCycle=Cycle) %>% 
-  distinct %>% ungroup() %>% 
-  mutate(Stage=factor(Stage,levels=c("Parent","CET","PYT","AYT","UYT"))) %>% 
-  ggplot(.,aes(x=Stage,y=Intensity,fill=DescendentsOfCycle)) + 
-  geom_boxplot(position = 'dodge2',color='black') + 
-  theme_bw() + scale_fill_viridis_d()  + labs(y="Stadardized Selection Intensity")
-propPast + realIntensity +  
-  plot_annotation(tag_levels = 'A',
-                  title = 'Realized selection intensities: measuring post-cross selection') & 
-  theme(plot.title = element_text(size = 14, face='bold'),
-        plot.tag = element_text(size = 13, face='bold'),
-        strip.text.x = element_text(size=11, face='bold'))
-```
+In order to combined predicted means and variances into a **UC**, we first calculated the realized intensity of within-family selection ($i_{RS}$ and $i_{VDP}$). For $UC_{parent}$ we computed the $i_{RS}$ based on the proportion of progeny from each family, that themselves later appeared in the pedigree as parents. For $UC_{clone}$ we compute computed $i_{VDP}$ based on the proportion of family-members that had at least one plot at the penultimate stage of the **VDP**, the advanced yield trial (AYT). For completeness and as part of exploratory analysis, we computed the proportion selected at each of the **VDP** stages: clonal evaluation trial (CET), preliminary yield trial (PYT), advanced yield trial (AYT) and uniform yield trial (UYT).  
 
 The table below provides a quick summary of the number of families available with realized selection observed at each stage, plus the corresponding mean selection intensity and proportion selected across families.
 
 ```{r}
+## Table S13: Realized within-cross selection metrics
+crossmetrics<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS13")
 left_join(crossmetrics %>%
-            select(sireID,damID,contains("realIntensity")) %>%
-            pivot_longer(cols = contains("realIntensity"),names_to = "Stage", values_to = "Intensity",names_prefix = "realIntensity") %>%
+            select(sireID,damID,contains("realIntensity")) %>%   distinct %>% 
+            pivot_longer(cols = contains("realIntensity"),
+                         names_to = "Stage", values_to = "Intensity",names_prefix = "realIntensity") %>%
             group_by(Stage) %>%
             summarize(meanIntensity=mean(Intensity, na.rm = T),
                       Nfam=length(which(!is.na(Intensity)))),
           crossmetrics %>% 
-            select(sireID,damID,contains("prop")) %>% 
+            select(sireID,damID,contains("prop")) %>%   distinct %>% 
             rename(propParent=propUsedAsParent,
                    propCET=propPhenotyped,
                    propPYT=propPastCET,
                    propAYT=propPastPYT,
                    propUYT=propPastAYT) %>% 
-            pivot_longer(cols = contains("prop"),values_to = "PropPast",names_to = "Stage",names_prefix = "propPast|prop") %>% 
+            pivot_longer(cols = contains("prop"),
+                         values_to = "PropPast",names_to = "Stage",names_prefix = "propPast|prop") %>% 
             group_by(Stage) %>% 
             summarize(meanPropPast=mean(PropPast, na.rm = T))) %>%
   mutate(Stage=factor(Stage,levels=c("Parent","CET","PYT","AYT","UYT"))) %>% 
@@ -721,9 +271,7 @@ left_join(crossmetrics %>%
   select(Stage,Nfam,meanIntensity,meanPropPast) %>% mutate_if(is.numeric,~round(.,2))
 ```
 
-There were 48 families with a mean intensity of 1.59 (mean 2% selected) that themselves had members who were parents in the pedigree.
-
-As expected, the number of available families and the proportion selected decreased (increasing selection intensity) from CET to UYT. We choose to focus on the AYT stage, which has 104 families, mean intensity 1.46 (mean 5% selected).
+There were 48 families with a mean intensity of 1.59 (mean 2% selected) that themselves had members who were parents in the pedigree. As expected, the number of available families and the proportion selected decreased (increasing selection intensity) from CET to UYT. We choose to focus on the AYT stage, which has 104 families, mean intensity 1.46 (mean 5% selected).
 
 ```{r}
 library(tidyverse); library(magrittr);
@@ -748,171 +296,149 @@ uc_cv_summary %>%
             maxMeanFamSize=max(meanFamSize))
 ```
 
-On a per-repeat-fold basis, sample sizes (number of families) with observed usefulness (and thus for measuring prediction accuracy) were limited. For $UC_{parent}$ there were an average of 17 families (min 9, max 24). For $UC_{clone}$ the sizes depending on the Stage, with the focal stage $UC_{clone}^{[AYT]}$ mean number of families was 37 (min 25, max 50).
-
-```{r}
-predVSobsUC %>% 
-  filter(VarMethod=="PMV",Stage %in% c("Parent","AYT")) %>% 
-  select(-predMean,-predSD,-realIntensity) %>% 
-  nest(predVSobs=c(sireID,damID,predUC,obsUC,FamSize,Repeat,Fold,Model)) %>% 
-  mutate(AccuracyWtCor=map_dbl(predVSobs,~psych::cor.wt(.[,3:4],w = .$FamSize) %$% round(r[1,2],2))) %>% 
-  select(-predVSobs,-VarMethod,-predOf) %>% 
-  spread(Stage,AccuracyWtCor)
-```
-
-Computing a single accuracy across all repeats, folds *and* models, the $UC_{parent}$ criterion is more accurately predicted (0.46 stdSI, 0.61 biofortSI) than $UC_{clone}^{[AYT]}$ (0.24 stdSI, 0.38 biofortSI).
+#### Accuracy comparisons
 
 ```{r}
 library(tidyverse); library(magrittr);
 ## Table S12: Accuracies predicting the usefulness criteria
 accUC<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS12")
+accUCmain<-accUC %>% 
+  filter(VarMethod=="PMV",grepl("DirDom",Model),Stage %in% c("Parent","AYT")) %>%
+  select(-Model,-VarMethod,-AccuracyCor,-Stage)
+# accMeansMain %>% count(Trait,predOf)
+# accVarsMain %>% count(Trait1,Trait2,predOf)
+# accUCmain %>% count(Repeat,Fold)
 ```
 
+Proportion of UC accuracy estimates greater than zero.
 ```{r}
-accUC %>% 
-  filter(VarMethod=="PMV",Stage %in% c("Parent","AYT")) %>% 
+length(which(accUC$AccuracyWtCor>0))/nrow(accUC)
+```
+
+Compare Mean, Variance and UC accuracy:
+```{r}
+meanVsUCacc<-accUCmain %>% 
+  rename(AccUC=AccuracyWtCor) %>% 
+  left_join(accMeansMain %>% 
+              select(-ValidationData,-Model) %>% 
+              mutate(predOf=gsub("Mean","",predOf)) %>% 
+              rename(AccMean=Accuracy))
+meanVsUCacc %<>% 
+  left_join(accVarsMain %>% 
+              filter(Trait1==Trait2) %>% 
+              select(-ValidationData,-Model,-AccuracyCor,-VarMethod,-Trait2) %>% 
+              mutate(predOf=gsub("Var","",predOf)) %>% 
+              rename(AccVar=AccuracyWtCor,
+                     Trait=Trait1))
+```
+
+Correlation between mean, Var and UC accuracy, overall
+```{r}
+meanVsUCacc %>% 
+  summarize(corMeanUCacc=cor(AccUC,AccMean),
+            meanDiffMeanUC=mean(AccUC-AccMean),
+            corMeanVarAcc=cor(AccVar,AccMean),
+            corVarUCacc=cor(AccUC,AccVar))
+```
+
+**Correlation between mean, Var and UC accuracy, by predOf (BV vs. TGV)**
+```{r}
+meanVsUCacc %>% 
+  group_by(predOf) %>% 
+  summarize(corMeanUCacc=cor(AccUC,AccMean),
+            meanDiffMeanUC=mean(AccUC-AccMean),
+            corMeanVarAcc=cor(AccVar,AccMean))
+```
+**Correlation between mean, Var and UC accuracy, by Trait**
+```{r}
+meanVsUCacc %>% 
   group_by(Trait) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),2)) %>% 
-  ungroup()
+  summarize(corMeanUCacc=cor(AccUC,AccMean),
+            meanDiffMeanUC=mean(AccUC-AccMean),
+            corMeanVarAcc=cor(AccVar,AccMean)) %>% arrange(desc(corMeanUCacc))
+```
+**Make an overall comparison of trait accuracies for UC**
+```{r, rows.print=12}
+accUCmain %>% 
+  mutate(TraitType=ifelse(grepl("SI",Trait),"SI","ComponentTrait")) %>% 
+  group_by(Trait) %>% 
+  summarize(propAboveZero=length(which(AccuracyWtCor>0))/n(),
+            quantile = scales::percent(c(0.1,0.5,0.9)),
+            AccuracyWtCor = quantile(AccuracyWtCor, c(0.1,0.5,0.9))) %>% 
+  pivot_wider(names_from = "quantile", values_from = "AccuracyWtCor") %>% 
+  mutate(across(is.numeric,~round(.,2))) %>% 
+  arrange(desc(`50%`))
 ```
 
-Perhaps indicating that the cross-mean dominates the prediction of UC, and in contrast to predictions of cross variances, the mean UC for the biofortSI was higher (0.55) compared to the stdSI (0.42).
+Compare UC accuracy of TGV vs. BV, overall
+```{r, rows.print=12}
+accUCmain %>% 
+  spread(predOf,AccuracyWtCor) %>% 
+  mutate(diffAcc=TGV-BV) %$% round(summary(diffAcc),2)
+```
 
+Proportion of accuracy estimates where BV>TGV.
 ```{r}
-accUC %>% 
-  filter(VarMethod=="PMV",Stage %in% c("Parent","AYT")) %>% 
-  group_by(Model,predOf,Trait,Stage) %>% 
-  summarize(meanAcc=round(mean(AccuracyWtCor),2)) %>% 
-  ungroup() %>% 
-  select(-predOf) %>% 
-  spread(Model,meanAcc) %>% mutate(diffAcc=ifelse(Stage=="AYT",AD-DirDomAD,A-DirDomBV))
+accUCmain %>% 
+  spread(predOf,AccuracyWtCor) %>% 
+  mutate(diffAcc=TGV-BV) %$% (length(which(diffAcc<=0))/length(diffAcc))
 ```
 
-For the biofortSI, the ClassicAD and DirDom models had nearly identical accuracy.
-
-For the stdSI, however, accuracy was higher for the Classic AD model than for the DirDom model (by 0.07 $UC_{parent}$ and 0.09 $UC_{clone}^{[AYT]}$).
-
-The results above are for the PMV method of variance prediction, which we note give on average a 0.14 (0.41 vs. 0.55) lower accuracy estimate than VPM. As was the case with variance prediction accuracy, we did not observe qualitative differences between PMV and VPM.
-
-```{r}
-accUC %>% 
-  group_by(VarMethod) %>% summarize(meanAcc=mean(AccuracyWtCor)) %>% spread(VarMethod,meanAcc)
+Compare UC accuracy difference TGV minus BV, by Trait
+```{r, rows.print=12}
+accUCmain %>% 
+  mutate(TraitType=ifelse(grepl("SI",Trait),"SI","ComponentTrait")) %>% 
+  spread(predOf,AccuracyWtCor) %>% 
+  mutate(diffAcc=TGV-BV) %>% 
+  group_by(Trait,TraitType) %>% 
+  summarize(quantile = scales::percent(c(0.1,0.5,0.9)),
+            diffAcc = quantile(diffAcc, c(0.1,0.5,0.9))) %>% 
+  pivot_wider(names_from = "quantile", values_from = "diffAcc") %>% 
+  mutate(across(is.numeric,~round(.,2))) %>% 
+  arrange(desc(`50%`))
 ```
 
-# Population estimates of additive-dominance genetic variance-covariances
+- Mean: TGV<BV (median -0.017)
+- Var: No consistent / small differences
+- UC: TGV<BV
 
-In this study, our focus is mainly on distinguishing among crosses, and the accuracy of cross-metric predictions. Detailed analysis of the additive-dominance genetic variance-covariance structure in cassava (sub)-populations is an important topic, which we mostly leave for future study. However, we make a brief examination of the genetic variance-covariance estimates associated with the overall population and component genetic groups. We report all variance-covariance estimates in **TableS15** and complete BGLR output in the [repository associated with this study]().
 
-```{r}
-library(tidyverse); library(magrittr);
-## Table S15: Variance estimates for genetic groups
-varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
-```
 
-## Justify focus on PMV - M2 estimatess
+# Population estimates of the importance of dominance variance 
 
-```{r}
-varcomps %>% 
-  select(-propDom) %>% 
-  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "VarEst") %>% 
-  filter(!is.na(VarEst)) %>% 
-  spread(VarMethod,VarEst) %>% 
-  nest(pmv_vpm=c(Trait1,Trait2,PMV,VPM)) %>% 
-  mutate(corPMV_VPM=map_dbl(pmv_vpm,~cor(.$PMV,.$VPM, use = 'pairwise.complete.obs'))) %>% 
-  select(-pmv_vpm) %$% summary(corPMV_VPM)
-```
-
-Close correspondence between VPM and PMV.
-
-```{r}
-varcomps %>% 
-  select(-propDom) %>% 
-  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "VarEst") %>% 
-  filter(!is.na(VarEst)) %>% 
-  spread(VarMethod,VarEst) %>% 
-  mutate(diffVar=PMV-VPM) %$% summary(diffVar)
-```
-
-Difference in magnitude with PMV\>VPM, usually.
-
-Focus on PMV estimates.
-
-The functions for computing PMV estimates included in the **predCrossVar** package return "Method 2" (M2) variance estimates, which refers to variance accounting for LD (see Lehermeier et al. 2017a). The standard estimate is "Method 1" (M1) and is also included.
-
-```{r}
-varcomps %>% 
-  filter(VarMethod=="PMV") %>% 
-  select(-VarMethod,-propDom) %>%
-  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "VarEst") %>% 
-  filter(!is.na(VarEst),
-         (Model=="AD" | Model=="DirDomAD"),
-         Trait1==Trait2) %>% 
-  spread(Method,VarEst) %>% 
-  nest(m1_m2=c(Trait1,Trait2,M2,M1)) %>% 
-  mutate(corM1_M2=map_dbl(m1_m2,~cor(.$M2,.$M1, use = 'pairwise.complete.obs'))) %>% 
-  select(-m1_m2) %$% summary(corM1_M2)
-```
-
-The correlation between M1 and M2 estimates is very high, so we will focus on M2 estimates as they correspond to the predictions of within-cross variance.
-
-## Pop.-level importance Add. vs. Dom.
+In this study, our focus is mainly on distinguishing among crosses, and the accuracy of cross-metric predictions. Detailed analysis of the additive-dominance genetic variance-covariance structure in cassava (sub)-populations is an important topic, which we mostly leave for future study. However, we make a brief examination of the genetic variance-covariance estimates associated with the overall population and component genetic groups. We report all variance-covariance estimates in **TableS15** and complete BGLR output in the [FTP repository associated with this study](ftp://ftp.cassavabase.org/marnin_datasets/Wolfe_et_al_GenomicMateSelection).
 
 ```{r}
 library(tidyverse); library(magrittr);
 ## Table S15: Variance estimates for genetic groups
-varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
+varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15") %>% 
+  filter(VarMethod=="PMV", Method=="M2",Model %in% c("DirDomAD")) %>% 
+  select(-VarMethod,-Method)
 ```
-
-Over all genetic groups analyzed, across trait and SI variances, dominance accounted for an average of 34% (range 7-68%) in the AD model, and 24% (6-53%) for the DirDom model.
 
 ```{r}
 varcomps %>% 
-  filter(VarMethod=="PMV", Method=="M2",Model %in% c("AD","DirDomAD"), Trait1==Trait2) %>% 
-  select(-VarMethod,-Method) %>% 
+  filter(Trait1==Trait2) %>% 
   group_by(Model) %>% 
   summarize(minPropDom=min(propDom),
             meanPropDom=mean(propDom),
             maxPropDom=max(propDom))
 ```
+Over all genetic groups analyzed, across trait and SI variances, dominance accounted for an average of 24% (range 6-53%).
+
 
 ```{r}
 varcomps %>% 
-  filter(VarMethod=="PMV", Method=="M2",Model %in% c("AD","DirDomAD"), Trait1==Trait2) %>% 
-  select(-VarMethod,-Method) %>% 
+  filter(Trait1==Trait2) %>% 
   group_by(Trait1,Trait2) %>% 
   summarize(minPropDom=min(propDom),
             meanPropDom=mean(propDom),
             maxPropDom=max(propDom)) %>% arrange(desc(meanPropDom))
 ```
 
-Across models (AD vs. DirDom), dominance was most important (mean 52% of genetic variance) for yield (logFYLD) and least important for DM (mean 22%) and TCHART (mean 13%) (Figure 4).
+Dominance was most important (mean 46% of genetic variance) for yield (logFYLD) and least important for TCHART (mean 11%) (Figure 4).
 
-```{r}
-varcomps %>% 
-  filter(VarMethod=="PMV", Method=="M2",Model %in% c("AD","DirDomAD")) %>% 
-  filter(Trait1!=Trait2,!grepl("SI",Trait1)) %>%  
-  group_by(Trait1,Trait2) %>% 
-  summarize(meanPropDom=mean(propDom)) %>% 
-  arrange(desc(meanPropDom))
-```
-
-For covariances, we observed that dominances were strongest (72% of genetic covariance) and in the same direction for logFYLD-MCMDS and was weakest for DM-TCHART (5%).
-
-```{r}
-varcomps %>% 
-  filter(VarMethod=="PMV", Method=="M2",Model %in% c("AD","DirDomAD")) %>% 
-  filter(Trait1!=Trait2,!grepl("SI",Trait1)) %>% 
-  mutate(oppCovarDirection=ifelse(VarA>0 & VarD<0 | VarA<0 & VarD>0,TRUE,FALSE),
-         CovarDiff=VarA-VarD) %>% 
-  filter(oppCovarDirection==TRUE) %>% arrange(desc(CovarDiff)) %>% 
-  group_by(Trait1,Trait2) %>% 
-  summarize(meanCovarA=mean(VarA),
-            meanCovarD=mean(VarD))
-```
-
-For several covariance estimates, there was an opposing sign of the estimate between dominance and additive components. For DM-logFYLD there was a tendency for positive dominance but negative additive covariance. For DM-MCMDS, in contrast, the tendency was for negative dominance but positive additive covariance.
-
-## Pop.-level estimates of inbreeding effects
+# Population estimates of inbreeding effects
 
 ```{r}
 ## Table S16: Directional dominance effects estimates
@@ -928,108 +454,70 @@ ddEffects %>%
 
 We found mostly consistent and significant (diff. from zero) effects of inbreeding *depression* associated especially (**Figure 5**, **Table S16**), with logFYLD (mean effect -2.75 across genetic groups, -3.88 across cross-validation folds), but also DM (-4.82 genetic groups, -7.85 cross-validation) and MCMDS (0.32 genetic groups, 1.27 cross-validation). This corresponds to higher homozygosity being associated with lower DM, lower yield and worse disease.
 
+
 # Exploring Untested Crosses
 
-We made 16 predictions (2 SIs x 2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]) prediction for each of 47,083 possible crosses of 306 parents.
+We made 8 predictions (2 SIs x 2 prediction targets [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]) prediction for each of 47,083 possible crosses of 306 parents.
 
 ## Correlations among predictions
 
-First, quickly evaluate the multivariate decision space encompassed by predictions of mean, SD, UC for BV and TGV, ClassicAD vs. DirDomAD.
+First, quickly evaluate the multivariate decision space encompassed by predictions of mean, SD, UC for BV and TGV.
 
 ```{r}
 library(tidyverse); library(magrittr); 
-predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F) %>% 
+  filter(Model=="DirDom") %>% select(-Model)
 ```
-
-**TABLE:** Correlations between predictions about each selection index ($\overset{StdSI,BiofortSI}{\textbf{cor}}$).
-
-```{r}
-predUntestedCrosses %>% 
-  spread(Trait,Pred) %>% 
-  group_by(Model,PredOf,Component) %>% 
-  summarize(corSelIndices=cor(stdSI,biofortSI)) %>% 
-  spread(Component,corSelIndices) %>% 
-  arrange(Model,PredOf) %>% 
-  rmarkdown::paged_table()
-```
-
 
 Average correlations between BiofortSI and StdSI by prediction.
 ```{r}
 predUntestedCrosses %>% 
   spread(Trait,Pred) %>% 
-  group_by(PredOf,Model,Component) %>% 
+  group_by(PredOf,Component) %>% 
   summarize(corSelIndices=cor(stdSI,biofortSI)) %>% 
   group_by(PredOf) %>% 
   summarize(meanCorSIs=mean(corSelIndices))
 ```
 
-**TABLE:** Correlations between predictions about each prediction model, within trait ($\overset{ClassicAD,DirDomAD}{\textbf{cor}}$).
-
+**TABLE:** Correlations between predictions about each selection index ($\overset{StdSI,BiofortSI}{\textbf{cor}}$).
 ```{r}
 predUntestedCrosses %>% 
-  spread(Model,Pred) %>% 
-  group_by(Trait,PredOf,Component) %>% 
-  summarize(corModels=round(cor(ClassicAD,DirDom),2)) %>% 
-  spread(Component,corModels) %>% 
-  arrange(Trait,PredOf) %>% 
-  rmarkdown::paged_table()
-```
-Average correlations between ClassicAD and DirDomAD by prediction.
-```{r}
-predUntestedCrosses %>% 
-  spread(Model,Pred) %>% 
-  group_by(Trait,PredOf,Component) %>% 
-  summarize(corModels=round(cor(ClassicAD,DirDom),2)) %>% 
-  group_by(PredOf) %>% 
-  summarize(meanCorModels=mean(corModels))
-```
-
-**TABLE:** Correlations between predictions about each component, within trait ($\overset{BV,TGV}{\textbf{cor}}$).
-
-```{r}
-predUntestedCrosses %>% 
-  spread(Component,Pred) %>% 
-  group_by(Trait,Model,PredOf) %>% 
-  summarize(corComponents=round(cor(BV,TGV),2)) %>% 
-  spread(Model,corComponents) %>% 
-  arrange(Trait,PredOf) %>% 
+  spread(Trait,Pred) %>% 
+  group_by(PredOf,Component) %>% 
+  summarize(corSelIndices=cor(stdSI,biofortSI)) %>% 
+  spread(Component,corSelIndices) %>% 
+  arrange(PredOf) %>% 
   rmarkdown::paged_table()
 ```
 
-```{r}
-predUntestedCrosses %>% 
-  spread(Component,Pred) %>% 
-  group_by(Trait,Model,PredOf) %>% 
-  summarize(corComponents=round(cor(BV,TGV),2)) %>% 
-  group_by(PredOf) %>% 
-  summarize(meanCorBV_TGV=mean(corComponents))
-```
+**TABLE:** Correlations between predictions about each component, for each trait ($\overset{BV,TGV}{\textbf{cor}}$).
 
 ```{r}
 predUntestedCrosses %>% 
   spread(Component,Pred) %>% 
-  group_by(Trait,Model,PredOf) %>% 
-  summarize(corComponents=round(cor(BV,TGV),2)) %$% summary(corComponents) 
+  group_by(Trait,PredOf) %>% 
+  summarize(corBV_TGV=round(cor(BV,TGV),2)) %>% 
+  spread(Trait,corBV_TGV)
 ```
 
 ```{r}
 predUntestedCrosses %>% 
   spread(PredOf,Pred) %>% 
-  group_by(Trait,Model,Component) %>% 
-  summarize(corMeanSD=round(cor(Mean,Sd),2),
-            corMeanUC=round(cor(Mean,UC),2),
-            corSdUC=round(cor(Sd,UC),2)) %>% 
-  rmarkdown::paged_table()
-```
-```{r}
-predUntestedCrosses %>% 
-  spread(PredOf,Pred) %>% 
-  group_by(Trait,Model,Component) %>% 
+  group_by(Trait,Component) %>% 
   summarize(corMeanSD=round(cor(Mean,Sd),2),
             corMeanUC=round(cor(Mean,UC),2),
             corSdUC=round(cor(Sd,UC),2)) %>% ungroup() %>% 
 summarize(across(is.numeric,mean))#corComponents=round(cor(BV,TGV),2)) %$% summary(corComponents) 
+```
+
+```{r}
+predUntestedCrosses %>% 
+  spread(PredOf,Pred) %>% 
+  group_by(Trait,Component) %>% 
+  summarize(corMeanSD=round(cor(Mean,Sd),2),
+            corMeanUC=round(cor(Mean,UC),2),
+            corSdUC=round(cor(Sd,UC),2)) %>% 
+  rmarkdown::paged_table()
 ```
 
 The mean and variance have a low, but negative correlation. At the standardized intensity of 2.67 (1% selected), leads to a small negative correlation between SD and UC. The crosses with highest mean will mostly be those with highest UC. The crosses with highest mean will also have a small tendency to have smaller variance.
@@ -1037,44 +525,16 @@ The mean and variance have a low, but negative correlation. At the standardized 
 Nevertheless, the **biggest differences** in decision space have to do with the difference between using the Mean vs. including the SD via the UC.
 
 
-**Figure S14: Correlation matrix for predictions on the StdSI**
-```{r}
-forCorrMat<-predUntestedCrosses %>%
-  mutate(Family=paste0(sireID,"x",damID),
-         PredOf=paste0(Trait,"_",PredOf,"_",Component,"_",ifelse(Model=="ClassicAD","classic","dirdom"))) %>%
-  select(Family,PredOf,Pred) %>%
-  spread(PredOf,Pred)
-```
-
-```{r, fig.width=10, fig.height=7}
-corMat_std<-cor(forCorrMat[,grepl("stdSI",colnames(forCorrMat))],use = 'pairwise.complete.obs')
-corrplot::corrplot(corMat_std, type = 'lower', col = viridis::viridis(n = 10), diag = F,addCoef.col = "black", 
-                   tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
-```
-
-**Figure S15: Correlation matrix for predictions on the BiofortSI**
-
-```{r, fig.width=10, fig.height=7}
-corMat_bio<-cor(forCorrMat[,grepl("biofortSI",colnames(forCorrMat))],use = 'pairwise.complete.obs')
-corrplot::corrplot(corMat_bio, type = 'lower', col = viridis::viridis(n = 10), diag = F,addCoef.col = "black", 
-                   tl.srt = 15, tl.offset = 1,tl.col = 'darkred') 
-```
-
 ## Decision space - top 50 crosses?
 
 What we next want to know, is how different the selections of crosses-to-make would be if we use different criteria, particularly the mean vs. the UC.
 
-```{r, fig.width=10}
-library(tidyverse); library(magrittr); library(ggforce)
-predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
-```
-
-For each of the 16 predictions of 47,083 crosses, select the top 50 ranked crosses.
+For each of the 8 predictions of 47,083 crosses, select the top 50 ranked crosses.
 
 ```{r}
 top50crosses<-predUntestedCrosses %>% 
   filter(PredOf!="Sd") %>%
-  group_by(Trait,Model,PredOf,Component) %>% 
+  group_by(Trait,PredOf,Component) %>% 
   slice_max(order_by = Pred,n=50) %>% ungroup()
 ```
 
@@ -1088,6 +548,7 @@ top50crosses %>%
   distinct(Trait,sireID,damID) %>% 
   count(Trait)
 ```
+
 Number of Self vs. Outcross selected by Trait
 ```{r}
 top50crosses %>% 
@@ -1095,7 +556,7 @@ top50crosses %>%
   count(Trait,IsSelf)
 ```
 
-Only 310 unique crosses selected based on at least one of the 16 criteria. Of those 190 were selected for the StdSI (120 Biofort) including 7 (7) selfs on the StdSI (BiofortSI). 
+Only 202 unique crosses selected based on at least one of the 8 criteria. Of those 112 were selected for the StdSI (90 Biofort) including 7 (6) selfs on the StdSI (BiofortSI). 
 
 ```{r}
 top50crosses %>% 
@@ -1104,14 +565,13 @@ top50crosses %>%
   spread(Trait,Selected) %>% 
   na.omit(.)
 ```
-There were 0 crosses selected for both SI, all of which were selfs. 
+There were 0 crosses selected for both SI. 
 
 ```{r}
 top50crosses %>% 
   distinct(CrossPrevMade,sireID,damID) %>% 
   count(CrossPrevMade)
 ```
-
 None of the selected crosses have previously been tested.
 
 **Table:** Summarize, by trait, the number of and relative contributions (number of matings) proposed for each parent selected in the group of top crosses.
@@ -1125,72 +585,41 @@ top50crosses %>%
   summarize(Nparents=length(unique(germplasmName)),
             minProg=min(n),maxProg=max(n),medianProg=median(n))
 ```
-```{r}
-top50crosses %>% 
-  mutate(Family=paste0(sireID,"x",damID)) %>% 
-  select(Trait,Family,sireID,damID) %>% 
-  pivot_longer(cols = c(sireID,damID), names_to = "Parent", values_to = "germplasmName") %>% 
-  count(Trait,germplasmName) %>% 
-  group_by(Trait) %>% slice_max(n)
-```
-
-There were 96 parents represented among the 221 "best" crosses for StdSI with an median usage in 5 families (range 1-91, most popular parent = **TMS13F1095P0013**). Only 51 parents were indicated for the BiofortSI with a median contribution to 4 (range 1-116, most popular parent = **IITA-TMS-IBA011371**) crosses.
 
 **Next:** For each SI, break down the criteria for which the "best" crosses are interesting.
 
 Quantify the number of unique crosses selected by:
 
-**1. Model (ClassicAD vs. DirDomAD)**
-    * The ClassicAD model selects only a few selfs for their mean, but does by the UC. 
-    * The DirDomAD model, in contrast, selects exclusively selfs for UC_TGV and not only because of high predicted mean.
-    * Crosses selected by ClassicAD, DirDomAD vs. Both?
+**Component (BV vs. TGV)**
+   
+  * Not many crosses are selected for both their BV _and_ TGV?
+  * Selfs get selected mostly by TGV???
 
-```{r}
-top50crosses %>% 
-  distinct(Trait,sireID,damID,IsSelf,Model) %>% 
-  mutate(Selected="Yes") %>% 
-  spread(Model,Selected) %>% 
-  mutate(across(everything(),replace_na,replace = "No")) %>% 
-  count(Trait,IsSelf,ClassicAD,DirDom) %>% 
-  spread(IsSelf,n,sep = "") %>% rmarkdown::paged_table()
-```
-
-For the StdSI 29 crosses selected by both, 109 and 83 unique to ClassicAD and DirDomAD respectively.
-For the BiofortSI 66 crosses selected by both models, 41 and 28 unique to ClassicAD and DirDomAD respectively.
-
-Most of the selfs chosen, were chosen by the DirDomAD predictions; 59% of 70 selected StdSI selfs were uniquely chosen by the DirDomAD model (35% of 34 BiofortSI selfs).
-
-Selfs selected by ClassicAD were mostly chosen based on the UC (and thus their predicted variance). In contrast, the DirDomAD model selected selfs having a high means _and_ variances.
-
-
-**2. Component (BV vs. TGV)**
-    * Not many crosses are selected for both their BV _and_ TGV?
-    * Selfs get selected mostly by TGV???
-
-```{r}
-top50crosses %>% 
-  distinct(Trait,sireID,damID,IsSelf,Component,PredOf) %>% 
-  mutate(Selected="Yes") %>% 
-  spread(Component,Selected) %>% 
-  mutate(across(everything(),replace_na,replace = "No")) %>% 
-  count(Trait,IsSelf,BV,TGV) %>% 
-  spread(IsSelf,n,sep = "") %>% rmarkdown::paged_table()
-```
-Most selfs were selected either based on TGV. 
-
+**Table:** Number of crosses for each SI selected by BV, TGV or both, ignoring selection based Mean vs. UC.
 ```{r}
 top50crosses %>% 
   distinct(Trait,sireID,damID,Component) %>% 
   mutate(Selected="Yes") %>% 
   spread(Component,Selected) %>% 
-  mutate(across(everything(),replace_na,replace = "No")) %>% 
-  count(Trait,BV,TGV) %>%        
+  mutate(across(everything(.),replace_na,replace = "No")) %>% 
+  count(Trait,BV,TGV) %>% spread(Trait,n) %>% 
   rmarkdown::paged_table()
 ```
-Only 23 of 190 (StdSI) and 37 of 120 crosses (BiofortSI) were selected for both BV and TGV.
 
+**Table:** Number of crosses for each SI selected by BV, TGV or both, ignoring selection based Mean vs. UC. Broken down by whether
 ```{r}
-# Compute the number of parents unique selected based on BV vs. TGV
+top50crosses %>% filter(IsSelf==TRUE) %>% 
+  distinct(Trait,sireID,damID,Component) %>% 
+  mutate(Selected="Yes") %>% 
+  spread(Component,Selected) %>% 
+  mutate(across(everything(.),replace_na,replace = "No")) %>% 
+  count(Trait,BV) %>% 
+  rmarkdown::paged_table()
+```
+Selfs were _only_ selected based on BV.
+
+**Table:** Compute the number of parents unique selected based on BV vs. TGV
+```{r}
 top50crosses %>% 
   nest(families=c(-Trait,-Component)) %>% 
   spread(Component,families) %>% 
@@ -1200,39 +629,22 @@ top50crosses %>%
   select(-BV,-TGV) %>% arrange(Trait) %>% rmarkdown::paged_table()
 ```
 
-```{r}
-# Compute the number of parents unique selected based on BV vs. TGV
-top50crosses %>% 
-  nest(families=c(-Trait,-Component,-Model)) %>% 
-  spread(Component,families) %>% 
-  mutate(NparentsBVunique=map2_dbl(BV,TGV,~length(union(.x$sireID,.x$damID) %>% .[!. %in% union(.y$sireID,.y$damID)])),
-         NparentsTGVunique=map2_dbl(BV,TGV,~length(union(.y$sireID,.y$damID) %>% .[!. %in% union(.x$sireID,.x$damID)])),
-         NparentsTot=map2_dbl(BV,TGV,~length(unique(c(.x$sireID,.x$damID,.y$sireID,.y$damID))))) %>% 
-  select(-BV,-TGV) %>% arrange(Trait,Model) %>% rmarkdown::paged_table()
-```
-
-3. Mean vs. UC
-    * Again, there are crosses selected by Mean, UC and both
-
+**Table:** Compute the number of parents uniquely selected based on Mean, UC and both
 ```{r}
 top50crosses %>% 
   distinct(Trait,sireID,damID,PredOf) %>% 
   mutate(Selected="Yes") %>% 
   spread(PredOf,Selected) %>% 
-  mutate(across(everything(),replace_na,replace = "No")) %>% 
-  count(Trait,Mean,UC) %>%
+  mutate(across(everything(.),replace_na,replace = "No")) %>% 
+  count(Trait,Mean,UC) %>%spread(Trait,n) %>% 
   rmarkdown::paged_table()
 ```
 
-In fact, 28 of 87 parents selected on the StdSI were chosen only for the TGV of crosses and 26 only for BV (Figure 7). For the BiofortSI, no parents were chosen only for BV, but 23 of 42 were only interesting for their TGV. 
-
-Only 39 crosses for the StdSI (18 for BiofortSI) were selected only based on the UC (i.e. selected for their variance but not their mean).
-
-
-So which are the "BEST" crosses? 
-    * Chosen most times, for most criteria?
+## So which are the "BEST" crosses? 
+   
+* Chosen most times, for most criteria?
   
-```{r best50crosses}
+```{r}
 best50crosses<-top50crosses %>% 
   count(sireID,damID,Trait) %>% 
   group_by(Trait) %>% 
@@ -1240,88 +652,384 @@ best50crosses<-top50crosses %>%
   rename(NtimesChosen=n) 
 best50crosses %>% count(Trait)
 ```
-
-If you use the most times chosen as the criteria and you don't break ties, there are 112 StdSI and 50 BiofortSI crosses to consider as the "best".
-
-## Plot relationship between pred. mean and variances on StdSI
+If you use the most times chosen as the criteria and you don't break ties, there are 58 StdSI and 66 BiofortSI crosses to consider as the "best".
 
 ```{r}
-library(tidyverse); library(magrittr); library(patchwork);
-library(ggforce); library(concaveman); library(V8)
-predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F)
-preds_std<-predUntestedCrosses %>% filter(Trait=="stdSI")
-top50crosses_std<-preds_std %>% 
-  filter(PredOf!="Sd") %>%
-  group_by(Trait,Model,PredOf,Component) %>% 
-  slice_max(order_by = Pred,n=50) %>% ungroup()
-
-forplot_std<-preds_std %>% 
-  spread(PredOf,Pred) %>% 
-  mutate(CrossType=ifelse(IsSelf==TRUE,"SelfCross","Outcross")) %>% 
-  left_join(top50crosses_std %>% 
-              distinct(sireID,damID) %>% 
-              mutate(Group="NewCrosses")) %>% 
-  mutate(Group=ifelse(CrossPrevMade=="Yes","PreviousCrosses",Group))
+### Are these crosses really "better"?
+# bind_rows(predUntestedCrosses %>% 
+#             filter(CrossPrevMade=="Yes") %>% 
+#             mutate(Group=ifelse(grepl("TMS13",sireID) & grepl("TMS13",damID),"C1",
+#                                 ifelse(grepl("TMS14",sireID) & grepl("TMS14",damID),"C2",
+#                                        ifelse(grepl("TMS15",sireID) & grepl("TMS15",damID),"C3","C0")))),
+#           predUntestedCrosses %>% 
+#             semi_join(best50crosses) %>% 
+#             mutate(Group="NewCrosses")) %>% 
+#   group_by(Group,Trait,PredOf,Component) %>% 
+#   summarize(meanPred=mean(Pred),
+#             sePred=sd(Pred)/sqrt(n())) %>% 
+#   ggplot(.,aes(x=Group,y=meanPred,fill=Component)) + 
+#   facet_grid(PredOf~Trait, scales = 'free') + 
+#   geom_bar(stat = 'identity', position='dodge')
 ```
 
-```{r, fig.width=10}
-meanVSvar<-forplot_std %>% 
-  ggplot(.,aes(x=Mean,y=Sd,shape=CrossType)) + 
-  geom_point(color='gray20',size=0.75, alpha=0.6) + 
-  geom_mark_ellipse(data=forplot_std %>% 
-                      filter(Group=="NewCrosses") %>% 
-                      mutate(#lab="Best New Crosses",
-                             desc=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
-                    aes(fill=Group,label=desc), expand = unit(2.5, "mm")) + # , label.buffer = unit(30, 'mm')) +
-  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==FALSE),
-             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F) + 
-  geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==TRUE),
-             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F) + 
-  scale_color_viridis_d() + 
-  scale_fill_manual(values = c("goldenrod2","darkorchid4")) + 
-  facet_grid(Component~Model, scales='free') + 
-  theme_bw() + 
-  theme(axis.title = element_text(face='bold', color='black'),
-        axis.text = element_text(face='bold', color='black'),
+# Supplementary Questions
+
+## Does the validation type make a difference?
+
+Most often, cross-validation done to test genomic prediction accuracy uses validation data (the stand-in for "truth") consisting of adjusted values, (e.g. BLUPs or BLUEs) for total individual performance, not including genomic relatedness information. In our study we set-up cross-validation folds that enable use to predict the GEBV and GETGV (GBLUPs) of validation family-members, and to subsequently compute their sample means, variances and usefulness. This approach has the added advantage of expanding the available sample size of validation progeny with complete data across traits. Nevertheless, we made some comparison to results using BLUPs that do not incorporate genomic relatedness information; in other words, independent and identically distributed (i.i.d.) BLUPs.
+
+```{r}
+library(tidyverse); library(magrittr);
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS10")
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
+  mutate(Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
+         TraitType=ifelse(grepl("SI",Trait1),"SI","ComponentTrait"))
+```
+**Summarize accuracy differences between GBLUPs and iidBLUPs as validation data.**
+```{r}
+accMeans %>% 
+  filter(grepl("DirDom",Model)) %>% 
+  spread(ValidationData,Accuracy) %>% 
+  mutate(diffAcc=GBLUPs-iidBLUPs) %$% summary(diffAcc)
+```
+Prediction accuracy for family means were nearly uniformly higher using GBLUPs compared to iidBLUPs (median 0.18 higher). 
+
+**Compute Spearman rank correlations on a per Trait, per prediction type (BV vs TGV) basis.**
+```{r}
+accMeans %>% 
+  filter(grepl("DirDom",Model)) %>% 
+  spread(ValidationData,Accuracy) %>% 
+  group_by(Trait,predOf) %>% 
+  summarize(corAcc=cor(GBLUPs,iidBLUPs,method = 'spearman')) %$% summary(corAcc) # arrange(desc(corAcc))
+```
+The Spearman rank correlation between prediction accuracies based on iidBLUPs and GBLUPs was high (median 0.75, range 0.55-0.84). 
+
+**Summarize accuracy differences between GBLUPs and iidBLUPs as validation data.**
+```{r}
+accVars %>% 
+  filter(grepl("DirDom",Model),VarMethod=="PMV") %>% 
+  select(-AccuracyCor) %>% 
+  spread(ValidationData,AccuracyWtCor) %>% 
+  mutate(diffAcc=GBLUPs-iidBLUPs) %$% summary(diffAcc)
+```
+Similar to the means, accuracy using GBLUP-validation-data appeared mostly higher compared to iidBLUPs (median difference GBLUPs-iidBLUPs = 0.07, interquartile range -0.002-0.14).
+
+**Compute Spearman rank correlations on a per Trait, per prediction type (BV vs TGV) basis.**
+```{r}
+accVars %>% 
+  filter(grepl("DirDom",Model),VarMethod=="PMV") %>% 
+  select(-AccuracyCor) %>% 
+  spread(ValidationData,AccuracyWtCor) %>% 
+  group_by(Component,TraitType,Trait1,Trait2,predOf) %>% 
+  summarize(corAcc=cor(GBLUPs,iidBLUPs,method = 'spearman')) %$% summary(corAcc) # arrange(desc(corAcc))
+```
+
+The Spearman rank correlations of iidBLUP and GBLUP-validation-based accuracies was positive for family (co)variances, but smaller compared to family means (mean correlation 0.5, range 0.04-0.89). 
+
+Supplementary plots comparing validation-data accuracies for means and (co)variances were inspected (**Figure S??-S??** [Figure ???](SupplementaryFigures.html)). Based on this, we conclude that we would reach similar though more muted conclusions about which trait variances and trait-trait covariances are best or worst predicted, if restricted to iidBLUPs for validation data.
+
+## Accuracy considering only families with 10+ members?
+
+```{r, eval=T}
+library(tidyverse); library(magrittr);
+obsVSpredVars<-readRDS(here::here("output","obsVSpredVars.rds")) %>% 
+  filter(grepl("DirDom",Model),ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
+  select(-Model,-ValidationData,-VarMethod)
+```
+```{r}
+obsVSpredVars %>% 
+  distinct(sireID,damID,FamSize) %>% 
+  filter(FamSize>=10) %>% nrow()
+```
+```{r}
+obsVSpredVars %>% 
+  distinct(sireID,damID,FamSize) %>% 
+  filter(FamSize>=20) %>% nrow()
+```
+
+In our primary analysis, we computed (co)variance prediction accuracies with weighted correlations, considering any family with more than one member. We also considered a more conservative alternative approach of including only families with $\geq$10 (n=112) or $\geq$20 (n=22). 
+
+Family Size >= 20
+```{r, eval=T}
+# Variances
+compareAllFamsToBigFamsAccuracy<-obsVSpredVars %>% 
+  drop_na(.) %>% 
+  filter(FamSize>=20) %>% 
+  select(-FamSize,-Nobs) %>% 
+  nest(predVSobs=c(sireID,damID,predVar,obsVar,CorrWeight)) %>% 
+  mutate(FamSize10plus=map_dbl(predVSobs,~psych::cor.wt(.[,3:4],w = .$CorrWeight) %$% r[1,2])) %>% 
+  select(-predVSobs) %>% 
+  left_join(readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
+              filter(VarMethod=="PMV",ValidationData=="GBLUPs", grepl("DirDom",Model)) %>% 
+              select(-Model,-ValidationData,-VarMethod) %>% 
+              select(-AccuracyCor) %>% 
+              rename(AllFams=AccuracyWtCor)) %>% 
+  mutate(accDiff=FamSize10plus-AllFams)
+compareAllFamsToBigFamsAccuracy$accDiff %>% summary
+```
+Family Size >= 20
+```{r}
+compareAllFamsToBigFamsAccuracy %>% 
+  summarize(corAllVSBig=cor(FamSize10plus,AllFams,method = 'spearman',use='pairwise.complete.obs'))
+```
+Family Size >= 10
+```{r}
+# Variances
+compareAllFamsToBigFamsAccuracy<-obsVSpredVars %>% 
+  drop_na(.) %>% 
+  filter(FamSize>=10) %>% 
+  select(-FamSize,-Nobs) %>% 
+  nest(predVSobs=c(sireID,damID,predVar,obsVar,CorrWeight)) %>% 
+  mutate(FamSize10plus=map_dbl(predVSobs,~psych::cor.wt(.[,3:4],w = .$CorrWeight) %$% r[1,2])) %>% 
+  select(-predVSobs) %>% 
+  left_join(readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
+              filter(VarMethod=="PMV",ValidationData=="GBLUPs", grepl("DirDom",Model)) %>% 
+              select(-Model,-ValidationData,-VarMethod) %>% 
+              select(-AccuracyCor) %>% 
+              rename(AllFams=AccuracyWtCor)) %>% 
+  mutate(accDiff=FamSize10plus-AllFams)
+compareAllFamsToBigFamsAccuracy$accDiff %>% summary
+```
+Family Size >= 10
+```{r}
+compareAllFamsToBigFamsAccuracy %>% 
+  summarize(corAllVSBig=cor(FamSize10plus,AllFams,method = 'spearman',use='pairwise.complete.obs'))
+```
+```{r, rows.print=12}
+compareAllFamsToBigFamsAccuracy %>% 
+  group_by(Trait1,Trait2) %>% 
+  summarize(medianDiffAccSize10PlusVsAllFams=round(median(FamSize10plus-AllFams),3)) %>% arrange(desc(medianDiffAccSize10PlusVsAllFams))
+```
+The Spearman rank correlation between accuracy estimates when all vs. only families with more than 10 members was 0.89. There should therefore be good concordance with our primary conclusions, depending on the family size threshold we impose. 
+
+The median difference in accuracy ("threshold size families" minus "all families") was 0.01. Considering only size 10 or greater families noticeably improved prediction accuracy for several trait variances and especially for two covariances (DM-TCHART and logFYLD-MCMDS) (**Figures S???**). 
+ 
+## Comparing PMV and VPM predictions
+
+Comparing posterior mean variance (PMV) to variance of posterior mean (VPM) predictions: 
+
+Variances and covariances estimates and cross-validation predictions were made with the PMV method, which is computationally more intensive than VPM. 
+
+**Overall Spearman rank correlation between VPM and PMV variance component estimates.**
+```{r}
+library(tidyverse); library(magrittr);
+## Table S15: Variance estimates for genetic groups
+varcomps<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS15")
+varcomps %>% 
+  filter(Method=="M2",grepl("DirDomAD",Model)) %>% 
+  select(-propDom,-Model,-Method) %>% 
+  pivot_longer(cols = c(VarA,VarD), names_to = "VarComp", values_to = "VarEst") %>% 
+  filter(!is.na(VarEst)) %>% 
+  spread(VarMethod,VarEst) %>% 
+  summarize(corPMV_VPM=cor(PMV,VPM, use = 'pairwise.complete.obs',method = 'spearman'))
+```
+We observed that population variance estimates based on PMV were consistently larger than VPM, but the correlation of those estimates is 0.98 (**Figure __**). 
+
+**Compute the correlation between PMV and VPM predictions.**
+```{r}
+obsVSpredVars<-readRDS(here::here("output","obsVSpredVars.rds")) %>% 
+  filter(grepl("DirDom",Model),ValidationData=="GBLUPs") %>% 
+  select(-ValidationData,-Model)
+
+obsVSpredVars %>% 
+  select(-obsVar,-FamSize,-Nobs,-CorrWeight) %>% 
+  spread(VarMethod,predVar) %>% 
+  #group_by(predOf) %>% 
+  summarize(corPMV_VPM=cor(PMV,VPM, use = 'pairwise.complete.obs',method = 'spearman'))
+```
+Using the predictions from the cross-validation results, we further observed that the PMV predictions were consistently larger and most notably that the correlation between PMV and VPM was very high (0.995). Some VPM prediction accuracies actually appear better than PMV predictions (**Figure S???**). 
+
+The critical point is that VPM and PMV predictions should have very similar rankings. In our primary analysis, we focus on the PMV results with the only exception being the exploratory predictions where we saved time/computation and used the VPM. If implementing mate selections via the usefulness criteria, choosing the VPM method would mostly have the consequence of shrinking the influence on selection decisions towards the mean. 
+
+## Compare directional dominance to "classic" model
+
+Our focus in this article was not in finding the optimal or most accurate prediction model for obtaining marker effects. However, genome-wide estimates of directional dominance have not previously been made in cassava. For this reason, we make some brief comparison to the standard or “classic” additive-dominance prediction model, where dominance effects are centered on zero.
+
+```{r}
+library(tidyverse); library(magrittr);
+# Table S10: Accuracies predicting the mean
+accMeans<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS10") %>% 
+  filter(ValidationData=="GBLUPs") %>% 
+  select(-ValidationData) %>% 
+  mutate(Model=ifelse(grepl("DirDom",Model),"DirDom","Classic"))
+## Table S11: Accuracies predicting the variances
+accVars<-readxl::read_xlsx(here::here("manuscript","SupplementaryTables.xlsx"),sheet = "TableS11") %>% 
+  mutate(Component=ifelse(Trait1==Trait2,"Variance","Covariance"),
+         TraitType=ifelse(grepl("SI",Trait1),"SI","ComponentTrait")) %>% 
+  filter(ValidationData=="GBLUPs",VarMethod=="PMV") %>% 
+  select(-ValidationData,-VarMethod,-AccuracyCor) %>% 
+  mutate(Model=ifelse(grepl("DirDom",Model),"DirDom","Classic"))
+
+```
+
+**Compute rank correlations overall (DirDom vs Classic): Means**
+```{r}
+accMeans %>% 
+  spread(Model,Accuracy) %>%   
+  summarize(corMeanAcc=cor(DirDom,Classic,method = 'spearman'))
+```
+**Compute rank correlations overall (DirDom vs Classic): Variances**
+```{r}
+accVars %>% 
+  spread(Model,AccuracyWtCor) %>% 
+  summarize(corVarAcc=cor(DirDom,Classic,method = 'spearman'))
+```
+Overall, the ranking of models and predictions between the two models were similar, as indicated by a rank correlation between model accuracy estimates of 0.98 for family means and 0.94 for variances and covariances. 
+
+**Summarize accuracy differences between DirDom and Classic model: Means**
+```{r}
+accMeans %>% 
+  spread(Model,Accuracy) %>% 
+  mutate(diffAcc=DirDom-Classic) %$% summary(diffAcc)
+```
+**Summarize accuracy differences between DirDom and Classic model: Variances**
+```{r}
+accVars %>% 
+  spread(Model,AccuracyWtCor) %>% 
+  mutate(diffAcc=DirDom-Classic) %$% summary(diffAcc)
+```
+
+Three-quarters of family-mean and almost half of (co)variance accuracy estimates were higher using the directional dominance model. 
+
+```{r}
+# **Compute rank correlations of models - cor(DirDom,Classic) - by Trait, predOf - Means**
+# accMeans %>% 
+#   spread(Model,Accuracy) %>%   
+#   group_by(Trait,predOf) %>% 
+#   summarize(corAcc=cor(DirDom,Classic,method = 'spearman')) %>% spread(predOf,corAcc) # %$% summary(corAcc) # arrange(desc(corAcc))
+
+
+# **Compute rank correlations of models - cor(DirDom,Classic) - by Trait, predOf - Variances**
+#  accVars %>% 
+#   spread(Model,AccuracyWtCor) %>% 
+#   group_by(Component,TraitType,Trait1,Trait2,predOf) %>% 
+#   summarize(corAcc=round(cor(DirDom,Classic,method = 'spearman'),3),
+#             medianDiffAcc=round(median(DirDom-Classic),3)) %>% arrange(corAcc) %>% rmarkdown::paged_table()
+```
+
+The most notably improved predictions were for the family-mean logFYLD TGV (**Figure S?? and S??**).
+
+
+**Overall correlations between all Classic and Directional Dominance Predictions of Untested Crosses**
+```{r}
+library(tidyverse); library(magrittr); 
+predUntestedCrosses<-read.csv(here::here("manuscript","SupplementaryTable18.csv"),stringsAsFactors = F) 
+# predUntestedCrosses %>% 
+#   spread(Model,Pred) %>% 
+#   group_by(Trait,PredOf,Component) %>% 
+#   summarize(corModels=round(cor(ClassicAD,DirDom,method = 'spearman'),2)) %>% 
+#   spread(Component,corModels) %>% 
+#   arrange(Trait,PredOf) %>% 
+#   rmarkdown::paged_table()
+predUntestedCrosses %>% 
+  spread(Model,Pred) %>% 
+  summarize(corModels=round(cor(ClassicAD,DirDom,method = 'spearman'),2))
+```
+There was also an overall rank correlation of 0.98 between models in the prediction of untested crosses. 
+
+## Convergence
+
+Visual check of the posterior distribution and trace of error variance estimates, to check convergence.
+
+```{r, eval=T}
+library(tidyverse); library(magrittr); library(patchwork); library(ragg)
+cv_brrIterHist<-list.files(here::here("output/mtMarkerEffects")) %>% 
+  grep(".dat",.,value = T) %>% 
+  grep("Repeat",.,value = T) %>% 
+  tibble(Filename=.) %>% 
+  separate(col = Filename,
+           into = c("prefix","rep","fold","dataset","Model","extra"),
+           sep = "_",remove = F) %>% 
+  mutate(Dataset=paste(rep,fold,dataset,Model,sep = "_")) %>% 
+  select(Dataset,Model,Filename)
+gengroup_brrIterHist<-list.files(here::here("output/mtMarkerEffects")) %>% 
+  grep(".dat",.,value = T) %>% 
+  grep("Repeat",.,value = T, invert = T) %>% 
+  tibble(Filename=.) %>% 
+  separate(col = Filename,
+           into = c("prefix","Dataset","Model","extra"),
+           sep = "_",remove = F) %>% 
+  mutate(Dataset=paste0(Dataset,"_",Model)) %>% 
+  select(Dataset,Model,Filename)
+
+brrIterHist<-bind_rows(gengroup_brrIterHist,cv_brrIterHist) %>% 
+  mutate(iterHist=map(Filename,~read.table(paste0(here::here("output/mtMarkerEffects/"),.),
+                                            header = F, stringsAsFactors = F) %>% 
+                        mutate(Iteration=1:nrow(.)))) %>% 
+  unnest() %>% 
+  pivot_longer(cols=c(V1:V10),values_to = "varR",names_to = "varCovarParam")
+# brrIterHist$iterHist[[1]] %>% slice()
+# brrIterHist %>% slice(1) %>% unnest(iterHist)
+```
+
+```{r,warning=F}
+pngfile <- fs::path(knitr::fig_path(),  "figureS2.png")
+#agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
+agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
+
+colors<-viridis::viridis(4)[1:3]
+
+brrIterHist %>% 
+  ggplot(.,aes(x=Iteration,y=varR,color=Model,group=Dataset)) + 
+  geom_line(alpha=0.7,size=0.8) + 
+  theme_bw() +
+  facet_grid(varCovarParam~., scales = 'free_y') + 
+ # facet_wrap(~varCovarParam,scales = 'free_y',ncol=1) + 
+  theme_bw() +  
+  theme(plot.title = element_text(face='bold'),
+        axis.title.x = element_blank(), #element_text(face='bold',color = 'black'),
+        axis.title.y = element_text(face='bold',color = 'black'),
+        strip.text.x = element_text(face='bold',color='black'),
+        axis.text.x = element_text(color='black'),
+        axis.text.y = element_text(color='black'),
+        legend.title = element_text(face = 'bold',color='black'),
+        legend.text = element_text(face='bold'),
+        legend.position = 'bottom',
         strip.background = element_blank(),
-        strip.text = element_text(face='bold', size=14),
-        strip.text.y = element_text(angle=0)) #       legend.position = 'none')
-meanVSvar
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_color_manual(values=colors) + 
+  labs(x="Thinned Iteration", y = "Error (Co)variance")
+invisible(dev.off())
+knitr::include_graphics(pngfile)
 ```
-```{r, fig.width=10}
-forplot_std_bvVStgv<-forplot_std %>% 
-  select(-Mean,-Sd) %>% 
-  spread(Component,UC)
-bvVStgv<-forplot_std_bvVStgv %>% 
-  ggplot(.,aes(x=BV,y=TGV,shape=CrossType)) + 
-  geom_point(color='gray20',size=0.75, alpha=0.6) + 
-  geom_abline(slope=1, color='darkred') +
-  geom_mark_ellipse(data=forplot_std_bvVStgv %>% 
-                      filter(Group=="NewCrosses") %>% 
-                      mutate(lab=ifelse(CrossType=="SelfCross","New Selfs","New Outcrosses")),
-                    aes(fill=Group,label=lab), expand = unit(2.5, "mm")) + 
-  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==FALSE),
-             aes(x=BV,y=TGV,fill=Group), shape=21, color='black',inherit.aes = F) + 
-  geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==TRUE),
-             aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F) + 
-  scale_color_viridis_d() + 
-  scale_fill_manual(values = c("goldenrod2","darkorchid4")) + 
-  facet_grid(.~Model, scales='free') + 
-  theme_bw() + 
-  theme(axis.title = element_text(face='bold', color='black', size=12),
-        axis.text = element_text(face='bold', color='black'),
+```{r}
+brrIterHist %>% 
+  arrange(Dataset,Model,varCovarParam,Iteration) %>% 
+  group_by(Dataset,Model,varCovarParam) %>% 
+  slice(1001:6000) %>% 
+  ungroup() %>% 
+  arrange(Dataset,Model,varCovarParam,Iteration) -> x
+```
+
+```{r,warning=F}
+pngfile <- fs::path(knitr::fig_path(),  "figureS2.png")
+agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
+
+colors<-viridis::viridis(10)
+x %>%   
+  ggplot(.,aes(x=varR,fill=Model)) + 
+  geom_density(alpha=0.7,color='black') + 
+  theme_bw() +
+#  facet_grid(varCovarParam~Model, scales = 'free') + 
+  facet_wrap(~varCovarParam,scales = 'free') + 
+  theme_bw() +  
+  theme(plot.title = element_text(face='bold'),
+        axis.title.x = element_blank(), #element_text(face='bold',color = 'black'),
+        axis.title.y = element_text(face='bold',color = 'black'),
+        strip.text.x = element_text(face='bold',color='black'),
+        axis.text.x = element_text(face = 'bold',color='black', angle=30, hjust=1),
+        axis.text.y = element_text(face = 'bold',color='black'),
+        legend.title = element_text(face = 'bold',color='black'),
+        legend.text = element_text(face='bold'),
+        legend.position = 'bottom',
         strip.background = element_blank(),
-        strip.text = element_text(face='bold', size=14),
-        strip.text.y = element_text(angle=0)) + 
-  labs(x = expression("UC"["parent"]~" (BV)"), y=expression("UC"["variety"]~" (TGV)"))
-bvVStgv
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_color_manual(values=colors) + 
+  labs(title="Distribution of Post burn-in Error (co)variance estimates")
+invisible(dev.off())
+knitr::include_graphics(pngfile)
 ```
-
-
-# Appendix
-
-**Validation-data types (GBLUPs vs. i.i.d. BLUPs):** Prediction accuracy using GBLUPs as validation gives a nearly uniformly higher correlation (mean 0.19 higher) as opposed to the i.i.d. BLUPs for family means (Figure S03, Figure S05, Table S10). Figure S04  illustrates that accuracies per trait-fold-rep-model do not re-rank much depending on whether GBLUPs or i.i.d. BLUPs were used as validation data. Given these results, we only consider accuracy based on GBLUPs in the comparisons below.
-As for the family means, we compared the estimates of variance-prediction accuracy obtained using GBLUPs versus i.i.d. BLUPs. Similar to the means, GBLUPs-as-validation data for variances led to higher estimates of accuracy on average (mean 0.073). We briefly explored the consequences of using GBLUPs vs. i.i.d. BLUPs as validation data. First, we found that there is re-ranking of accuracies between validation data-types (Figure S09). However, plotting the distributions of accuracies for variances (Figure S10A) and covariances (Figure S10B) suggests that we would reach similar but less strong conclusions about the difference between prediction models and variance components. Moreover, we would reach similar conclusions about which trait variances and trait-trait covariances are best or worst predicted. We thus consider for our primary conclusions, the prediction accuracy with GBLUP-derived validation data.
-Based on the i.i.d. BLUP  for validation estimates, we noted that the accuracy predicting variance on the BiofortSI was negative (FiguresS09, FiguresS10), a fact which would preclude use for selection. Validation sample variance for a selection index, based on i.i.d. BLUPs sample size is limited relative to using GBLUPs because clones in each family must have observed BLUPs for each component trait or else the observed SI value cannot be computed.
-
-**What difference does the weighted correlation make?** For variances (but not means), we chose to weight prediction-observation pairs according to the number of family members (GBLUPs-as-validation) or the number of observed non-missing i.i.d. BLUPs per family per trait (i.i.d. BLUPs-as-validation) when computing prediction accuracies. The weighted correlations are justified because large families (or heavily phenotyped ones) should have better-estimated variances than small ones. Below, we consider briefly the effect weighted correlations have on results. We found that the weighted-vs-unweighted (WT vs. no WT) accuracies are themselves highly correlated (mean cor. 0.87) across traits, variance components, models and validation-data types. There was not a consistent increase or decrease in accuracy according to weighting. Across variance components, models, validation-data and var. methods (PMV vs. VPM), very close to mean 0 diff. between WT and no WT, but generally WT>no WT. Conclusions appear to be at least qualitatively similar whether or not weighted correlations are considered as measures of accuracy (Figure S11).
