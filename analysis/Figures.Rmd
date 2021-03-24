@@ -60,7 +60,7 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r figure1,warning=F}
-pngfile <- here::here("analysis/figure","figure1.png")
+pngfile <- here::here("docs/figure","figure1.png")
 
 #pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
