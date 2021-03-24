@@ -59,12 +59,8 @@ p2<-baseplot + plottheme +
   theme(axis.title.y=element_blank())
 ```
 
-```{r,warning=F}
-pngfile <- fs::path("figure/Figures.Rmd/","figure1.png")
-
-#pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
-agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
+```{r figure1,warning=F}
+fig1<-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
   plot_annotation(tag_levels = 'A') &
   theme(plot.tag = element_text(face='bold'),
         axis.title = element_text(face='bold',color = 'black'),
@@ -73,9 +69,14 @@ p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') +
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom')
+
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure1.png"))
+agg_png(pngfile,width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
+fig1
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure1-1/","figure1.png")`)
+
 
 **Figure 1. Accuracy predicting the family mean.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample mean GEBV or GETGV. For each trait, accuracies are given for two predictions types: family mean BV vs. TGV.
 
@@ -125,12 +126,7 @@ p3<-baseplot +
 ```
 
 ```{r, warning=F}
-#pngfile <- fs::path("figure/Figures.Rmd/","figure2.png")
-pngfile<-fs::path(knitr::fig_path(),  "figure2.png")
-#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
-agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
-
-((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
+fig2<-((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
   plot_layout(guides = 'collect',nrow=2) +
   plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text(face='bold'),
@@ -140,11 +136,14 @@ agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling 
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom') & labs(y="Accuracy")
-
+  
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
+agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
+fig2
 invisible(dev.off())
-knitr::include_graphics(pngfile)
 
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure2-1/","figure2.png")`)
 
 **Figure 2. Accuracy predicting the genetic (co)variances.** Fivefold parent-wise cross-validation estimates of the accuracy predicting the genetic variance of crosses on selection indices (A) and for component trait variances (B) and covariances (C). Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample (co)variance of **GEBV** or **GETGV**. For each trait (panel), accuracies for two prediction types are given: **VarBV** and **VarTGV.**
 
@@ -184,10 +183,7 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r figure3, warning=F}
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
-agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
-
-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
+fig3<-p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
   plot_annotation(tag_levels = 'A') &
   theme(plot.tag = element_text(face='bold'),
         axis.title = element_text(face='bold',color = 'black'),
@@ -196,10 +192,13 @@ p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') +
         legend.title = element_blank(),
         legend.text = element_text(face='bold'),
         legend.position = 'bottom') & labs(y="Accuracy")
-
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
+agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
+fig3
 invisible(dev.off())
 knitr::include_graphics(pngfile)
 ```
+![](`r here::here("docs/figure/Figures.Rmd/figure3-1/","figure3.png")`)
 
 **Figure 3. Accuracy predicting the usefulness (the expected mean of future selected offspring).** Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the family-size weighted correlation between the predicted and observed usefulness of crosses for breeding parents ($UC_{parent}$) or varieties ($UC_{variety}$).
 
