@@ -660,16 +660,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree7b9ec9d395eb1a9dad7bc4824f4ad3a2963787b2targetblank7b9ec9da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/7b9ec9d395eb1a9dad7bc4824f4ad3a2963787b2" target="_blank">7b9ec9d</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreecd36185942f42fe153f3d16f64733adf3c4bc531targetblankcd36185a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/cd36185942f42fe153f3d16f64733adf3c4bc531" target="_blank">cd36185</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree7b9ec9d395eb1a9dad7bc4824f4ad3a2963787b2targetblank7b9ec9da" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreecd36185942f42fe153f3d16f64733adf3c4bc531targetblankcd36185a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/7b9ec9d395eb1a9dad7bc4824f4ad3a2963787b2" target="_blank">7b9ec9d</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/cd36185942f42fe153f3d16f64733adf3c4bc531" target="_blank">cd36185</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -685,6 +685,8 @@ Ignored files:
 Untracked files:
     Untracked:  Icon
     Untracked:  PredictOutbredCrossVarMS_ResponseToReviews_R1.gdoc
+    Untracked:  analysis/images/
+    Untracked:  figures/
     Untracked:  manuscript/
     Untracked:  output/crossPredictions/
     Untracked:  output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
@@ -758,6 +760,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/cd36185942f42fe153f3d16f64733adf3c4bc531/analysis/Figures.Rmd" target="_blank">cd36185</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-03-24
+</td>
+<td>
+Save figures to figures/ subdirectory, at same level of heirarchy as docs/. Images displayed as external with relative link.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/b25a5f176128dc2fb78f0f7310f84aa5b4a68304/docs/Figures.html" target="_blank">b25a5f1</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-03-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1271,12 +1307,12 @@ Submission and GitHub ready version.
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face=</span><span class="st">&#39;bold&#39;</span>),</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure1.png&quot;</span>))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure1.png&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure1.png&quot;))</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile,<span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">8.9</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>fig1</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure1-1/figure1.png" /></p>
+<p><img src="../figures/figure1.png" /></p>
 <p><strong>Figure 1. Accuracy predicting the family mean.</strong> Fivefold parent-wise cross-validation estimates of the accuracy predicting the cross means on selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample mean GEBV or GETGV. For each trait, accuracies are given for two predictions types: family mean BV vs. TGV.</p>
 </div>
 <div id="figure-2-accuracy-predicting-family-variances-and-covariances" class="section level1">
@@ -1330,12 +1366,12 @@ Submission and GitHub ready version.
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face=</span><span class="st">&#39;bold&#39;</span>),</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">&amp;</span> <span class="fu">labs</span>(<span class="at">y=</span><span class="st">&quot;Accuracy&quot;</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure2.png&quot;</span>))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure2.png&quot;</span>  </span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure2.png&quot;))</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">11.13</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>fig2</span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure2-1/figure2.png" /></p>
+<p><img src="../figures/figure2.png" /></p>
 <p><strong>Figure 2. Accuracy predicting the genetic (co)variances.</strong> Fivefold parent-wise cross-validation estimates of the accuracy predicting the genetic variance of crosses on selection indices (A) and for component trait variances (B) and covariances (C). Accuracy (y-axis) was measured as the correlation between the predicted and the estimated sample (co)variance of <strong>GEBV</strong> or <strong>GETGV</strong>. For each trait (panel), accuracies for two prediction types are given: <strong>VarBV</strong> and <strong>VarTGV.</strong></p>
 </div>
 <div id="figure-3-accuracy-predicting-usefulness-criteria" class="section level1">
@@ -1379,11 +1415,12 @@ Submission and GitHub ready version.
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face=</span><span class="st">&#39;bold&#39;</span>),</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">&amp;</span> <span class="fu">labs</span>(<span class="at">y=</span><span class="st">&quot;Accuracy&quot;</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure3.png&quot;</span>))</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">8.9</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>fig3</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure3-1/figure3.png" /></p>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure3.png&quot;</span>  </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure3.png&quot;))</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">8.9</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>fig3</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
+<p><img src="../figures/figure3.png" /></p>
 <p><strong>Figure 3. Accuracy predicting the usefulness (the expected mean of future selected offspring).</strong> Fivefold parent-wise cross-validation estimates of the accuracy predicting the usefulness of crosses on the selection indices (A) and for component traits (B), is summarized in boxplots. Accuracy (y-axis) was measured as the family-size weighted correlation between the predicted and observed usefulness of crosses for breeding parents (<span class="math inline">\(UC_{parent}\)</span>) or varieties (<span class="math inline">\(UC_{variety}\)</span>).</p>
 </div>
 <div id="figure-4-importance-of-non-additive-effects-variance-components" class="section level1">
@@ -1441,11 +1478,12 @@ Submission and GitHub ready version.
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&#39;bold&#39;</span>),</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure4.png&quot;</span>))</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">11.13</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>fig4</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure4-1/figure4.png" /></p>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure4.png&quot;</span>  </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure4.png&quot;))</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">17.8</span>, <span class="at">height =</span> <span class="fl">11.13</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>fig4</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
+<p><img src="../figures/figure4.png" /></p>
 <p><strong>Figure 4. Population-level measures of the importance of dominance genetic effects.</strong> The genetic variance estimates from the models fitted to the overall population (“All”) and also to its four genetic groups (x-axis) are presented in these barplots. Each panel contains results for a trait variance or covariance. For selection indices (A) and component traits (B) the proportion of genetic variance accounted for by dominance is shown on the y-axis. For covariances between component traits (C) the estimates themselves are plotted. In C, fill color indicates variance component (additive vs. dominance).</p>
 </div>
 <div id="figure-5-inbreeding-effect-estimates" class="section level1">
@@ -1483,11 +1521,12 @@ Submission and GitHub ready version.
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">#axis.text.x = element_text(face = &#39;bold&#39;,color = &#39;black&#39;, angle=30),</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&#39;bold&#39;</span>,<span class="at">color =</span> <span class="st">&#39;black&#39;</span>),</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;right&#39;</span>) </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure5.png&quot;</span>))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">15.24</span>, <span class="at">height =</span> <span class="fl">7.62</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>fig5</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure5-1/figure5.png" /></p>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure5.png&quot;</span>  </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure5.png&quot;))</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">15.24</span>, <span class="at">height =</span> <span class="fl">7.62</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>fig5</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
+<p><img src="../figures/figure5.png" /></p>
 <p><strong>Figure 5. Estimates of the genome-wide effect of inbreeding.</strong> For each trait (panels), the fixed-effect for genome-wide proportion of homozygous sites is shown on the y-axis, as estimated by a directional dominance model. For the overall population (“All”) and four genetic groups (“C0”, “C1”, “C2” and “C3”), the posterior mean estimate and its standard deviation (bars) are shown on the x-axis. For comparison a boxplot showing the distribution of estimates from models fit to parent-wise cross-validation training and validation sets (“ParentwiseCV”) is also shown.</p>
 </div>
 <div id="figure-6-exploring-untested-crosses" class="section level1">
@@ -1549,11 +1588,12 @@ Submission and GitHub ready version.
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&#39;bold&#39;</span>,<span class="at">color =</span> <span class="st">&#39;black&#39;</span>),</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&#39;bold&#39;</span>),</span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&#39;right&#39;</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure6.png&quot;</span>))</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">12.7</span>, <span class="at">height =</span> <span class="dv">15</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>fig6</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure6-1/figure6.png" /></p>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure6.png&quot;</span>  </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure6.png&quot;))</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">12.7</span>, <span class="at">height =</span> <span class="dv">15</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.9</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>fig6</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
+<p><img src="../figures/figure6.png" /></p>
 <p><strong>Figure 6. Genomic mate selection criteria for the StdSI predicted for previously untested crosses</strong>. We predicted 47,083 crosses among 306 parents. We made four predictions: 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]. Selfs are shown as triangles, outcrosses as circles. For each of the predictions, we took the top 50 ranked crosses and then selected the union of crosses selected by at least one metric. The 462 crosses previously made are also shown and genetic groups (C0, C1 and C2) are distinguished by color from the 112 new crosses to highlight the opportunity for improvement. The predicted cross genetic mean is plotted against the predicted family genetic standard deviation (Sd, ) for breeding value [BV] and total genetic value [TGV] (panel rows) (A). The <span class="math inline">\(UC_{parent}\)</span> is plotted against the <span class="math inline">\(UC_{variety}\)</span> with a red one-to-one line in B.</p>
 </div>
 <div id="figure-7-network-plot-of-selected-parents-and-matings" class="section level1">
@@ -1569,11 +1609,12 @@ Submission and GitHub ready version.
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_edge_color_manual</span>(<span class="at">values =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">4</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]) <span class="sc">+</span> <span class="co">#c(&quot;goldenrod2&quot;,&quot;darkorchid4&quot;)) + </span></span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  plottheme <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title =</span> <span class="fu">element_blank</span>())</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>pngfile <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;docs&quot;</span>,fs<span class="sc">::</span><span class="fu">path</span>(knitr<span class="sc">::</span><span class="fu">fig_path</span>(),  <span class="st">&quot;figure7.png&quot;</span>))</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">8.9</span>, <span class="at">height =</span> <span class="fl">6.68</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.7</span>)</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>fig7</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
-<p><img src="/Users/mw489/Google%20Drive/PredictOutbredCrossVar/manuscript/PredictOutbredCrossVar/docs/figure/Figures.Rmd/figure7-1/figure7.png" /></p>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>pngfile<span class="ot">&lt;-</span><span class="st">&quot;figures/figure7.png&quot;</span>  </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#pngfile &lt;- here::here(&quot;docs&quot;,fs::path(knitr::fig_path(),  &quot;figure7.png&quot;))</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="fu">agg_png</span>(pngfile, <span class="at">width =</span> <span class="fl">8.9</span>, <span class="at">height =</span> <span class="fl">6.68</span>, <span class="at">units =</span> <span class="st">&quot;cm&quot;</span>, <span class="at">res =</span> <span class="dv">300</span>, <span class="at">scaling =</span> <span class="fl">0.7</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>fig7</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
+<p><img src="../figures/figure7.png" /></p>
 <p><strong>Figure 7. Network plot of selected parents and matings for the StdSI.</strong> There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels.</p>
 <br>
 <p>
