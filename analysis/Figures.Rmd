@@ -11,8 +11,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
-                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE,
-                      dev = "ragg_png")
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
 #                      fig.width = 6, fig.asp = 0.618)
 ```
 
@@ -61,8 +60,9 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r figure1,warning=F}
-#pngfile <- "figure1.png" #here::here("docs",fs::path(knitr::fig_path(),  "figure1.png"))
-pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
+pngfile <- here::here("analysis/figure","figure1.png")
+
+#pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
   plot_annotation(tag_levels = 'A') &
