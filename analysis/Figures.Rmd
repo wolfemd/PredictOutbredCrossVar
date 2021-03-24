@@ -59,7 +59,7 @@ p2<-baseplot + plottheme +
   theme(axis.title.y=element_blank())
 ```
 
-```{r figure1,warning=F}
+```{r,warning=F}
 pngfile <- here::here("docs/figure","figure1.png")
 
 #pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
