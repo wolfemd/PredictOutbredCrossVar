@@ -11,7 +11,8 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
-                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE,
+                      dev = "ragg_png")
 #                      fig.width = 6, fig.asp = 0.618)
 ```
 
@@ -60,7 +61,7 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r figure1,warning=F}
-pngfile <- fs::path(knitr::fig_path(),  "figure1.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure1.png"))
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
   plot_annotation(tag_levels = 'A') &
@@ -123,7 +124,7 @@ p3<-baseplot +
 ```
 
 ```{r figure2, warning=F}
-pngfile <- fs::path(knitr::fig_path(),  "figure2.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure2.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 
 ((p1 + p2 + plot_layout(widths=c(0.33,0.67))) / p3) + 
@@ -180,7 +181,7 @@ p2<-baseplot + plottheme +
 ```
 
 ```{r figure3, warning=F}
-pngfile <- fs::path(knitr::fig_path(),  "figure3.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure3.png"))
 agg_png(pngfile, width = 17.8, height = 8.9, units = "cm", res = 300, scaling = 0.9)
 
 p1 + p2 + plot_layout(widths = c(1, 2), guides='collect') + 
@@ -248,7 +249,7 @@ p3<-forplot %>%
 ```
 
 ```{r figure4}
-pngfile <- fs::path(knitr::fig_path(),  "figure4.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure4.png"))
 agg_png(pngfile, width = 17.8, height = 11.13, units = "cm", res = 300, scaling = 0.9)
 (p1 + p2 + plot_layout(widths = c(1, 2))) / p3 + 
   plot_annotation(tag_levels = 'A') & 
@@ -298,7 +299,7 @@ p<-ggplot(forplot,aes(x=Group,y=InbreedingEffect,fill=Group)) +
 ```
 
 ```{r figure5}
-pngfile <- fs::path(knitr::fig_path(),  "figure5.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure5.png"))
 agg_png(pngfile, width = 15.24, height = 7.62, units = "cm", res = 300, scaling = 0.9)
 p + 
   theme(plot.tag = element_text(face = 'bold'),
@@ -369,7 +370,7 @@ bvVStgv<-forplot_std_bvVStgv %>%
 ```
 
 ```{r figure6}
-pngfile <- fs::path(knitr::fig_path(),  "figure6.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
 agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
 (meanVSvar / bvVStgv) + 
   plot_layout(ncol=1,guides = 'collect',heights = c(0.6,0.4)) + 
@@ -394,7 +395,7 @@ knitr::include_graphics(pngfile)
 ```{r figure7}
 library(ggraph); library(tidygraph)
 
-pngfile <- fs::path(knitr::fig_path(),  "figure7.png")
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
 agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
 
 #set_graph_style(plot_margin = margin(0.5,0.5,0.5,0.5))
