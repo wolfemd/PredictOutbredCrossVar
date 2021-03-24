@@ -24,10 +24,11 @@ Diverse crops are both outbred and clonally propagated. Breeders typically use t
 
 # Manuscript
 
-1. [Supplementary Tables](SupplementaryTables.html)
-2. [Results](Results.html) to make numeric summaries for the text, based on e.g. the [Sup. Tables](SupplementaryTables.html). Most supplementary figures appear here first.
-3. [Figures](Figures.html)
-4. [Supplementary Figures](SupplementaryFigures.html)
+1. [Results](Results.html): numeric summaries for the text 
+2. [Figures](Figures.html): main text figures
+3. [Supplementary Tables](SupplementaryTables.html)
+4. [Supplementary Figures](SupplementaryFigures.html): referenced in both main text and appendix
+5. [Appendix](Appendix.html): additional comparisons that did not quite belong in the primary article
 
 See also drop-down navigation menu "Manuscript".
 

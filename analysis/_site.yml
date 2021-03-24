@@ -31,6 +31,8 @@ navbar:
       href: Results.html
     - text: Figures
       href: Figures.html
+    - text: Appendix
+      href: Appendix.html
     - text: Supplementary Tables
       href: SupplementaryTables.html
     - text: Supplementary Figures

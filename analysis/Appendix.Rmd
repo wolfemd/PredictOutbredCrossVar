@@ -1,0 +1,28 @@
+---
+title: "Appendix"
+site: workflowr::wflow_site
+date: "2021-March-25"
+output: 
+  workflowr::wflow_html:
+    code_folding: "hide"
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+
+**Does the validation-data type (i.i.d. BLUPs vs. GBLUPs) make a difference?** Most often, cross-validation done to test genomic prediction accuracy uses validation data (the stand-in for "truth") consisting of adjusted values, (e.g. BLUPs or BLUEs) for total individual performance, not including genomic relatedness information. In our study we set-up cross-validation folds that enable us to predict the GEBV and GETGV (GBLUPs) of validation family-members, and to subsequently compute their sample means, variances and usefulness. This approach has the added advantage of expanding the available sample size of validation progeny with complete data across traits. Nevertheless, we made some comparison to results using BLUPs that do not incorporate genomic relatedness information; in other words, independent and identically distributed (i.i.d.) BLUPs.
+
+Prediction accuracy for family means were nearly uniformly higher using GBLUPs compared to iidBLUPs (median 0.18 higher). The Spearman rank correlation between prediction accuracies based on iidBLUPs and GBLUPs was high (median 0.75, range 0.55-0.84). Similar to the means, accuracy using GBLUP-validation-data appeared mostly higher compared to iidBLUPs (median difference GBLUPs-iidBLUPs = 0.07, interquartile range -0.002-0.14). The Spearman rank correlations of iidBLUP and GBLUP-validation-based accuracies was positive for family (co)variances, but smaller compared to family means (mean correlation 0.5, range 0.04-0.89). Supplementary plots comparing validation-data accuracies for means and (co)variances were inspected (Figure S6-S7). Based on this, we conclude that we would reach similar though more muted conclusions about which trait variances and trait-trait covariances are best or worst predicted, if restricted to iidBLUPs for validation data.
+
+**What if we consider only families with greater than a threshold size?** In our primary analysis, we computed (co)variance prediction accuracies with weighted correlations, considering any family with more than one member. We also considered a more conservative alternative approach of including only families with $\geq$ 10 (n=112); we thought beyond that was too stringent as at $\geq$ 20 only 22 families remain. The Spearman rank correlation between accuracy estimates when all vs. only families with more than 10 members was 0.89. There should therefore be good concordance with our primary conclusions, depending on the family size threshold we impose. The median difference in accuracy ("threshold size families" minus "all families'') was 0.01. Considering only size 10 or greater families noticeably improved prediction accuracy for several trait variances and especially for two covariances (DM-TCHART and logFYLD-MCMDS) (Figure S8).
+
+**Comparing posterior mean variance (PMV) to variance of posterior mean (VPM) predictions:** Variances and covariances were predicted with the computationally intensive PMV method. Population variance estimates based on PMV were consistently larger than VPM, but the correlation of those estimates is 0.98 (Figure S9). Using the predictions from the cross-validation results, we further observed that the PMV predictions were consistently larger and most notably that the correlation between PMV and VPM was very high (0.995). Some VPM prediction accuracies actually appear better than PMV predictions (Figure S10).
+
+The critical point is that VPM and PMV predictions should have very similar rankings. In our primary analysis, we focus on the PMV results with the only exception being the exploratory predictions where we saved time/computation and used the VPM. If implementing mate selections via the usefulness criteria, choosing the VPM method would mostly have the consequence of shrinking the influence on selection decisions towards the mean.
+
+**Comparing the directional dominance to the "classic" model:** Our focus in this article was not in finding the optimal or most accurate prediction model for obtaining marker effects. However, genome-wide estimates of directional dominance have not previously been made in cassava. For this reason, we make some brief comparison to the standard or "classic" additive-dominance prediction model, where dominance effects are centered on zero. Overall, the ranking of models and predictions between the two models were similar, as indicated by a rank correlation between model accuracy estimates of 0.98 for family means and 0.94 for variances and covariances. Three-quarters of family-mean and almost half of (co)variance accuracy estimates were higher using the directional dominance model. The most notably improved predictions were for the family-mean logFYLD TGV (Figure S11-S12). There was also an overall rank correlation of 0.98 between models in the prediction of untested crosses.
+
