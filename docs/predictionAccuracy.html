@@ -13,13 +13,22 @@
 
 <title>Compute prediction accuracies</title>
 
-<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.7/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -47,7 +56,14 @@ div.section {
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
@@ -137,39 +153,8 @@ code span.wa { color: #da4453; } /* Warning */
   }
 })();
 </script>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
 
 
 
@@ -180,10 +165,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -200,40 +181,13 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -261,7 +215,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -273,7 +227,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -284,10 +238,23 @@ $(document).ready(function () {
   var menuAnchor = $('a[href="' + href + '"]');
 
   // mark it active
-  menuAnchor.parent().addClass('active');
+  menuAnchor.tab('show');
 
   // if it's got a parent navbar menu mark it active as well
   menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -299,7 +266,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -425,13 +391,13 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
+<div class="row">
+<div class="col-sm-12 col-md-4 col-lg-3">
 <div id="TOC" class="tocify">
 </div>
 </div>
 
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+<div class="toc-content col-sm-12 col-md-8 col-lg-9">
 
 
 
@@ -549,7 +515,7 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -579,7 +545,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-02-01
+<strong>Last updated:</strong> 2021-03-24
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -670,16 +636,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree883b1d4d2dae0efefd64e4c238477ce34df13895targetblank883b1d4a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/883b1d4d2dae0efefd64e4c238477ce34df13895" target="_blank">883b1d4</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreef73b05f90806a89b69b2625c6d64761317eaa00ftargetblankf73b05fa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/f73b05f90806a89b69b2625c6d64761317eaa00f" target="_blank">f73b05f</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree883b1d4d2dae0efefd64e4c238477ce34df13895targetblank883b1d4a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartreef73b05f90806a89b69b2625c6d64761317eaa00ftargetblankf73b05fa" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/883b1d4d2dae0efefd64e4c238477ce34df13895" target="_blank">883b1d4</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/f73b05f90806a89b69b2625c6d64761317eaa00f" target="_blank">f73b05f</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -689,21 +655,59 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-    Ignored:    analysis/.DS_Store
-    Ignored:    code/.DS_Store
-    Ignored:    data/.DS_Store
     Ignored:    output/.DS_Store
-    Ignored:    output/crossRealizations/.DS_Store
 
 Untracked files:
-    Untracked:  .gitignore
     Untracked:  Icon
-    Untracked:  PredictOutbredCrossVar.Rproj
+    Untracked:  PredictOutbredCrossVarMS_ResponseToReviews_R1.gdoc
+    Untracked:  figure/
     Untracked:  manuscript/
     Untracked:  output/crossPredictions/
     Untracked:  output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
     Untracked:  output/gblups_geneticgroups.rds
     Untracked:  output/gblups_parentwise_crossVal_folds.rds
+    Untracked:  output/mtMarkerEffects/
+
+Unstaged changes:
+    Modified:   analysis/NGCleadersCall.Rmd
+    Modified:   code/fitDirectionalDomMtBRR.R
+    Modified:   code/fitmtBRR.R
+    Modified:   code/getDirectionalDomGenomicBLUPs.R
+    Modified:   code/getDirectionalDomMtCrossMeanPreds.R
+    Modified:   code/getDirectionalDomMtCrossVarBVpreds.R
+    Modified:   code/getDirectionalDomMtCrossVarTGVpreds.R
+    Modified:   code/getDirectionalDomVarComps.R
+    Modified:   code/getGenomicBLUPs.R
+    Modified:   code/getMtCrossMeanPreds.R
+    Modified:   code/getMtCrossVarPreds.R
+    Modified:   code/getUntestedMtCrossVarPreds.R
+    Modified:   code/getVarComps.R
+    Modified:   data/blups_forawcdata.rds
+    Modified:   data/genmap_awc_May2020.rds
+    Modified:   data/parentwise_crossVal_folds.rds
+    Modified:   data/ped_awc.rds
+    Modified:   data/selection_index_weights_4traits.rds
+    Modified:   output/CrossesToPredict_top100stdSI_and_209originalParents.rds
+    Modified:   output/accuraciesMeans.rds
+    Modified:   output/accuraciesUC.rds
+    Modified:   output/accuraciesVars.rds
+    Modified:   output/crossRealizations/realizedCrossMeans.rds
+    Modified:   output/crossRealizations/realizedCrossMeans_BLUPs.rds
+    Modified:   output/crossRealizations/realizedCrossMetrics.rds
+    Modified:   output/crossRealizations/realizedCrossVars.rds
+    Modified:   output/crossRealizations/realizedCrossVars_BLUPs.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_covs_traits.rds
+    Modified:   output/crossRealizations/realized_cross_means_and_vars_selindices.rds
+    Modified:   output/ddEffects.rds
+    Modified:   output/gebvs_ModelA_GroupAll_stdSI.rds
+    Modified:   output/obsVSpredMeans.rds
+    Modified:   output/obsVSpredUC.rds
+    Modified:   output/obsVSpredVars.rds
+    Modified:   output/pmv_DirectionalDom_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups.rds
+    Modified:   output/pmv_varcomps_geneticgroups_tidy_includingSIvars.rds
+    Modified:   output/propHomozygous.rds
+    Modified:   output/top100stdSI.rds
 
 </code></pre>
 <p>
@@ -742,6 +746,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/f73b05f90806a89b69b2625c6d64761317eaa00f/analysis/predictionAccuracy.Rmd" target="_blank">f73b05f</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-03-24
+</td>
+<td>
+Update to match revised manuscript. Several comparisons moved to Appendix to streamline primary results, figures, etc.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/4de1330d37b1c2f02a4c9e91970c8675f789d833/docs/predictionAccuracy.html" target="_blank">4de1330</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-02-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -888,14 +926,14 @@ Submission and GitHub ready version.
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">distinct</span>(Repeat,Fold,sireID,damID,FamSize) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>())</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>obsVSpredVars <span class="sc">%&gt;%</span> head</span></code></pre></div>
 <pre><code># A tibble: 6 x 13
-  Repeat Fold  Model sireID damID Trait1 Trait2 VarMethod  predVar predOf
-  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt; 
-1 Repea… Fold1 A     IITA-… IITA… biofo… biofo… PMV       55.4     VarBV 
-2 Repea… Fold1 A     IITA-… IITA… biofo… biofo… VPM        5.86    VarBV 
-3 Repea… Fold1 A     IITA-… IITA… DM     DM     PMV        4.35    VarBV 
-4 Repea… Fold1 A     IITA-… IITA… DM     DM     VPM        0.355   VarBV 
-5 Repea… Fold1 A     IITA-… IITA… DM     logFY… PMV       -0.0762  VarBV 
-6 Repea… Fold1 A     IITA-… IITA… DM     logFY… VPM       -0.00459 VarBV 
+  Repeat  Fold  Model sireID    damID    Trait1 Trait2 VarMethod  predVar predOf
+  &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt; 
+1 Repeat1 Fold1 A     IITA-TMS… IITA-TM… biofo… biofo… PMV       55.4     VarBV 
+2 Repeat1 Fold1 A     IITA-TMS… IITA-TM… biofo… biofo… VPM        5.86    VarBV 
+3 Repeat1 Fold1 A     IITA-TMS… IITA-TM… DM     DM     PMV        4.35    VarBV 
+4 Repeat1 Fold1 A     IITA-TMS… IITA-TM… DM     DM     VPM        0.355   VarBV 
+5 Repeat1 Fold1 A     IITA-TMS… IITA-TM… DM     logFY… PMV       -0.0762  VarBV 
+6 Repeat1 Fold1 A     IITA-TMS… IITA-TM… DM     logFY… VPM       -0.00459 VarBV 
 # … with 3 more variables: obsVar &lt;dbl&gt;, ValidationData &lt;chr&gt;, FamSize &lt;dbl&gt;</code></pre>
 <p>For ValidationData==“iidBLUPs”, weight by the number of observed non-missing BLUPs per family per trait.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>parentfolds<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>,<span class="st">&quot;parentwise_crossVal_folds.rds&quot;</span>)) <span class="sc">%&gt;%</span> </span>
@@ -955,221 +993,186 @@ Submission and GitHub ready version.
 <h2>Usefulness</h2>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Usefulness</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>realizedcrossmetrics<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/crossRealizations&quot;</span>,<span class="st">&quot;realizedCrossMetrics.rds&quot;</span>))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Join the predicted means and variances</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Only for Sel Indices</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#predvars %&gt;% count(Model,predOf)</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#predmeans %&gt;%  count(Model,predOf)</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>predUsefulness<span class="ot">&lt;-</span><span class="fu">left_join</span>(predvars <span class="sc">%&gt;%</span> <span class="co"># Variances</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">filter</span>(Trait1 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;stdSI&quot;</span>,<span class="st">&quot;biofortSI&quot;</span>),</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                                   Trait1<span class="sc">==</span>Trait2) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rename</span>(<span class="at">Trait=</span>Trait1) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">select</span>(<span class="sc">-</span>Trait2) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="fu">gsub</span>(<span class="st">&quot;Var&quot;</span>,<span class="st">&quot;&quot;</span>,predOf)),</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                          predmeans <span class="sc">%&gt;%</span> <span class="co"># Means</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">filter</span>(Trait <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;stdSI&quot;</span>,<span class="st">&quot;biofortSI&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="fu">gsub</span>(<span class="st">&quot;Mean&quot;</span>,<span class="st">&quot;&quot;</span>,predOf))) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predSD=</span><span class="fu">sqrt</span>(predVar)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVar)</span></code></pre></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># previously only calculated UC accuracy</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># for sel. indices</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Now include component traits</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>predUsefulness<span class="ot">&lt;-</span><span class="fu">left_join</span>(predvars <span class="sc">%&gt;%</span> <span class="co"># Variances</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">filter</span>(<span class="co">#Trait1 %in% c(&quot;stdSI&quot;,&quot;biofortSI&quot;),</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                                   Trait1<span class="sc">==</span>Trait2) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">rename</span>(<span class="at">Trait=</span>Trait1) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">select</span>(<span class="sc">-</span>Trait2) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="fu">gsub</span>(<span class="st">&quot;Var&quot;</span>,<span class="st">&quot;&quot;</span>,predOf)),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                          predmeans <span class="sc">%&gt;%</span> <span class="co"># Means</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                            <span class="co">#filter(Trait %in% c(&quot;stdSI&quot;,&quot;biofortSI&quot;)) %&gt;% </span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="fu">gsub</span>(<span class="st">&quot;Mean&quot;</span>,<span class="st">&quot;&quot;</span>,predOf))) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predSD=</span><span class="fu">sqrt</span>(predVar)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVar)</span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Add the realized selection intensities</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Create a variable &quot;Stage&quot; for which there are several applying to &quot;Usefulness&quot; for TGV</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>predBVs<span class="ot">&lt;-</span>predUsefulness <span class="sc">%&gt;%</span> </span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,FamSize,realIntensityParent) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,FamSize,realIntensityParent) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rename</span>(<span class="at">realIntensity=</span>realIntensityParent) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">Stage=</span><span class="st">&quot;Parent&quot;</span>,</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;ClassicAD&quot;</span>,<span class="st">&quot;A&quot;</span>,<span class="st">&quot;DirDomBV&quot;</span>)))</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>predTGVs<span class="ot">&lt;-</span>predUsefulness <span class="sc">%&gt;%</span> </span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(predOf<span class="sc">==</span><span class="st">&quot;TGV&quot;</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,FamSize,<span class="fu">contains</span>(<span class="st">&quot;realIntensity&quot;</span>),<span class="sc">-</span>realIntensityParent) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;realIntensity&quot;</span>),</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_to =</span> <span class="st">&quot;Stage&quot;</span>, </span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_to =</span> <span class="st">&quot;realIntensity&quot;</span>, </span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_prefix =</span> <span class="st">&quot;realIntensity&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;ClassicAD&quot;</span>,<span class="st">&quot;AD&quot;</span>,<span class="st">&quot;DirDomAD&quot;</span>)))</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>predUsefulness<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(predBVs,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                          predTGVs) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># include a &quot;stage&quot; (==&quot;ConstIntensity&quot;) </span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># where intensity for predicted UC is set to 2.67</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(predUsefulness <span class="sc">%&gt;%</span> </span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>              <span class="fu">left_join</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">distinct</span>(Repeat,Fold,sireID,damID,FamSize)) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>,</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>                     <span class="at">realIntensity=</span><span class="fl">2.67</span>))</span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="do">## Compute predicted UCs</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>predUsefulness <span class="sc">%&lt;&gt;%</span> </span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predUC=</span>predMean<span class="sc">+</span>(realIntensity<span class="sc">*</span>predSD))</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>predUsefulness <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,predOf,Stage)</span></code></pre></div>
-<pre><code># A tibble: 14 x 4
-   Model    predOf Stage              n
-   &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;
- 1 A        BV     ConstIntensity 16608
- 2 A        BV     Parent         16608
- 3 AD       TGV    AYT            16608
- 4 AD       TGV    CET            16608
- 5 AD       TGV    ConstIntensity 16608
- 6 AD       TGV    PYT            16608
- 7 AD       TGV    UYT            16608
- 8 DirDomAD TGV    AYT            16608
- 9 DirDomAD TGV    CET            16608
-10 DirDomAD TGV    ConstIntensity 16608
-11 DirDomAD TGV    PYT            16608
-12 DirDomAD TGV    UYT            16608
-13 DirDomBV BV     ConstIntensity 16608
-14 DirDomBV BV     Parent         16608</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>predUsefulness <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(predUC)) <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,predOf,Stage)</span></code></pre></div>
-<pre><code># A tibble: 14 x 4
-   Model    predOf Stage              n
-   &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;
- 1 A        BV     ConstIntensity 16608
- 2 A        BV     Parent          1732
- 3 AD       TGV    AYT             3728
- 4 AD       TGV    CET            14892
- 5 AD       TGV    ConstIntensity 16608
- 6 AD       TGV    PYT            10328
- 7 AD       TGV    UYT             1412
- 8 DirDomAD TGV    AYT             3728
- 9 DirDomAD TGV    CET            14892
-10 DirDomAD TGV    ConstIntensity 16608
-11 DirDomAD TGV    PYT            10328
-12 DirDomAD TGV    UYT             1412
-13 DirDomBV BV     ConstIntensity 16608
-14 DirDomBV BV     Parent          1732</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Format observed UCs</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>obsUCgca<span class="ot">&lt;-</span>realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;realizedUCparent&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;realizedUCparent&quot;</span>),</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, </span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;obsUC&quot;</span>, </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_prefix =</span> <span class="st">&quot;realizedUCparent_&quot;</span>,</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_drop_na =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;BV&quot;</span>,</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">Stage=</span><span class="st">&quot;Parent&quot;</span>)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#obsUCgca %&gt;% count(VarComp,Stage,Model,Trait)</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>obsUCtgv<span class="ot">&lt;-</span>realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;realizedUCat&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;realizedUCat&quot;</span>),</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, </span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;obsUC&quot;</span>, </span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_prefix =</span> <span class="st">&quot;realizedUCat&quot;</span>,</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_drop_na =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(Trait,<span class="fu">c</span>(<span class="st">&quot;Stage&quot;</span>,<span class="st">&quot;Trait&quot;</span>),<span class="st">&quot;_&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;TGV&quot;</span>)</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">#obsUCtgv %&gt;% count(VarComp,Stage,Model)</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>obsUsefulness<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(obsUCgca,obsUCtgv)</span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>obsUsefulness <span class="sc">%&lt;&gt;%</span> </span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;meanTop1pctGEBV&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>              <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;meanTop1pctGEBV&quot;</span>),</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, </span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_to =</span> <span class="st">&quot;obsUC&quot;</span>,</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_prefix =</span> <span class="st">&quot;meanTop1pctGEBV_&quot;</span>,</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_drop_na =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;BV&quot;</span>,</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,<span class="fu">contains</span>(<span class="st">&quot;meanTop1pctGETGV&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>              <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;meanTop1pctGETGV&quot;</span>),</span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_to =</span> <span class="st">&quot;Trait&quot;</span>, </span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_to =</span> <span class="st">&quot;obsUC&quot;</span>,</span>
-<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_prefix =</span> <span class="st">&quot;meanTop1pctGETGV_&quot;</span>,</span>
-<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_drop_na =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;TGV&quot;</span>,</span>
-<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>))</span>
-<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>obsUsefulness <span class="sc">%&lt;&gt;%</span> </span>
-<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;ClassicAD&quot;</span>,</span>
-<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>),</span>
-<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;DirDomBV&quot;</span>,<span class="st">&quot;DirDomAD&quot;</span>)))</span>
-<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="co"># obsUsefulness</span></span>
-<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% count(Model,predOf,Stage)</span></span>
-<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a><span class="co"># obsUsefulness %&gt;% count(Model,predOf,Stage)</span></span>
-<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="co"># obsUsefulness %&gt;% filter(!is.na(obsUC))</span></span>
-<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% filter(!is.na(predUC)) %&gt;% count(Model,predOf,Stage)</span></span>
-<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="co">#predUsefulness %&gt;% filter(is.na(FamSize)) %&gt;% count(Model,predOf,VarMethod,Stage)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>obsVSpredUC<span class="ot">&lt;-</span><span class="fu">left_join</span>(predUsefulness,obsUsefulness) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&lt;&gt;%</span> <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&gt;%</span> str</span></code></pre></div>
-<pre><code>tibble [130,616 × 15] (S3: tbl_df/tbl/data.frame)
- $ Repeat       : chr [1:130616] &quot;Repeat1&quot; &quot;Repeat1&quot; &quot;Repeat1&quot; &quot;Repeat1&quot; ...
- $ Fold         : chr [1:130616] &quot;Fold1&quot; &quot;Fold1&quot; &quot;Fold1&quot; &quot;Fold1&quot; ...
- $ Model        : chr [1:130616] &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
- $ sireID       : chr [1:130616] &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; ...
- $ damID        : chr [1:130616] &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; ...
- $ Trait        : chr [1:130616] &quot;biofortSI&quot; &quot;biofortSI&quot; &quot;stdSI&quot; &quot;stdSI&quot; ...
- $ VarMethod    : chr [1:130616] &quot;PMV&quot; &quot;VPM&quot; &quot;PMV&quot; &quot;VPM&quot; ...
- $ predOf       : chr [1:130616] &quot;BV&quot; &quot;BV&quot; &quot;BV&quot; &quot;BV&quot; ...
- $ predMean     : num [1:130616] 4.49 4.49 9.21 9.21 -1.03 ...
- $ predSD       : num [1:130616] 7.26 2.29 8.82 3.03 7.34 ...
- $ FamSize      : num [1:130616] 38 38 38 38 7 7 7 7 28 28 ...
- $ realIntensity: num [1:130616] 2.32 2.32 2.32 2.32 1.58 ...
- $ Stage        : chr [1:130616] &quot;Parent&quot; &quot;Parent&quot; &quot;Parent&quot; &quot;Parent&quot; ...
- $ predUC       : num [1:130616] 21.33 9.81 29.65 16.23 10.57 ...
- $ obsUC        : num [1:130616] -0.886 -0.886 7.152 7.152 0.163 ...</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obsVSpredUC %&gt;% count(Model,predOf,Stage)</span></span></code></pre></div>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,FamSize,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">contains</span>(<span class="st">&quot;realIntensity&quot;</span>),<span class="sc">-</span>realIntensityParent) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>              <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;realIntensity&quot;</span>),</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_to =</span> <span class="st">&quot;Stage&quot;</span>, </span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                           <span class="at">values_to =</span> <span class="st">&quot;realIntensity&quot;</span>, </span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                           <span class="at">names_prefix =</span> <span class="st">&quot;realIntensity&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;ClassicAD&quot;</span>,<span class="st">&quot;AD&quot;</span>,<span class="st">&quot;DirDomAD&quot;</span>)))</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>predUsefulness<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(predBVs,</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>                          predTGVs) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># include a &quot;stage&quot; (==&quot;ConstIntensity&quot;) </span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># where intensity for predicted UC is set to 2.67</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(predUsefulness <span class="sc">%&gt;%</span> </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>              <span class="fu">left_join</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">distinct</span>(Repeat,Fold,sireID,damID,Trait,FamSize)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>,</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>                     <span class="at">realIntensity=</span><span class="fl">2.67</span>))</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="do">## Compute predicted UCs</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>predUsefulness <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predUC=</span>predMean<span class="sc">+</span>(realIntensity<span class="sc">*</span>predSD))</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% count(Model,predOf,Stage)</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% filter(!is.na(predUC)) %&gt;% count(Model,predOf,Stage)</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="do">## Format observed UCs</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>obsUCgca<span class="ot">&lt;-</span>realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,realizedUCparent) <span class="sc">%&gt;%</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">obsUC=</span>realizedUCparent) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;BV&quot;</span>,</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>         <span class="at">Stage=</span><span class="st">&quot;Parent&quot;</span>)</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a><span class="co">#obsUCgca %&gt;% count(VarComp,Stage,Model,Trait)</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>obsUCtgv<span class="ot">&lt;-</span>realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,<span class="fu">contains</span>(<span class="st">&quot;realizedUCat&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">contains</span>(<span class="st">&quot;realizedUCat&quot;</span>),</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;Stage&quot;</span>, </span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;obsUC&quot;</span>, </span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_prefix =</span> <span class="st">&quot;realizedUCat&quot;</span>,</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_drop_na =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;TGV&quot;</span>)</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a><span class="co">#obsUCtgv %&gt;% count(VarComp,Stage,Model)</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>obsUsefulness<span class="ot">&lt;-</span><span class="fu">bind_rows</span>(obsUCgca,obsUCtgv)</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>obsUsefulness <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,meanTop1pctGEBV) <span class="sc">%&gt;%</span></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>               <span class="fu">rename</span>(<span class="at">obsUC=</span>meanTop1pctGEBV) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>               <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;BV&quot;</span>,</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(realizedcrossmetrics <span class="sc">%&gt;%</span> </span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(Repeat,Fold,Model,sireID,damID,Trait,meanTop1pctGETGV) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rename</span>(<span class="at">obsUC=</span>meanTop1pctGETGV) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">predOf=</span><span class="st">&quot;TGV&quot;</span>,</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Stage=</span><span class="st">&quot;ConstIntensity&quot;</span>))</span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>obsUsefulness <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Model=</span><span class="fu">ifelse</span>(Model<span class="sc">==</span><span class="st">&quot;ClassicAD&quot;</span>,</span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;A&quot;</span>,<span class="st">&quot;AD&quot;</span>),</span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ifelse</span>(predOf<span class="sc">==</span><span class="st">&quot;BV&quot;</span>,<span class="st">&quot;DirDomBV&quot;</span>,<span class="st">&quot;DirDomAD&quot;</span>)))</span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a><span class="co">#obsUsefulness %&gt;% count(Trait,Stage,predOf,Model) %&gt;% spread(Trait,n)</span></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% count(Model,predOf,Stage)</span></span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a><span class="co"># obsUsefulness %&gt;% count(Model,predOf,Stage)</span></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a><span class="co"># obsUsefulness %&gt;% filter(!is.na(obsUC))</span></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a><span class="co"># predUsefulness %&gt;% filter(!is.na(predUC)) %&gt;% count(Model,predOf,Stage)</span></span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a><span class="co">#predUsefulness %&gt;% filter(is.na(FamSize)) %&gt;% count(Model,predOf,VarMethod,Stage)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>obsVSpredUC<span class="ot">&lt;-</span><span class="fu">left_join</span>(predUsefulness,obsUsefulness) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&lt;&gt;%</span> <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&gt;%</span> str</span></code></pre></div>
+<pre><code>tibble [391,848 × 15] (S3: tbl_df/tbl/data.frame)
+ $ Repeat       : chr [1:391848] &quot;Repeat1&quot; &quot;Repeat1&quot; &quot;Repeat1&quot; &quot;Repeat1&quot; ...
+ $ Fold         : chr [1:391848] &quot;Fold1&quot; &quot;Fold1&quot; &quot;Fold1&quot; &quot;Fold1&quot; ...
+ $ Model        : chr [1:391848] &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
+ $ sireID       : chr [1:391848] &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; &quot;IITA-TMS-IBA030075&quot; ...
+ $ damID        : chr [1:391848] &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; &quot;IITA-TMS-IBA940006&quot; ...
+ $ Trait        : chr [1:391848] &quot;biofortSI&quot; &quot;biofortSI&quot; &quot;DM&quot; &quot;DM&quot; ...
+ $ VarMethod    : chr [1:391848] &quot;PMV&quot; &quot;VPM&quot; &quot;PMV&quot; &quot;VPM&quot; ...
+ $ predOf       : chr [1:391848] &quot;BV&quot; &quot;BV&quot; &quot;BV&quot; &quot;BV&quot; ...
+ $ predMean     : num [1:391848] 4.49 4.49 1.4605 1.4605 0.0746 ...
+ $ predSD       : num [1:391848] 7.263 2.294 2.055 0.626 0.186 ...
+ $ FamSize      : num [1:391848] 38 38 38 38 38 38 38 38 38 38 ...
+ $ realIntensity: num [1:391848] 2.32 2.32 2.32 2.32 2.32 ...
+ $ Stage        : chr [1:391848] &quot;Parent&quot; &quot;Parent&quot; &quot;Parent&quot; &quot;Parent&quot; ...
+ $ predUC       : num [1:391848] 21.327 9.807 6.225 2.913 0.505 ...
+ $ obsUC        : num [1:391848] -0.886 -0.886 1.805 1.805 0.121 ...</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&gt;%</span> <span class="fu">count</span>(Trait)</span></code></pre></div>
+<pre><code># A tibble: 6 x 2
+  Trait         n
+  &lt;chr&gt;     &lt;int&gt;
+1 biofortSI 65308
+2 DM        65308
+3 logFYLD   65308
+4 MCMDS     65308
+5 stdSI     65308
+6 TCHART    65308</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obsVSpredUC %&gt;% count(Model,predOf,Stage)</span></span></code></pre></div>
 </div>
 <div id="save" class="section level2">
 <h2>–&gt; Save</h2>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredMeans,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredMeans.rds&quot;</span>))</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredVars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredVars.rds&quot;</span>))</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredUC,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredUC.rds&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredMeans,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredMeans.rds&quot;</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredVars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredVars.rds&quot;</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredUC,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredUC.rds&quot;</span>))</span></code></pre></div>
 </div>
 </div>
 <div id="compute-prediction-accuracies" class="section level1">
 <h1>Compute prediction accuracies</h1>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr);</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>obsVSpredMeans<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredMeans.rds&quot;</span>))</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>obsVSpredVars<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredVars.rds&quot;</span>))</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>obsVSpredUC<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredUC.rds&quot;</span>))</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Means</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>obsVSpredMeans <span class="sc">%&lt;&gt;%</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predMean,obsMean)) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Accuracy=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predMean,.<span class="sc">$</span>obsMean,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Variances</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>obsVSpredVars <span class="sc">%&lt;&gt;%</span> </span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>FamSize,<span class="sc">-</span>Nobs) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predVar,obsVar,CorrWeight)) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AccuracyWtCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span>psych<span class="sc">::</span><span class="fu">cor.wt</span>(.[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">w =</span> .<span class="sc">$</span>CorrWeight) <span class="sc">%$%</span> r[<span class="dv">1</span>,<span class="dv">2</span>]),</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">AccuracyCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predVar,.<span class="sc">$</span>obsVar,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Usefulness</span></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&lt;&gt;%</span> </span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predMean,<span class="sc">-</span>predSD,<span class="sc">-</span>realIntensity) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predUC,obsUC,FamSize)) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AccuracyWtCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span>psych<span class="sc">::</span><span class="fu">cor.wt</span>(.[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">w =</span> .<span class="sc">$</span>FamSize) <span class="sc">%$%</span> r[<span class="dv">1</span>,<span class="dv">2</span>]),</span>
-<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">AccuracyCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predUC,.<span class="sc">$</span>obsUC,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,predOf,Stage)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr);</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>obsVSpredMeans<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredMeans.rds&quot;</span>))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>obsVSpredVars<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredVars.rds&quot;</span>))</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>obsVSpredUC<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;obsVSpredUC.rds&quot;</span>))</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Means</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>obsVSpredMeans <span class="sc">%&lt;&gt;%</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predMean,obsMean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Accuracy=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predMean,.<span class="sc">$</span>obsMean,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Variances</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>obsVSpredVars <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>FamSize,<span class="sc">-</span>Nobs) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predVar,obsVar,CorrWeight)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AccuracyWtCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span>psych<span class="sc">::</span><span class="fu">cor.wt</span>(.[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">w =</span> .<span class="sc">$</span>CorrWeight) <span class="sc">%$%</span> r[<span class="dv">1</span>,<span class="dv">2</span>]),</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">AccuracyCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predVar,.<span class="sc">$</span>obsVar,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Usefulness</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predMean,<span class="sc">-</span>predSD,<span class="sc">-</span>realIntensity) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">predVSobs=</span><span class="fu">c</span>(sireID,damID,predUC,obsUC,FamSize)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AccuracyWtCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span>psych<span class="sc">::</span><span class="fu">cor.wt</span>(.[,<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">w =</span> .<span class="sc">$</span>FamSize) <span class="sc">%$%</span> r[<span class="dv">1</span>,<span class="dv">2</span>]),</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">AccuracyCor=</span><span class="fu">map_dbl</span>(predVSobs,<span class="sc">~</span><span class="fu">cor</span>(.<span class="sc">$</span>predUC,.<span class="sc">$</span>obsUC,<span class="at">use =</span> <span class="st">&#39;complete.obs&#39;</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>predVSobs)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>obsVSpredUC <span class="sc">%&gt;%</span> <span class="fu">count</span>(Model,predOf,Stage)</span></code></pre></div>
 <pre><code># A tibble: 14 x 4
    Model    predOf Stage              n
    &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;
- 1 A        BV     ConstIntensity   100
- 2 A        BV     Parent           100
- 3 AD       TGV    AYT              100
- 4 AD       TGV    CET              100
- 5 AD       TGV    ConstIntensity   100
- 6 AD       TGV    PYT              100
- 7 AD       TGV    UYT              100
- 8 DirDomAD TGV    AYT              100
- 9 DirDomAD TGV    CET              100
-10 DirDomAD TGV    ConstIntensity   100
-11 DirDomAD TGV    PYT              100
-12 DirDomAD TGV    UYT              100
-13 DirDomBV BV     ConstIntensity   100
-14 DirDomBV BV     Parent           100</code></pre>
+ 1 A        BV     ConstIntensity   300
+ 2 A        BV     Parent           300
+ 3 AD       TGV    AYT              300
+ 4 AD       TGV    CET              300
+ 5 AD       TGV    ConstIntensity   300
+ 6 AD       TGV    PYT              300
+ 7 AD       TGV    UYT              300
+ 8 DirDomAD TGV    AYT              300
+ 9 DirDomAD TGV    CET              300
+10 DirDomAD TGV    ConstIntensity   300
+11 DirDomAD TGV    PYT              300
+12 DirDomAD TGV    UYT              300
+13 DirDomBV BV     ConstIntensity   300
+14 DirDomBV BV     Parent           300</code></pre>
 <div id="save-1" class="section level2">
 <h2>–&gt; Save</h2>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredMeans,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesMeans.rds&quot;</span>))</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredVars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesVars.rds&quot;</span>))</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredUC,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesUC.rds&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredMeans,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesMeans.rds&quot;</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredVars,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesVars.rds&quot;</span>))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(obsVSpredUC,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;accuraciesUC.rds&quot;</span>))</span></code></pre></div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1177,10 +1180,10 @@ Submission and GitHub ready version.
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
-<pre><code>R version 4.0.2 (2020-06-22)
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>R version 4.0.3 (2020-10-10)
 Platform: x86_64-apple-darwin17.0 (64-bit)
-Running under: macOS Catalina 10.15.7
+Running under: macOS Big Sur 10.16
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
@@ -1194,26 +1197,27 @@ attached base packages:
 
 other attached packages:
  [1] predCrossVar_0.1.0 magrittr_2.0.1     forcats_0.5.1      stringr_1.4.0     
- [5] dplyr_1.0.3        purrr_0.3.4        readr_1.4.0        tidyr_1.1.2       
- [9] tibble_3.0.6       ggplot2_3.3.3      tidyverse_1.3.0   
+ [5] dplyr_1.0.5        purrr_0.3.4        readr_1.4.0        tidyr_1.1.3       
+ [9] tibble_3.1.0       ggplot2_3.3.3      tidyverse_1.3.0    workflowr_1.6.2   
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.6        lattice_0.20-41   lubridate_1.7.9.2 here_1.0.1       
- [5] ps_1.5.0          assertthat_0.2.1  rprojroot_2.0.2   digest_0.6.27    
- [9] psych_2.0.12      utf8_1.1.4        R6_2.5.0          cellranger_1.1.0 
-[13] backports_1.2.1   reprex_1.0.0      evaluate_0.14     httr_1.4.2       
-[17] pillar_1.4.7      rlang_0.4.10      readxl_1.3.1      rstudioapi_0.13  
-[21] whisker_0.4       rmarkdown_2.6     munsell_0.5.0     broom_0.7.4      
-[25] compiler_4.0.2    httpuv_1.5.5      modelr_0.1.8      xfun_0.20        
+ [1] Rcpp_1.0.6        lattice_0.20-41   lubridate_1.7.10  here_1.0.1       
+ [5] assertthat_0.2.1  rprojroot_2.0.2   digest_0.6.27     psych_2.0.12     
+ [9] utf8_1.2.1        R6_2.5.0          cellranger_1.1.0  backports_1.2.1  
+[13] reprex_1.0.0      evaluate_0.14     httr_1.4.2        pillar_1.5.1     
+[17] rlang_0.4.10      readxl_1.3.1      rstudioapi_0.13   whisker_0.4      
+[21] jquerylib_0.1.3   rmarkdown_2.7     munsell_0.5.0     broom_0.7.5      
+[25] compiler_4.0.3    httpuv_1.5.5      modelr_0.1.8      xfun_0.22        
 [29] pkgconfig_2.0.3   mnormt_2.0.2      tmvnsim_1.0-2     htmltools_0.5.1.1
-[33] tidyselect_1.1.0  workflowr_1.6.2   fansi_0.4.2       crayon_1.3.4     
-[37] dbplyr_2.0.0      withr_2.4.1       later_1.1.0.1     grid_4.0.2       
-[41] nlme_3.1-151      jsonlite_1.7.2    gtable_0.3.0      lifecycle_0.2.0  
-[45] DBI_1.1.1         git2r_0.28.0      scales_1.1.1      cli_2.3.0        
-[49] stringi_1.5.3     fs_1.5.0          promises_1.1.1    xml2_1.3.2       
-[53] ellipsis_0.3.1    generics_0.1.0    vctrs_0.3.6       tools_4.0.2      
-[57] glue_1.4.2        hms_1.0.0         parallel_4.0.2    yaml_2.2.1       
-[61] colorspace_2.0-0  rvest_0.3.6       knitr_1.31        haven_2.3.1      </code></pre>
+[33] tidyselect_1.1.0  fansi_0.4.2       crayon_1.4.1      dbplyr_2.1.0     
+[37] withr_2.4.1       later_1.1.0.1     grid_4.0.3        nlme_3.1-152     
+[41] jsonlite_1.7.2    gtable_0.3.0      lifecycle_1.0.0   DBI_1.1.1        
+[45] git2r_0.28.0      scales_1.1.1      cli_2.3.1         stringi_1.5.3    
+[49] fs_1.5.0          promises_1.2.0.1  xml2_1.3.2        bslib_0.2.4      
+[53] ellipsis_0.3.1    generics_0.1.0    vctrs_0.3.6       tools_4.0.3      
+[57] glue_1.4.2        hms_1.0.0         parallel_4.0.3    yaml_2.2.1       
+[61] colorspace_2.0-0  rvest_1.0.0       knitr_1.31        haven_2.3.1      
+[65] sass_0.3.1       </code></pre>
 </div>
 </div>
 </div>
@@ -1261,7 +1265,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
