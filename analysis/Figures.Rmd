@@ -421,8 +421,8 @@ fig7<-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
   scale_edge_color_manual(values = viridis::viridis(4)[1:2]) + #c("goldenrod2","darkorchid4")) + 
   plottheme + theme(axis.text = element_blank(), axis.title = element_blank())
 
-#pngfile<-"docs/figures/figure7.png"  
-pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
+pngfile<-"docs/figures/figure7.png"  
+#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
 agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
 fig7
 invisible(dev.off())
