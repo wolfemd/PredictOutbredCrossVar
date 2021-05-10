@@ -349,12 +349,13 @@ forplot_std<-preds_std %>%
 
 ```{r}
 meanVSvar<-forplot_std %>% 
-  ggplot(.,aes(x=Mean,y=Sd,shape=CrossType)) + 
-  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  ggplot(.,aes(x=Mean,y=Sd)) + #,shape=CrossType
+  geom_density_2d(color='gray5', alpha=0.75) + 
+  #geom_point(color='gray5',size=0.65, alpha=0.5) + 
   geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==FALSE),
-             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F, alpha=0.7) + 
+             aes(x=Mean,y=Sd,fill=Group), shape=21, color='black',inherit.aes = F, alpha=0.9) + 
   geom_point(data = forplot_std %>% filter(!is.na(Group),IsSelf==TRUE),
-             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F, alpha=0.7) + 
+             aes(x=Mean,y=Sd,fill=Group), shape=25, color='black',inherit.aes = F, alpha=0.9) + 
   scale_fill_manual(values = viridis::viridis(4)) + 
   facet_grid(Component~., scales='free') + 
   labs(x = "Predicted Cross Mean", y = "Predicted Cross SD") + 
@@ -364,21 +365,22 @@ forplot_std_bvVStgv<-forplot_std %>%
   select(-Mean,-Sd) %>% 
   spread(Component,UC)
 bvVStgv<-forplot_std_bvVStgv %>% 
-  ggplot(.,aes(x=BV,y=TGV,shape=CrossType)) + 
-  geom_point(color='gray20',size=0.75, alpha=0.6) + 
+  ggplot(.,aes(x=BV,y=TGV)) +  # ,shape=CrossType
+  geom_density_2d(color='gray5', alpha=0.75) + 
+  #geom_point(color='gray5',size=0.65, alpha=0.5) + 
   geom_abline(slope=1, color='darkred') +
   geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==FALSE),
-             aes(x=BV,y=TGV,fill=Group), shape=21, color='black',inherit.aes = F, alpha=0.7) + 
+             aes(x=BV,y=TGV,fill=Group), shape=21, color='black',inherit.aes = F, alpha=0.9) + 
   scale_fill_manual(values = viridis::viridis(4)) + 
   geom_point(data = forplot_std_bvVStgv %>% filter(!is.na(Group),IsSelf==TRUE),
-             aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F, alpha=0.7) + 
+             aes(x=BV,y=TGV,fill=Group), shape=25, color='black',inherit.aes = F, alpha=0.9) + 
   labs(x = expression(bold("UC"["parent"]~" (BV)")), y=expression(bold("UC"["variety"]~" (TGV)"))) + 
   plottheme
 ```
 
 ```{r figure6}
 fig6<-(meanVSvar / bvVStgv) + 
-  plot_layout(ncol=1,guides = 'collect',heights = c(0.6,0.4)) + 
+  plot_layout(ncol=1,guides = 'collect',heights = c(0.7,0.4)) + 
   plot_annotation(tag_levels = 'A') &
   theme(plot.tag = element_text(face = 'bold'),
         axis.title.x = element_text(face = 'bold',color = 'black'),
@@ -387,12 +389,13 @@ fig6<-(meanVSvar / bvVStgv) +
         axis.text.x = element_text(face = 'bold',color = 'black'),
         axis.text.y = element_text(face = 'bold',color = 'black'),
         legend.text = element_text(face = 'bold'),
-        legend.position = 'right')
+        legend.position = 'bottom')
 pngfile<-"docs/figures/figure6.png"  
 #pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure6.png"))
 agg_png(pngfile, width = 12.7, height = 15, units = "cm", res = 300, scaling = 0.9)
 fig6
 invisible(dev.off())
+#knitr::include_graphics(pngfile)
 ```
 
 ![](figures/figure6.png)
@@ -403,22 +406,28 @@ invisible(dev.off())
 
 ```{r figure7}
 library(ggraph); library(tidygraph)
+
+
 fig7<-as_tbl_graph(top50crosses_std %>% filter(Model=="DirDom"),
                            directed = F) %>% 
   mutate(degree = centrality_degree()) %>% 
-  ggraph(., layout = 'nicely') +
-  geom_edge_fan(aes(colour = Component, linetype = PredOf),strength = 3) +
-  geom_edge_loop(aes(colour = Component, linetype = PredOf),strength = 3) + 
-  geom_node_point(aes(size = degree),show.legend = F) + 
+  ggraph(., layout = 'stress') +
+  # ggraph(., layout = 'linear',circular=F) +
+  # ggraph(., layout = 'linear',circular=T) +
+  geom_edge_fan(aes(colour = Component, linetype = PredOf), strength=0.5) +
+  geom_edge_loop(aes(colour = Component, linetype = PredOf)) +
+  geom_node_point(aes(size = degree),show.legend = F,
+                  alpha=0.6, shape=21, color='black',fill='gray40') + #viridis::viridis(4)[4]) +
   scale_edge_color_manual(values = viridis::viridis(4)[1:2]) + #c("goldenrod2","darkorchid4")) + 
   plottheme + theme(axis.text = element_blank(), axis.title = element_blank())
 
-pngfile<-"docs/figures/figure7.png"  
-#pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
+#pngfile<-"docs/figures/figure7.png"  
+pngfile <- here::here("docs",fs::path(knitr::fig_path(),  "figure7.png"))
 agg_png(pngfile, width = 8.9, height = 6.68, units = "cm", res = 300, scaling = 0.7)
 fig7
 invisible(dev.off())
+#knitr::include_graphics(pngfile)
 ```
 ![](figures/figure7.png)
 
-**Figure 7. Network plot of selected parents and matings for the StdSI.** There were 87 parents and 190 crosses chosen because they were in the top 50 for at least one of eight criteria (2 prediction models [ClassicAD, DirDomAD] x 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV (orange) vs. total genetic value, TGV (purple). Selections arising from the ClassicAD model (A) and the DirDomAD model (B) are shown in panels.
+**Figure 7. Network plot of selected parents and matings for the StdSI.** There were 44 parents and 112 crosses chosen because they were in the top 50 for at least one of four predictions: 2 variance components [BV, TGV] x 2 criteria [Mean, UC = Mean + 2\*SD]). Parents are shown as nodes, with size proportional to their usage (number of connections). Matings are shown as edges, with linetype distinguishing selection based on Mean (solid) and UC (dashed) and color depicts selection for breeding value, BV vs. total genetic value, TGV. 
