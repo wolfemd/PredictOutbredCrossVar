@@ -473,7 +473,7 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-03-24
+<strong>Last updated:</strong> 2021-05-10
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -564,16 +564,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree45e6b20bcdef218696db24e5f166df7186b77d97targetblank45e6b20a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/45e6b20bcdef218696db24e5f166df7186b77d97" target="_blank">45e6b20</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree545ab6c6230e1e469cd477df348912e1cdd0741ftargetblank545ab6ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/545ab6c6230e1e469cd477df348912e1cdd0741f" target="_blank">545ab6c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree45e6b20bcdef218696db24e5f166df7186b77d97targetblank45e6b20a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdPredictOutbredCrossVartree545ab6c6230e1e469cd477df348912e1cdd0741ftargetblank545ab6ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/45e6b20bcdef218696db24e5f166df7186b77d97" target="_blank">45e6b20</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/PredictOutbredCrossVar/tree/545ab6c6230e1e469cd477df348912e1cdd0741f" target="_blank">545ab6c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -583,12 +583,17 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
     Ignored:    output/.DS_Store
 
 Untracked files:
     Untracked:  Icon
     Untracked:  PredictOutbredCrossVarMS_ResponseToReviews_R1.gdoc
-    Untracked:  figure/
+    Untracked:  analysis/DavisResearchSeminar.Rmd
+    Untracked:  analysis/accuracies.png
+    Untracked:  analysis/docs/
+    Untracked:  analysis/exploratorypreds.png
+    Untracked:  analysis/images/
     Untracked:  manuscript/
     Untracked:  output/crossPredictions/
     Untracked:  output/gblups_DirectionalDom_parentwise_crossVal_folds.rds
@@ -598,18 +603,6 @@ Untracked files:
 
 Unstaged changes:
     Modified:   analysis/NGCleadersCall.Rmd
-    Modified:   code/fitDirectionalDomMtBRR.R
-    Modified:   code/fitmtBRR.R
-    Modified:   code/getDirectionalDomGenomicBLUPs.R
-    Modified:   code/getDirectionalDomMtCrossMeanPreds.R
-    Modified:   code/getDirectionalDomMtCrossVarBVpreds.R
-    Modified:   code/getDirectionalDomMtCrossVarTGVpreds.R
-    Modified:   code/getDirectionalDomVarComps.R
-    Modified:   code/getGenomicBLUPs.R
-    Modified:   code/getMtCrossMeanPreds.R
-    Modified:   code/getMtCrossVarPreds.R
-    Modified:   code/getUntestedMtCrossVarPreds.R
-    Modified:   code/getVarComps.R
     Modified:   data/blups_forawcdata.rds
     Modified:   data/genmap_awc_May2020.rds
     Modified:   data/parentwise_crossVal_folds.rds
@@ -636,6 +629,9 @@ Unstaged changes:
     Modified:   output/pmv_varcomps_geneticgroups_tidy_includingSIvars.rds
     Modified:   output/propHomozygous.rds
     Modified:   output/top100stdSI.rds
+
+Staged changes:
+    Modified:   README.md
 
 </code></pre>
 <p>
@@ -674,6 +670,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/wolfemd/PredictOutbredCrossVar/blob/545ab6c6230e1e469cd477df348912e1cdd0741f/analysis/index.Rmd" target="_blank">545ab6c</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-05-10
+</td>
+<td>
+Final polishes for continuity with revised manuscript re-submission.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/PredictOutbredCrossVar/3100a7d033357527678f2c395137600a86347408/docs/index.html" target="_blank">3100a7d</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-03-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -806,7 +836,7 @@ Submission and GitHub ready version.
 </div>
 <div id="abstract" class="section level1">
 <h1>Abstract</h1>
-<p>Diverse crops are both outbred and clonally propagated. Breeders typically use truncation selection of parents and invest significant time, land and money evaluating the progeny of crosses to find exceptional genotypes. We developed and tested genomic mate selection criteria suitable for organisms of arbitrary homozygosity level where the full-sibling progeny are of direct interest as future parents and/or cultivars. We extended cross variance and covariance variance prediction to include dominance effects and predicted the multivariate selection index genetic variance of crosses based on haplotypes of proposed parents, marker effects and recombination frequencies. We combined the predicted mean and variance into usefulness criteria for parent and variety development. We present an empirical study of cassava (Manihot esculenta), a staple tropical root crop. We assessed the potential to predict the multivariate genetic distribution (means, variances and trait covariances) of 462 cassava families in terms of additive and total value using cross-validation. We were able to predict all genetic variances and most covariances with non-zero accuracy. We also tested a directional dominance model and found significant inbreeding depression for most traits and a boost in total merit accuracy for root yield. We predicted 47,083 possible crosses of 306 parents and contrasted them to those previously tested to show how mate selection can reveal new potential within the germplasm. We enable breeders to consider the potential of crosses to produce future parents (progeny with excellent breeding values) and varieties (progeny with top performance).</p>
+<p>Diverse crops are both outbred and clonally propagated. Breeders typically use truncation selection of parents and invest significant time, land and money evaluating the progeny of crosses to find exceptional genotypes. We developed and tested genomic mate selection criteria suitable for organisms of arbitrary homozygosity level where the full-sibling progeny are of direct interest as future parents and/or cultivars. We extended cross variance and covariance variance prediction to include dominance effects and predicted the multivariate selection index genetic variance of crosses based on haplotypes of proposed parents, marker effects and recombination frequencies. We combined the predicted mean and variance into usefulness criteria for parent and variety development. We present an empirical study of cassava (Manihot esculenta), a staple tropical root crop. We assessed the potential to predict the multivariate genetic distribution (means, variances and trait covariances) of 462 cassava families in terms of additive and total value using cross-validation. Most variance (89%) and covariance (70%) prediction accuracy estimates were greater than zero. The usefulness of crosses were accurately predicted with good correspondence between the predicted and the actual mean performance of family members breeders selected for advancement as new parents and candidate varieties. We also used a directional dominance model to quantify significant inbreeding depression for most traits. We predicted 47,083 possible crosses of 306 parents and contrasted them to those previously tested to show how mate selection can reveal new potential within the germplasm. We enable breeders to consider the potential of crosses to produce future parents (progeny with top breeding values) and varieties (progeny with top own performance).</p>
 </div>
 <div id="manuscript" class="section level1">
 <h1>Manuscript</h1>
@@ -823,7 +853,7 @@ Submission and GitHub ready version.
 <h1>Data availability and reproducibility</h1>
 <p>The R package <strong>workflowr</strong> was used to document this study reproducibly.</p>
 <p>Much of the supporting data <em>and</em> output from the analyses documented here are too large for GitHub.</p>
-<p>The repository will be mirrored, here: <a href="ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020">ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2020</a></p>
+<p>The repository will be mirrored, here: <a href="ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2021">ftp://ftp.cassavabase.org/manuscripts/Wolfe_et_al_2021</a></p>
 <p>or until publication <a href="ftp://ftp.cassavabase.org/marnin_datasets/">here</a>.</p>
 </div>
 <div id="analyses" class="section level1">
@@ -873,15 +903,15 @@ other attached packages:
 [1] workflowr_1.6.2
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.6        whisker_0.4       knitr_1.31        magrittr_2.0.1   
+ [1] Rcpp_1.0.6        whisker_0.4       knitr_1.32        magrittr_2.0.1   
  [5] R6_2.5.0          rlang_0.4.10      fansi_0.4.2       stringr_1.4.0    
  [9] tools_4.0.3       xfun_0.22         utf8_1.2.1        git2r_0.28.0     
 [13] jquerylib_0.1.3   htmltools_0.5.1.1 ellipsis_0.3.1    rprojroot_2.0.2  
-[17] yaml_2.2.1        digest_0.6.27     tibble_3.1.0      lifecycle_1.0.0  
-[21] crayon_1.4.1      later_1.1.0.1     sass_0.3.1        vctrs_0.3.6      
+[17] yaml_2.2.1        digest_0.6.27     tibble_3.1.1      lifecycle_1.0.0  
+[21] crayon_1.4.1      later_1.1.0.1     sass_0.3.1        vctrs_0.3.7      
 [25] promises_1.2.0.1  fs_1.5.0          glue_1.4.2        evaluate_0.14    
 [29] rmarkdown_2.7     stringi_1.5.3     bslib_0.2.4       compiler_4.0.3   
-[33] pillar_1.5.1      jsonlite_1.7.2    httpuv_1.5.5      pkgconfig_2.0.3  </code></pre>
+[33] pillar_1.6.0      jsonlite_1.7.2    httpuv_1.5.5      pkgconfig_2.0.3  </code></pre>
 </div>
 </div>
 
